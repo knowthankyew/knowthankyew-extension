@@ -20,7 +20,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.308",
+    "@types/chrome": "^0.3.0",
     "@types/node": "^26.6.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
