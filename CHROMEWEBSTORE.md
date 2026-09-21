@@ -32,8 +32,15 @@ When you reach a checkout page, terms of service modal, or subscription signup, 
 Unlike commercial extensions that upload your browsing history to cloud analytics servers, the KnowThankYew Reality Engine operates under strict zero-egress invariants:
 
 1. **100% On-Device Processing**: Contract evaluation runs entirely inside your browser tab sandbox. No document text, form inputs, or browsing history ever leave your device.
-2. **Zero Cloud Telemetry**: The public release contains no remote telemetry endpoints or network dispatch code.
-3. **The Hard Burn Switch**: Click "Hard Burn" at any moment to instantly wipe local extension storage, flush memory buffers, and leave your browser in a completely clean state.
+2. **Zero Network Egress (Browser Enforced)**: Manifest CSP strictly sets `connect-src 'none'`, physically prohibiting `fetch`, XHR, WebSocket, or beacon dispatch at the browser engine level.
+3. **The Hard Burn Switch**: Click "Hard Burn" at any moment to instantly wipe local extension storage, flush memory buffers, and dereference in-memory state.
+
+### Architectural Scope & Honest Limitations
+
+In accordance with our brutalist transparency principles:
+- **Visible DOM Text Only**: The engine analyzes visible DOM text extracted from the current active tab when you click the extension. It cannot follow external hyperlink chains (e.g., external "Terms & Conditions" URLs) or inspect opaque cross-origin iframes without explicit navigation.
+- **No False Reassurance ("No Findings" ≠ "Safe")**: If zero clauses are flagged, the extension shows "No Findings" and clears badge indicators. It never shows a green "OK" or "Safe" stamp, because no regex scanner can guarantee that an uninspected external contract is free of predatory terms.
+- **Strictly User-Triggered**: Under the least-privilege `activeTab` permission model, the extension has zero access to your browsing activity until you open the popup. It never tracks background tab navigation or history.
 
 ---
 

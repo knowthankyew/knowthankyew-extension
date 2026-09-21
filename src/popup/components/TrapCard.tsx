@@ -40,7 +40,7 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match }) => {
         >
           {match.title}
         </h3>
-        <SeverityBadge severity={match.severity} />
+        <SeverityBadge severity={match.severity} classification={match.classification} />
       </div>
 
       <div

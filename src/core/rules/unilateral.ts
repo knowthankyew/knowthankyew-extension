@@ -3,40 +3,42 @@ import { DetectionRule } from '../types';
 export const unilateralRules: DetectionRule[] = [
   {
     id: 'UNI-001',
-    title: 'Unilateral Modification Without Notice',
+    title: 'Unilateral Contract Modification Without Prior Notice',
     category: 'UNILATERAL_CHANGE',
-    severity: 'CRITICAL',
+    classification: 'ONE_SIDED_DISCRETION',
+    severity: 'WARNING',
     statute: {
-      code: 'Restatement (Second) of Contracts § 211 / CFPB Circular 2024-03',
-      title: 'Illusory Promise & Unilateral Contract Modification',
-      jurisdiction: 'Common Law & Federal Consumer Financial Protection',
-      plainExplanation: 'Terms of service cannot reserve the unlimited right to alter terms or pricing retroactively without requiring affirmative consumer consent.'
+      code: 'Restatement (Second) of Contracts § 211 / Illusory Promise Doctrine',
+      title: 'Common Law Contract Modification Standards',
+      jurisdiction: 'US Common Law',
+      plainExplanation: 'Courts frequently find provisions granting unlimited unilateral rights to alter material terms without notice to be unenforceable illusory promises.'
     },
     patterns: [
-      /reserve\s+the\s+right\s+to\s+(?:modify|change|alter|update|amend)\s+these\s+terms\s+(?:at\s+any\s+time|from\s+time\s+to\s+time)\s+without\s+(?:prior\s+)?notice/i,
+      /reserve\s+the\s+right\s+to\s+(?:modify|change|alter|update|amend)\s+these\s+terms[^.\n]{0,60}(?:without\s+notice|in\s+our\s+sole\s+discretion)/i,
       /we\s+may\s+(?:change|modify|amend)\s+these\s+terms\s+in\s+our\s+sole\s+discretion\s+without\s+liability/i,
       /modifications\s+are\s+effective\s+immediately\s+upon\s+posting/i
     ],
-    explanation: 'The company claims the power to rewrite their contract with you at any time without giving you notice or asking for your consent.',
-    recommendation: 'Beware of sudden price increases, feature removals, or data collection expansions under this clause.'
+    explanation: 'The platform claims the power to rewrite their agreement with you at any time without advance notice or affirmative re-consent.',
+    recommendation: 'Periodically monitor recurring pricing and terms directly rather than assuming terms remain fixed.'
   },
   {
     id: 'UNI-002',
-    title: 'Deemed Consent via Continued Use',
+    title: 'Passive Deemed Consent via Continued Usage',
     category: 'UNILATERAL_CHANGE',
-    severity: 'WARNING',
+    classification: 'ONE_SIDED_DISCRETION',
+    severity: 'INFO',
     statute: {
-      code: 'FTC Act § 5 (Unfair and Deceptive Practices)',
-      title: 'Deceptive Inferred Consent Standard',
+      code: '15 U.S.C. § 45 (FTC Act § 5 - Deceptive Omissions)',
+      title: 'Inferred Consent & Unfair Trade Practice',
       jurisdiction: 'US Federal',
-      plainExplanation: 'Treating passive inaction or normal app use as binding legal consent to modified material terms is considered an unfair consumer practice.'
+      plainExplanation: 'Treating silence or normal app usage as affirmative assent to modified material terms is scrutinized as an unfair business practice.'
     },
     patterns: [
-      /(?:your\s+)?continued\s+use.*?(?:shall|will)?\s*(?:constitute|signif(?:y|ies))\s+(?:your\s+)?acceptance/i,
-      /by\s+continuing\s+to\s+(?:access|use)\s+(?:the\s+service|our\s+platform).*?you\s+agree\s+to\s+be\s+bound\s+by\s+the\s+revised/i,
+      /(?:your\s+)?continued\s+use[^.\n]{0,60}(?:constitute|signif(?:y|ies))\s+(?:your\s+)?acceptance/i,
+      /by\s+continuing\s+to\s+(?:access|use)[^.\n]{0,60}agree\s+to\s+be\s+bound/i,
       /continued\s+use\s+following\s+any\s+updates\s+constitutes\s+binding\s+agreement/i
     ],
-    explanation: 'Simply opening the app or staying logged in is treated by the company as your legal signature on their new terms.',
-    recommendation: 'Periodically check subscription terms directly rather than assuming terms remain unchanged.'
+    explanation: 'Simply logging into your account is treated by the company as your legal signature accepting their newly revised terms.',
+    recommendation: 'Check policy revision dates if you notice billing or feature changes in your service.'
   }
 ];

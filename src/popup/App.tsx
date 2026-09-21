@@ -64,11 +64,13 @@ export const App: React.FC = () => {
           scannedLength: 3420,
           riskScore: 85,
           summary: { critical: 2, warning: 1, info: 0 },
+          limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation.',
           matches: [
             {
               ruleId: 'AR-001',
               title: 'Automatic Negative Option Renewal',
               category: 'AUTO_RENEWAL',
+              classification: 'STATUTORY_VIOLATION',
               severity: 'CRITICAL',
               statute: {
                 code: '15 U.S.C. § 8403',
@@ -84,7 +86,8 @@ export const App: React.FC = () => {
               ruleId: 'ARB-001',
               title: 'Mandatory Binding Arbitration Waiver',
               category: 'ARBITRATION',
-              severity: 'CRITICAL',
+              classification: 'RIGHTS_WAIVER',
+              severity: 'WARNING',
               statute: {
                 code: '9 U.S.C. § 2',
                 title: 'Federal Arbitration Act',
@@ -333,12 +336,22 @@ export const App: React.FC = () => {
               <div
                 style={{
                   textAlign: 'center',
-                  padding: '24px',
+                  padding: '24px 16px',
                   color: '#94a3b8',
                   fontSize: '12px',
+                  backgroundColor: '#131b2e',
+                  border: '1px solid #1e293b',
+                  borderRadius: '6px',
+                  lineHeight: 1.5,
                 }}
               >
-                🛡️ No predatory terms, auto-renew traps, or arbitration waivers detected.
+                <div style={{ fontSize: '20px', marginBottom: '8px' }}>🔍</div>
+                <div style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: '6px' }}>
+                  No Matched Traps Detected in Visible Text
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b' }}>
+                  {scanResult.limitationsNotice}
+                </div>
               </div>
             ) : (
               scanResult.matches.map((match) => (

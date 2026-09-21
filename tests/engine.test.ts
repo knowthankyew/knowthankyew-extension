@@ -32,7 +32,8 @@ describe('Local Document Scanning Engine', () => {
     const result = scanDocumentText(document, 'predatory-checkout.com');
     expect(result.urlDomain).toBe('predatory-checkout.com');
     expect(result.matches.length).toBe(4);
-    expect(result.summary.critical).toBeGreaterThanOrEqual(3);
+    expect(result.summary.critical).toBe(2);
+    expect(result.summary.warning).toBe(2);
     expect(result.riskScore).toBeGreaterThanOrEqual(70);
   });
 

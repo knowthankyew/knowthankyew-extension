@@ -26,9 +26,6 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Checkout Shared Privacy Telemetry
-        run: git clone --depth 1 https://github.com/knowthankyew/privacy-telemetry.git ../privacy-telemetry
-
       - name: Install Dependencies
         run: npm ci
 
@@ -43,6 +40,12 @@ jobs:
 
       - name: Build Production Extension
         run: npm run build
+
+      - name: Verify Zero-Egress Invariant (grep dist/)
+        run: |
+          echo "Verifying no network egress primitives in dist bundles..."
+          ! grep -E "fetch\(|new WebSocket\(|navigator\.sendBeacon\(|new XMLHttpRequest\(" dist/background/service-worker.js dist/content/scanner.js
+          echo "Zero-egress physically verified in bundled artifacts."
 
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json

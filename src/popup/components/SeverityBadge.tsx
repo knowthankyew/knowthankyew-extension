@@ -1,29 +1,42 @@
 import React from 'react';
-import { Severity } from '../../core/types';
+import { Severity, LegalClassification } from '../../core/types';
 
 interface SeverityBadgeProps {
   severity: Severity;
+  classification?: LegalClassification;
 }
 
-export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity }) => {
+export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity, classification }) => {
+  const getClassificationLabel = () => {
+    switch (classification) {
+      case 'STATUTORY_VIOLATION':
+        return 'UNLAWFUL PRACTICE';
+      case 'RIGHTS_WAIVER':
+        return 'RIGHTS WAIVER (LAWFUL)';
+      case 'ONE_SIDED_DISCRETION':
+        return 'ONE-SIDED TERM';
+      case 'SURVEILLANCE_NOTICE':
+        return 'DATA BROKERAGE';
+      default:
+        return severity === 'CRITICAL' ? 'CRITICAL TRAP' : severity === 'WARNING' ? 'HIGH RISK' : 'ADVISORY';
+    }
+  };
+
   const styles = {
     CRITICAL: {
       bg: 'rgba(239, 68, 68, 0.15)',
       border: '#ef4444',
       text: '#f87171',
-      label: 'CRITICAL TRAP',
     },
     WARNING: {
       bg: 'rgba(245, 158, 11, 0.15)',
       border: '#f59e0b',
       text: '#fbbf24',
-      label: 'HIGH RISK',
     },
     INFO: {
       bg: 'rgba(56, 189, 248, 0.15)',
       border: '#38bdf8',
       text: '#7dd3fc',
-      label: 'ADVISORY',
     },
   }[severity];
 
@@ -44,7 +57,7 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity }) => {
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
       }}
     >
-      {styles.label}
+      {getClassificationLabel()}
     </span>
   );
 };

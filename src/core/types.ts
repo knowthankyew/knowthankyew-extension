@@ -1,5 +1,11 @@
 export type Severity = 'CRITICAL' | 'WARNING' | 'INFO';
 
+export type LegalClassification =
+  | 'STATUTORY_VIOLATION'   // Explicit violation of statute (ROSCA non-disclosure, dark cancellation)
+  | 'RIGHTS_WAIVER'         // Enforceable under FAA/UCC, but strips consumer access to courts
+  | 'ONE_SIDED_DISCRETION'  // Unilateral modification / illusory promise
+  | 'SURVEILLANCE_NOTICE';  // Cross-context data brokerage / tracking disclosure
+
 export type TrapCategory = 
   | 'AUTO_RENEWAL'
   | 'ARBITRATION'
@@ -18,6 +24,7 @@ export interface DetectionRule {
   id: string;
   title: string;
   category: TrapCategory;
+  classification: LegalClassification;
   severity: Severity;
   statute: StatuteReference;
   patterns: RegExp[];
@@ -29,6 +36,7 @@ export interface EvaluationMatch {
   ruleId: string;
   title: string;
   category: TrapCategory;
+  classification: LegalClassification;
   severity: Severity;
   statute: StatuteReference;
   explanation: string;
@@ -47,4 +55,5 @@ export interface PageScanResult {
     warning: number;
     info: number;
   };
+  limitationsNotice: string;
 }

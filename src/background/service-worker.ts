@@ -18,8 +18,9 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         await chrome.action.setBadgeText({ text: String(summary.warning) });
         await chrome.action.setBadgeBackgroundColor({ color: '#f59e0b' }); // Amber
       } else {
-        await chrome.action.setBadgeText({ text: 'OK' });
-        await chrome.action.setBadgeBackgroundColor({ color: '#10b981' }); // Green
+        // Zero findings does NOT imply page is legally safe or trap-free.
+        // Clear badge to prevent deceptive false reassurance.
+        await chrome.action.setBadgeText({ text: '' });
       }
       sendResponse({ status: 'badge_updated' });
     })();

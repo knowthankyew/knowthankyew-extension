@@ -25,14 +25,15 @@ export function sanitizeSnippet(snippet: string): string {
 
 /**
  * Splits raw document text into readable sentences / paragraphs for heuristic matching.
+ * Bounded to 1,000 characters per segment to guard against ReDoS backtracking.
  */
 export function segmentText(rawText: string): string[] {
   if (!rawText) return [];
-  // Split on paragraph breaks or clause markers
   return rawText
     .split(/(?:\r?\n\s*\r?\n)|(?<=[.!?])\s+(?=[A-Z0-9])/g)
     .map(t => t.trim())
-    .filter(t => t.length > 20); // filter trivial snippets
+    .filter(t => t.length > 20)
+    .map(t => (t.length > 1000 ? t.slice(0, 1000) : t)); // Bounded segment guard
 }
 
 /**
@@ -46,7 +47,7 @@ export function scanDocumentText(text: string, domain = 'current-page'): PageSca
 
   for (const segment of segments) {
     for (const rule of ALL_RULES) {
-      if (matchedRuleIds.has(rule.id)) continue; // Keep one match per rule ID to prevent clutter
+      if (matchedRuleIds.has(rule.id)) continue;
 
       for (const pattern of rule.patterns) {
         if (pattern.test(segment)) {
@@ -58,6 +59,7 @@ export function scanDocumentText(text: string, domain = 'current-page'): PageSca
             ruleId: rule.id,
             title: rule.title,
             category: rule.category,
+            classification: rule.classification,
             severity: rule.severity,
             statute: rule.statute,
             explanation: rule.explanation,
@@ -88,5 +90,6 @@ export function scanDocumentText(text: string, domain = 'current-page'): PageSca
     matches,
     riskScore,
     summary,
+    limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation.',
   };
 }
