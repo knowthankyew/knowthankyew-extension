@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - KnowThankYew Reality Engine</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --border: #1f2937;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --primary: #10b981;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #ffffff;
+      margin-bottom: 0.75rem;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+    section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    p, ul {
+      color: #d1d5db;
+      margin-bottom: 1rem;
+    }
+    ul {
+      padding-left: 1.5rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+    }
+    strong {
+      color: #ffffff;
+    }
+    code {
+      background: #1f2937;
+      color: #a7f3d0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background: rgba(16, 185, 129, 0.05);
+      padding: 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.25rem 0;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">Zero-Egress Verified</div>
+      <h1>Privacy Policy</h1>
+      <div class="subtitle">KnowThankYew Reality Engine • Browser Extension</div>
+      <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted);">Effective Date: September 20, 2026 • Version 1.0.0</p>
+    </header>
+
+    <section>
+      <h2>1. The Fundamental Privacy Invariant: Zero Data Egress</h2>
+      <p>
+        The <strong>KnowThankYew Reality Engine</strong> is an open-source consumer advocacy extension designed to detect subscription traps, mandatory arbitration waivers, unilateral modification clauses, and dark patterns in digital agreements.
+      </p>
+      <div class="callout">
+        <strong>Absolute Air-Gap Guarantee:</strong> This extension does not collect, record, track, transmit, or monetize your personal information, browsing history, keystrokes, form inputs, credit card credentials, or analyzed webpage content. <strong>Zero bytes of user document text or personal data ever leave your computer.</strong>
+      </div>
+      <p>
+        All statutory analysis, regular expression matching, and risk evaluation occur 100% locally on your device silicon within your browser's execution sandbox.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Technical Enforcement & Browser Security Model</h2>
+      <p>Our zero-egress architecture is enforced not through policy promises, but through hard technical boundaries:</p>
+      <ul>
+        <li>
+          <strong>Browser-Enforced Content Security Policy (CSP):</strong> The extension declares <code>connect-src 'none'</code> in its Manifest V3 configuration. The Chromium browser engine physically intercepts and drops any outgoing network request (such as <code>fetch()</code>, <code>XMLHttpRequest</code>, or <code>WebSocket</code>) initiated from extension contexts.
+        </li>
+        <li>
+          <strong>Zero Remote Host Permissions:</strong> The extension requests no broad host permissions (<code>&lt;all_urls&gt;</code> is strictly absent). It cannot communicate with remote third-party servers.
+        </li>
+        <li>
+          <strong>Continuous Integration Egress Audit:</strong> Every production build is statically audited in automated CI pipelines. The release build fails closed if any network transmission primitive is detected in compiled artifacts.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>3. Declared Extension Permissions & Justifications</h2>
+      <p>Under Chrome Web Store Developer Policies, every declared permission must be strictly necessary and narrowly scoped:</p>
+      <ul>
+        <li>
+          <code>activeTab</code>: Grants temporary access to inspect the rendered text of the currently active tab <em>only when the user invokes the extension</em> (by opening the popup) or while actively reviewing checkout terms. Text is analyzed in volatile memory and never transmitted.
+        </li>
+        <li>
+          <code>storage</code>: Used exclusively to retain local user preferences (such as risk threshold settings) within the browser's local sandbox (<code>chrome.storage.local</code>). No identifiers or telemetry are synced to cloud storage.
+        </li>
+        <li>
+          <code>scripting</code>: Used to execute the local document text extraction engine inside the active webpage context to evaluate visible terms and identify dark patterns.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Volatile Telemetry & Amnesiac "Hard Burn"</h2>
+      <p>
+        The extension includes local operational telemetry exclusively to power the in-popup <strong>Privacy Audit Modal</strong>, allowing you to inspect what metadata the application generates in real time:
+      </p>
+      <ul>
+        <li>Telemetry is stored strictly in a temporary, fixed-size circular memory buffer. It is never written to remote telemetry endpoints or cloud servers.</li>
+        <li>
+          <strong>The "Burn Local Data" Button:</strong> When clicked, the extension immediately empties all in-memory buffers, clears <code>chrome.storage.local</code>, wipes toolbar badges, dereferences all cached DOM text strings for browser garbage collection, and locks the telemetry system into a permanent no-op tombstone for the remainder of the session.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. Google Chrome Web Store Limited Use Disclosure</h2>
+      <p>
+        KnowThankYew complies with the <strong>Chrome Web Store User Data Policy</strong>, including the Limited Use requirements:
+      </p>
+      <ul>
+        <li>We do not transfer user data to third parties, advertising platforms, data brokers, or information resellers.</li>
+        <li>We do not use or transfer user data to determine creditworthiness or for lending purposes.</li>
+        <li>We do not use user data for personalized advertisements or commercial profiling.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6. Open Source Inspection & Cryptographic Attestation</h2>
+      <p>
+        Every line of code powering the KnowThankYew Reality Engine is open-source under the MIT License and publicly inspectable on GitHub:
+      </p>
+      <p>
+        <a href="https://github.com/knowthankyew/knowthankyew-extension" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600;">
+          https://github.com/knowthankyew/knowthankyew-extension
+        </a>
+      </p>
+      <p>
+        Every release includes a machine-readable CycloneDX Software Bill of Materials (<code>bom.json</code>) and SLSA build provenance cryptographically attested via GitHub Actions.
+      </p>
+    </section>
+
+    <div class="footer">
+      <p>
+        KnowThankYew Reality Engine • Built for Consumer Sovereignty • <a href="https://github.com/knowthankyew">knowthankyew Organization</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

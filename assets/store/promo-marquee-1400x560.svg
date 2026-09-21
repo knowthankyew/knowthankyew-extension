@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="560" viewBox="0 0 1400 560">
+  <defs>
+    <linearGradient id="bgMarquee" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080c18"/>
+      <stop offset="50%" stop-color="#050811"/>
+      <stop offset="100%" stop-color="#020409"/>
+    </linearGradient>
+    <linearGradient id="shieldMarqueeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <pattern id="gridMarquee" width="35" height="35" patternUnits="userSpaceOnUse">
+      <path d="M 35 0 L 0 0 0 35" fill="none" stroke="#1f2937" stroke-width="0.8" opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="560" fill="url(#bgMarquee)"/>
+  <rect width="1400" height="560" fill="url(#gridMarquee)"/>
+
+  <!-- Subtle glow effects -->
+  <circle cx="280" cy="280" r="180" fill="#10b981" opacity="0.08" filter="blur(40px)"/>
+  <circle cx="1100" cy="300" r="150" fill="#3b82f6" opacity="0.05" filter="blur(40px)"/>
+
+  <!-- Left: Big Brand Emblem -->
+  <g transform="translate(190, 160) scale(4.0)">
+    <path d="M22 2L4 8v10c0 11.5 7.7 22.3 18 25 10.3-2.7 18-13.5 18-25V8L22 2z" fill="url(#shieldMarqueeGrad)"/>
+    <path d="M15 21l5 5 10-10" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Right: Typography & Value Proposition -->
+  <g transform="translate(480, 180)">
+    <!-- Pill -->
+    <rect width="260" height="34" rx="17" fill="#111827" stroke="#10b981" stroke-width="1.5" opacity="0.9"/>
+    <text x="130" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#10b981" text-anchor="middle" letter-spacing="1">ZERO-EGRESS INVARIANT</text>
+
+    <!-- Main Title -->
+    <text x="0" y="95" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="900" fill="#ffffff" letter-spacing="-1.5">KnowThankYew Reality Engine</text>
+
+    <!-- Tagline -->
+    <text x="0" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="500" fill="#9ca3af">
+      On-device consumer advocate intercepting subscription traps,
+    </text>
+    <text x="0" y="175" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="500" fill="#9ca3af">
+      mandatory arbitration waivers, and deceptive terms in real time.
+    </text>
+
+    <!-- Stat Pills -->
+    <g transform="translate(0, 220)">
+      <!-- Pill 1 -->
+      <g transform="translate(0, 0)">
+        <rect width="210" height="42" rx="8" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+        <text x="105" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f3f4f6" text-anchor="middle">🛡️ ROSCA 15 U.S.C. § 8403</text>
+      </g>
+
+      <!-- Pill 2 -->
+      <g transform="translate(230, 0)">
+        <rect width="210" height="42" rx="8" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+        <text x="105" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f3f4f6" text-anchor="middle">⚡ 100% Local Silicon</text>
+      </g>
+
+      <!-- Pill 3 -->
+      <g transform="translate(460, 0)">
+        <rect width="210" height="42" rx="8" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+        <text x="105" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#f3f4f6" text-anchor="middle">🔥 Amnesiac Hard Burn</text>
+      </g>
+    </g>
+  </g>
+</svg>

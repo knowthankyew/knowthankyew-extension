@@ -6,6 +6,7 @@ import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { extractPageLegalText } from '../src/content/dom-extractor';
 import { scanDocumentText, segmentText, ALL_RULES } from '../src/core/engine';
+import { executeScan, startDynamicObserver, stopDynamicObserver, getCachedScanResult } from '../src/content/scanner';
 
 describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
   it('extracts visible page text from a realistic checkout DOM fixture, stripping scripts and nav', () => {
@@ -160,5 +161,29 @@ describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
       const scannerPath = resolve(distPath, 'content/scanner.js');
       if (existsSync(scannerPath)) checkBundle(scannerPath);
     }
+  });
+
+  it('dynamically observes DOM mutations and re-scans when checkout clauses are injected', async () => {
+    document.body.innerHTML = '<main><h1>Welcome</h1></main>';
+    startDynamicObserver();
+
+    const initial = executeScan();
+    expect(initial.matches.length).toBe(0);
+
+    // Simulate dynamic SPA insertion of checkout subscription terms
+    const termsDiv = document.createElement('div');
+    termsDiv.className = 'terms legal';
+    termsDiv.innerHTML = '<p>Your subscription renews automatically each month unless you cancel.</p>';
+    document.body.appendChild(termsDiv);
+
+    // Wait for debounce (450ms)
+    await new Promise(r => setTimeout(r, 450));
+
+    const updated = getCachedScanResult();
+    expect(updated).not.toBeNull();
+    expect(updated!.summary.critical).toBeGreaterThan(0);
+    expect(updated!.matches.some(m => m.ruleId === 'AR-001')).toBe(true);
+
+    stopDynamicObserver();
   });
 });

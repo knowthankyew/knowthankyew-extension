@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "package": "npm run build && (cd dist && zip -r ../knowthankyew-extension-v1.0.0.zip .) && shasum -a 256 knowthankyew-extension-v1.0.0.zip > SHA256SUMS",
+    "build:assets": "node scripts/render-store-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

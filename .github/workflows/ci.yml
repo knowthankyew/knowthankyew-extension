@@ -50,6 +50,14 @@ jobs:
       - name: Run Test Suite (Vitest)
         run: npm test
 
+      - name: Package Chrome Web Store ZIP Bundle
+        run: |
+          cd dist
+          zip -r ../knowthankyew-extension-v1.0.0.zip .
+          cd ..
+          shasum -a 256 knowthankyew-extension-v1.0.0.zip > SHA256SUMS
+          echo "ZIP SHA256: $(cat SHA256SUMS)"
+
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
 
@@ -57,16 +65,16 @@ jobs:
         uses: actions/attest-build-provenance@v2
         if: github.ref == 'refs/heads/main'
         with:
-          subject-path: 'bom.json'
+          subject-path: |
+            bom.json
+            knowthankyew-extension-v1.0.0.zip
 
-      - name: Upload Extension Artifact
+      - name: Upload Store ZIP & Unpacked Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: knowthankyew-extension-unpacked
-          path: dist/
-
-      - name: Upload SBOM Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-knowthankyew-extension
-          path: bom.json
+          name: knowthankyew-extension-production-package
+          path: |
+            knowthankyew-extension-v1.0.0.zip
+            SHA256SUMS
+            bom.json
+            dist/

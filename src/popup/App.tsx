@@ -33,22 +33,50 @@ export const App: React.FC = () => {
           setActiveHostname('browser-tab');
         }
 
-        // Send scan request to content script
+        // Send scan request to content script, with automatic script injection fallback
         chrome.tabs.sendMessage(
           tab.id,
           { type: 'KTY_REQUEST_PAGE_SCAN' },
-          (response) => {
-            const duration = Math.round(performance.now() - startTime);
-
+          async (response) => {
             if (chrome.runtime.lastError || !response || !response.success) {
-              // Content script might need manual injection or page is protected (e.g. chrome://)
+              // Try on-demand injection via chrome.scripting
+              try {
+                if (chrome.scripting?.executeScript && tab.id) {
+                  await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['content/scanner.js'],
+                  });
+                  // Retry scan request after injection
+                  chrome.tabs.sendMessage(
+                    tab.id,
+                    { type: 'KTY_REQUEST_PAGE_SCAN' },
+                    (retryRes) => {
+                      const duration = Math.round(performance.now() - startTime);
+                      if (retryRes && retryRes.success) {
+                        setScanResult(retryRes.data);
+                        recordScanMetrics(retryRes.data.summary, duration);
+                      } else {
+                        setErrorMessage(
+                          'Cannot scan restricted browser system page. Navigate to an HTTP/HTTPS checkout or terms page.'
+                        );
+                      }
+                      setScanning(false);
+                    }
+                  );
+                  return;
+                }
+              } catch {
+                // Restricted page (chrome://, edge://, etc.)
+              }
+
               setErrorMessage(
-                'Cannot scan restricted browser system page or content script is loading. Navigate to a checkout, terms, or subscription agreement page.'
+                'Cannot scan restricted browser system page or protected URL. Navigate to an active checkout, terms, or subscription agreement page.'
               );
               setScanning(false);
               return;
             }
 
+            const duration = Math.round(performance.now() - startTime);
             const result: PageScanResult = response.data;
             setScanResult(result);
             recordScanMetrics(result.summary, duration);
