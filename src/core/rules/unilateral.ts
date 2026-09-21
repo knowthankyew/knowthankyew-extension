@@ -6,12 +6,12 @@ export const unilateralRules: DetectionRule[] = [
     title: 'Unilateral Contract Modification Without Prior Notice',
     category: 'UNILATERAL_CHANGE',
     classification: 'ONE_SIDED_DISCRETION',
-    severity: 'WARNING',
+    severity: 'INFO',
     statute: {
       code: 'Restatement (Second) of Contracts § 211 / Illusory Promise Doctrine',
       title: 'Common Law Contract Modification Standards',
       jurisdiction: 'US Common Law',
-      plainExplanation: 'Courts frequently find provisions granting unlimited unilateral rights to alter material terms without notice to be unenforceable illusory promises.'
+      plainExplanation: 'While common in commercial terms, courts scrutinize clauses granting unlimited unilateral rights to alter material terms without advance notice or opt-out rights as potentially unenforceable illusory promises.'
     },
     patterns: [
       /reserve\s+the\s+right\s+to\s+(?:modify|change|alter|update|amend)\s+these\s+terms[^.\n]{0,60}(?:without\s+notice|in\s+our\s+sole\s+discretion)/i,

@@ -380,6 +380,9 @@ export const App: React.FC = () => {
                 <div style={{ fontSize: '11px', color: '#64748b' }}>
                   {scanResult.limitationsNotice}
                 </div>
+                <div style={{ fontSize: '10.5px', color: '#38bdf8', marginTop: '6px' }}>
+                  Tip: If terms are hosted on a separate linked page, navigate to that tab and click Rescan.
+                </div>
               </div>
             ) : (
               scanResult.matches.map((match) => (
@@ -439,6 +442,19 @@ export const App: React.FC = () => {
 
         <BurnButton onBurnCompleted={handleBurnCompleted} />
       </footer>
+
+      {/* Legal Disclaimer */}
+      <div
+        style={{
+          marginTop: '8px',
+          textAlign: 'center',
+          fontSize: '9.5px',
+          color: '#64748b',
+          lineHeight: 1.3,
+        }}
+      >
+        Automated text analysis for informational/educational purposes only. Not legal advice.
+      </div>
 
       {/* Embedded PrivacyAuditModal from @knowthankyew/privacy-telemetry */}
       <PrivacyAuditModal

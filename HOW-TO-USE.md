@@ -28,8 +28,8 @@ flowchart LR
 
 ### 1. Download
 Click this link to download the pre-packaged zip file directly:  
-👉 **[Click Here to Download: knowthankyew-extension-v1.0.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.0.0/knowthankyew-extension-v1.0.0.zip)**  
-*(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)).*
+👉 **[Click Here to Download: knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)**  
+*(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
 
 Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.
 
@@ -57,17 +57,19 @@ Look at the top right of your browser next to your address bar:
 
 ## 3. How to Use It in the Wild
 
-You don't have to do anything special. Just browse the web normally.
+To protect your privacy, KnowThankYew **never watches your tabs in the background**. It runs only when you ask it to.
 
-### When You Visit a Checkout Page:
-1. Look at the KnowThankYew shield icon in your toolbar.
-2. If the website has hidden traps, a **number badge** will appear on the shield:
-   - **Red badge with a number**: Critical traps found (like automatic recurring billing or mandatory arbitration).
-   - **Amber badge with a number**: Warning traps found (like phone-only cancellation or unilateral term changes).
-3. **Click the shield icon.**
-   - A clean window drops down showing each clause in plain English.
-   - It quotes the exact sentence the company hid in their terms.
-   - It explains the exact legal statute protecting you (such as the federal **ROSCA** law that bans hidden recurring billing).
+### When You Reach a Checkout or Signup Screen:
+1. **Click the KnowThankYew shield icon** on your browser toolbar.
+2. The extension instantly scans visible terms and fine print on the active tab without sending a single byte to the web.
+3. If predatory terms are found:
+   - **Red Alert 🚨**: Critical traps found (like automatic recurring billing or mandatory binding arbitration).
+   - **Amber Alert ⚠️**: Squeeze tactics (like phone-only cancellation or post-trial conversion).
+   - **Clear Badge**: No matching traps detected in visible text on that screen.
+4. A clean window drops down showing each clause in plain English, quoting the buried sentence and explaining what statutory framework protects you (such as federal **ROSCA** or California ARL).
+5. If the site dynamically modifies terms (like an expanding terms accordion), the on-page observer tracks dynamic changes while you interact with that checkout.
+
+> *KnowThankYew is an educational and consumer transparency auditing tool. It is not legal advice.*
 
 ---
 

@@ -1,12 +1,12 @@
 # KnowThankYew Reality Engine 🛡️
-### An uncompromising, air-gapped consumer advocate in your browser toolbar.
+### Zero-egress consumer advocate in your browser toolbar.
 
 > **Stop getting tricked by fine print.**  
-> KnowThankYew automatically scans checkout screens, subscription signups, and terms-of-service agreements the second you land on them. It flags hidden recurring charges, impossible cancellation mazes, and clauses that strip your right to sue—**all on your own device, with zero data sent to the cloud.**
+> With a single click, KnowThankYew audits checkout screens, subscription signups, and terms-of-service agreements for predatory traps. It flags hidden recurring charges, impossible cancellation mazes, and clauses that strip your right to sue—**100% locally on your machine, with zero data sent to the cloud.**
 
 [![CI](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
-[![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Air--Gapped)-10b981.svg)](#how-it-protects-your-privacy)
+[![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 
 ---
 
@@ -16,9 +16,9 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 
 **KnowThankYew evens the odds.**
 
-1. **It Watches Checkout Pages for You**: The moment a website tries to sneak an auto-renewal or an arbitration clause past you, the shield icon in your toolbar lights up with a red or amber warning badge.
-2. **Plain English Explanations**: Click the shield. It shows you the exact sentence they buried in the terms, what law it touches, and what it actually means for your wallet.
-3. **Zero Data Leaves Your Machine**: We don't have servers. We don't have accounts. We don't have analytics. Your documents and checkout pages are analyzed on your computer's own processor and nowhere else.
+1. **Zero-Privilege On-Demand Audits**: We never spy on your browsing in the background. When you reach a checkout, sign-up, or terms page, click the shield icon in your toolbar to instantly extract visible text and flag predatory clauses.
+2. **Plain English Explanations**: Click any detected finding. It shows you the exact sentence they buried in the terms, what law or doctrine it touches, and what it actually means for your wallet.
+3. **Zero Data Leaves Your Machine**: We don't have servers. We don't have accounts. We don't have analytics. Pages are analyzed strictly in your browser's local sandbox and nowhere else.
 4. **The "Hard Burn" Red Button**: Finished buying? Click **"Burn Local Data"**. The extension wipes its own memory clean and goes into complete amnesia.
 
 ---
@@ -28,10 +28,14 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 Until our Chrome Web Store listing goes live, you can install the extension in 3 simple steps:
 
 ### Step 1: Download the Pre-Built Package
-👉 **[Click Here to Download: knowthankyew-extension-v1.0.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.0.0/knowthankyew-extension-v1.0.0.zip)**  
-*(Or visit the [Official v1.0.0 Release Page](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)).*
+👉 **[Click Here to Download: knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)**  
+*(Or visit the [Official Releases Page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
 
 Double-click the downloaded `.zip` file to unzip it into a folder.
+
+> **Integrity Verification (Optional):**  
+> You can verify the build archive matches our signed release:  
+> `shasum -a 256 knowthankyew-extension-v1.1.0.zip`
 
 ### Step 2: Open Extensions in Chrome or Brave
 In your address bar, type:
@@ -53,20 +57,21 @@ chrome://extensions
 | What You See | What's Actually Happening | The Legal Backbone |
 | :--- | :--- | :--- |
 | **"Start My Free Trial"** | You are silently enrolled in an auto-renewing subscription that bills your card automatically every month until you cancel. | **ROSCA (15 U.S.C. § 8403)** & State Automatic Renewal Laws (Cal. AB 2863, NY GBL § 527-a) |
-| **"Call Us to Cancel"** | You can subscribe online with 1 click, but you must call a phone hotline during business hours to stop charges. | Symmetrical Cancellation Standards (FTC Deceptive Practices & State ARLs) |
-| **"Dispute Resolution"** | You forfeit your right to join a class action or take the vendor to small claims court; you must submit to private binding arbitration. | **FAA § 2** / Fundamental Rights Waiver Auditing |
-| **"Terms May Change"** | The vendor reserves the right to raise prices or change terms at any time without notifying you. | Illusory Promise & Unilateral Discretion Doctrines |
-| **"Personalized Partners"** | Your checkout info and location data can be sold or shared with data brokers and ad networks. | Cross-Context Surveillance Disclosures |
+| **"Call Us to Cancel"** | You can subscribe online with 1 click, but you must call a phone hotline during business hours to stop charges. | Symmetrical Cancellation Standards (**15 U.S.C. § 45 / FTC Act § 5** & Cal. Bus. & Prof. Code § 17602) |
+| **"Dispute Resolution"** | You forfeit your right to join a class action or take the vendor to small claims court; you must submit to private binding arbitration. | **FAA § 2 (9 U.S.C. § 2)** & Fundamental Rights Waiver Auditing |
+| **"Terms May Change"** | The vendor reserves the right to raise prices or change terms at any time without notifying you. | Common Law Contract Principles & Unilateral Discretion Doctrines |
+| **"Personalized Partners"** | Your checkout info and location data can be sold or shared with data brokers and ad networks. | **Cal. Civ. Code § 1798.120 (CCPA/CPRA)** & State Privacy Disclosure Frameworks |
 
 ---
 
-## How It Protects Your Privacy (The Air-Gap Guarantee)
+## How It Protects Your Privacy (The Zero-Egress Guarantee)
 
-Unlike other "privacy" extensions that secretly send your browsing habits to analytics servers, **KnowThankYew cannot spy on you even if we wanted to**:
+Unlike other "privacy" extensions that quietly send your browsing habits to analytics servers, **KnowThankYew cannot transmit data over the network**:
 
-1. **Browser-Enforced Blockade**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser engine physically blocks this extension from making any internet connection.
-2. **Zero Cloud Infrastructure**: There is no login, no password, no email collection, and no remote server database.
-3. **Continuous Safety Audits**: Every update is automatically checked before release to guarantee zero tracking code exists.
+1. **Manifest-Level CSP**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser physically forbids extension pages (popup, background worker) from making outbound network calls.
+2. **Isolated Local Execution**: Scans run purely in the active tab's local context. Content scripts contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), verified via negative-control Chromium tests in CI.
+3. **No Cloud Sync**: All volatile states and metrics use `chrome.storage.local` exclusively, ensuring data is never synchronized to Google or browser cloud accounts.
+4. **Zero Cloud Infrastructure**: There is no remote backend, no user accounts, and no telemetry collection servers.
 
 Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github.io/knowthankyew-extension/)**.
 
@@ -75,11 +80,11 @@ Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github
 ## Interactive Live Test Page
 
 Want to test how it works right now?
-1. Open our **[Interactive Test Fixture Page](./tests/demo.html)**.
-2. Notice the shield badge immediately turns **RED** with a count of **`4`**.
-3. Click the shield to read the breakdown.
-4. Click the blue button on the page to inject a surprise clause and watch the badge automatically update in real time!
-5. Click **"Burn Local Data"** to watch the badge vanish.
+1. Open the live **[Interactive Test Fixture Page](https://knowthankyew.github.io/knowthankyew-extension/demo.html)** *(or run `npm run demo` locally)*.
+2. Click the KnowThankYew shield icon in your toolbar to scan the page.
+3. Review the plain-English breakdown of all 4 detected trap clauses.
+4. Click the blue button on the test page to dynamically inject a surprise clause, and hit **"↻ Rescan Tab"**.
+5. Click **"Burn Local Data"** to clear memory.
 
 ---
 
@@ -95,7 +100,7 @@ cd knowthankyew-extension
 # Install dependencies
 npm install
 
-# Run the 26-test verification suite (unit + Puppeteer real-Chromium E2E + ReDoS audit)
+# Run the test verification suite (unit + Puppeteer real-Chromium E2E + ReDoS audit)
 npm test
 
 # Build production bundle and package store zip
@@ -109,6 +114,12 @@ npm run demo
 - **Store Publication Spec**: See [`CHROMEWEBSTORE.md`](./CHROMEWEBSTORE.md)
 - **Product Roadmap**: See [`ROADMAP.md`](./ROADMAP.md)
 - **Legal Notice & Attributions**: See [`NOTICE.md`](./NOTICE.md)
+
+---
+
+## Disclaimer
+
+> KnowThankYew Reality Engine is an automated text-pattern analysis tool intended solely for informational and educational consumer transparency. It does not provide legal advice, does not assess all contractual terms, and is not a substitute for qualified legal counsel.
 
 ---
 

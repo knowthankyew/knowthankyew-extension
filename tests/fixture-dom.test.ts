@@ -84,7 +84,7 @@ describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
 
     const uni001 = scanResult.matches.find(m => m.ruleId === 'UNI-001');
     expect(uni001?.classification).toBe('ONE_SIDED_DISCRETION');
-    expect(uni001?.severity).toBe('WARNING');
+    expect(uni001?.severity).toBe('INFO');
 
     // Verify PII Sanitization
     for (const match of scanResult.matches) {
