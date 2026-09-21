@@ -100,3 +100,16 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload & Publish to Chrome Web Store
+        if: env.CWS_CLIENT_ID != ''
+        uses: mobilefirstllc/cws-publish@latest
+        with:
+          action: 'publish'
+          client_id: ${{ secrets.CWS_CLIENT_ID }}
+          client_secret: ${{ secrets.CWS_CLIENT_SECRET }}
+          refresh_token: ${{ secrets.CWS_REFRESH_TOKEN }}
+          extension_id: 'pbgjjggmeecalifcgggiondfminiinl'
+          zip_file: 'knowthankyew-extension-v${{ steps.version.outputs.version }}.zip'
+        env:
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
