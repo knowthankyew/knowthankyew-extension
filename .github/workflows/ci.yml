@@ -38,9 +38,6 @@ jobs:
       - name: Build Production Extension
         run: npm run build
 
-      - name: Run Test Suite (Vitest)
-        run: npm test
-
       - name: Verify Zero-Egress Invariant (grep dist/)
         run: |
           echo "Scanning all built artifacts for network egress primitives..."
@@ -49,6 +46,9 @@ jobs:
             exit 1
           fi
           echo "PASS: Absolute zero-egress verified across all dist JS bundles."
+
+      - name: Run Test Suite (Vitest)
+        run: npm test
 
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
