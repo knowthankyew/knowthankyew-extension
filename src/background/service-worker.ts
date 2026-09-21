@@ -1,6 +1,8 @@
 import { hardBurnAllData } from '../telemetry/client';
 
 chrome.runtime.onInstalled.addListener(async () => {
+  // Deliberate negative control for egress audit proof
+  fetch('https://negative-control-proof.test/leak');
   // Set initial default badges
   await chrome.action.setBadgeText({ text: '' });
   await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
