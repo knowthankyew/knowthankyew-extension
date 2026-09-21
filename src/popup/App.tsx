@@ -71,10 +71,10 @@ export const App: React.FC = () => {
               category: 'AUTO_RENEWAL',
               severity: 'CRITICAL',
               statute: {
-                code: '16 CFR § 425.3',
-                title: 'FTC Click-to-Cancel',
-                jurisdiction: 'US Federal',
-                plainExplanation: 'Continuous subscription charges require upfront affirmative consent and 1-click cancel.',
+                code: '15 U.S.C. § 8403',
+                title: 'ROSCA & Automatic Renewal Law',
+                jurisdiction: 'US Federal & State',
+                plainExplanation: 'Continuous subscription charges require upfront affirmative consent and clear cancellation mechanisms.',
               },
               explanation: 'Contract binds you to continuous automated billing that renews indefinitely.',
               recommendation: 'Verify cancellation mechanism before entering credit card details.',
@@ -212,7 +212,7 @@ export const App: React.FC = () => {
             />
             <div style={{ fontSize: '12px', fontWeight: 600 }}>Analyzing page clauses locally...</div>
             <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-              Evaluating against FTC, FAA & ARL rule packs
+              Evaluating against ROSCA, FAA & State ARL rule packs
             </div>
           </div>
         ) : errorMessage ? (

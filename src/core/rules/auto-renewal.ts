@@ -7,10 +7,10 @@ export const autoRenewalRules: DetectionRule[] = [
     category: 'AUTO_RENEWAL',
     severity: 'CRITICAL',
     statute: {
-      code: '16 CFR § 425.3 / Cal. Bus. & Prof. Code § 17602',
-      title: 'FTC Click-to-Cancel & Automatic Renewal Law',
+      code: '15 U.S.C. § 8403 (ROSCA) / Cal. Bus. & Prof. Code § 17602',
+      title: 'Restore Online Shoppers Confidence Act & State ARL',
       jurisdiction: 'US Federal & California',
-      plainExplanation: 'Sellers must obtain clear, affirmative consent before charging for automatic renewals and provide an easy, one-click mechanism to cancel.'
+      plainExplanation: 'Federal ROSCA and state Automatic Renewal Laws require clear disclosure of recurring terms and explicit consumer consent before initial billing.'
     },
     patterns: [
       /automatically\s+(?:renews?|renewing|extend(?:s|ed)?).*?(?:until|unless|each|every|successive)/i,
@@ -29,10 +29,10 @@ export const autoRenewalRules: DetectionRule[] = [
     category: 'AUTO_RENEWAL',
     severity: 'CRITICAL',
     statute: {
-      code: '16 CFR § 425.5',
-      title: 'FTC Symmetrical Cancellation Requirement',
-      jurisdiction: 'US Federal',
-      plainExplanation: 'If you signed up online, federal law requires that you must be able to cancel online through the same medium without having to call or mail.'
+      code: '15 U.S.C. § 45(a) / Cal. Bus. & Prof. Code § 17602(a)(4)',
+      title: 'FTC Act § 5 (Unfair Practices) & Symmetrical Cancellation',
+      jurisdiction: 'US Federal & State Law',
+      plainExplanation: 'Federal enforcement under FTC Act § 5 and state statutes mandate that consumers who subscribe online must be provided a simple, online mechanism to terminate recurring billing.'
     },
     patterns: [
       /(?:cancel|terminate)\s+(?:by\s+calling|only\s+by\s+phone|via\s+telephone|by\s+written\s+notice\s+sent\s+to)/i,

@@ -4,7 +4,7 @@ import { arbitrationRules } from '../src/core/rules/arbitration';
 import { unilateralRules } from '../src/core/rules/unilateral';
 import { surveillanceRules } from '../src/core/rules/surveillance';
 
-describe('Auto-Renewal Rule Pack (FTC Click-to-Cancel & ARL)', () => {
+describe('Auto-Renewal Rule Pack (ROSCA & State ARLs)', () => {
   it('detects negative option automatic renewal clauses', () => {
     const text = 'Your subscription automatically renews for successive one-month periods unless you cancel at least 24 hours prior.';
     const rule = autoRenewalRules.find(r => r.id === 'AR-001')!;

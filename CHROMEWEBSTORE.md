@@ -21,7 +21,7 @@ Browse the web with an invisible consumer protection advocate sitting quietly in
 
 When you reach a checkout page, terms of service modal, or subscription signup, the KnowThankYew Reality Engine instantly scans the agreement fine print on your device and highlights critical legal traps before you submit your credit card or click "I Agree":
 
-- **Automatic Renewal Traps**: Detects hidden continuous service commitments, negative-option billing, and promotional trial expirations under FTC Click-to-Cancel standards and state Automatic Renewal Laws.
+- **Automatic Renewal Traps**: Detects hidden continuous service commitments, negative-option billing, and promotional trial expirations under federal ROSCA standards (15 U.S.C. § 8403) and state Automatic Renewal Laws.
 - **Symmetrical Cancellation Obstacles**: Flags dark patterns that force you to call customer service hotlines or mail physical letters to cancel subscriptions you purchased online.
 - **Forced Arbitration & Class Action Bans**: Identifies mandatory binding arbitration clauses and class action waivers where companies force you to surrender your constitutional rights to a public trial.
 - **Unilateral Contract Alterations**: Alerts you when a company claims the power to change prices or terms retroactively without your affirmative consent.
