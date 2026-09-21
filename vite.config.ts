@@ -10,8 +10,21 @@ export default defineConfig({
       transform(code, id) {
         if (id.includes('@knowthankyew/privacy-telemetry')) {
           // Physically excise any remote network egress function from bundle
+          let modified = code;
+          // Robust replacement: keep the original function identifier ($1) while emptying its body
+          modified = modified.replace(
+            /async\s+function\s+([a-zA-Z0-9_$]+)\s*\([^{]*\{[\s\S]*?fetch\([\s\S]*?catch\s*\{[^\}]*\}\s*\}/g,
+            'async function $1() {}'
+          );
+          // Fallback matching minified 'r' function structure
+          modified = modified.replace(
+            /async\s+function\s+r\([^{]*\{[\s\S]*?catch\s*\{[^\}]*\}\s*\}/g,
+            'async function r() {}'
+          );
+          // Secondary defense-in-depth: neutralize any remaining fetch(...) calls in the module
+          modified = modified.replace(/\bfetch\s*\(/g, 'void /* air-gap stripped */ (');
           return {
-            code: code.replace(/async function r\([^{]*\{[\s\S]*?catch\s*\{[^\}]*\}\s*\}/g, 'async function r() {}'),
+            code: modified,
             map: null,
           };
         }

@@ -11,7 +11,7 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.0.0`
+- **Version**: `1.1.0`
 - **Default Language**: English (United States)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
@@ -40,7 +40,7 @@ Unlike commercial extensions that upload your browsing history to cloud analytic
 In accordance with our brutalist transparency principles:
 - **Visible DOM Text Only**: The engine analyzes visible DOM text extracted from the current active tab when you click the extension. It cannot follow external hyperlink chains (e.g., external "Terms & Conditions" URLs) or inspect opaque cross-origin iframes without explicit navigation.
 - **No False Reassurance ("No Findings" ≠ "Safe")**: If zero clauses are flagged, the extension shows "No Findings" and clears badge indicators. It never shows a green "OK" or "Safe" stamp, because no regex scanner can guarantee that an uninspected external contract is free of predatory terms.
-- **Strictly User-Triggered**: Under the least-privilege `activeTab` permission model, the extension has zero access to your browsing activity until you open the popup. It never tracks background tab navigation or history.
+- **User-Initiated Tab Inspection**: Under the least-privilege `activeTab` permission model, the extension has zero access to any tab until you explicitly open the popup. Once invoked, a local MutationObserver monitors that specific tab for dynamic checkout modals and accordion expansions until closed or cleared via Hard Burn. It never tracks other tabs, background navigation, or browsing history.
 
 ---
 
