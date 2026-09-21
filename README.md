@@ -16,7 +16,7 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 
 **KnowThankYew evens the odds.**
 
-1. **User-Initiated Audits**: The extension is not injected into every tab. When you reach a checkout, sign-up, or terms page, click the shield icon in your toolbar to inject the local scanner and analyze the visible fine print. After activation, that tab may be monitored for dynamically inserted terms until the scanner is stopped or the tab is closed.
+1. **User-Initiated Audits & Contract Discovery**: The extension is not injected into every tab. When you reach a checkout, sign-up, or landing page, click the shield icon in your toolbar to inject the local scanner and analyze visible fine print. It automatically scans footers and domain structures to discover hidden governing agreements (Terms of Service, Binding Arbitration, Billing Policies), providing 1-click audit navigation. After activation, that tab may be monitored for dynamically inserted terms until the scanner is stopped or the tab is closed.
 2. **Plain English Explanations**: Click any detected finding. It shows you the exact sentence they buried in the terms, what law or doctrine it touches, and what it actually means for your wallet.
 3. **Zero Data Leaves Your Machine**: We don't have servers. We don't have accounts. We don't have analytics. Pages are analyzed strictly in your browser's local sandbox and nowhere else.
 4. **The "Hard Burn" Red Button**: Finished buying? Click **"Burn Local Data"**. The extension clears its in-memory telemetry, popup/content-script scan state, local extension storage, and toolbar badges, then asks every open tab to stop its injected scanner. Cleanup is best-effort for tabs that are unavailable or do not contain the scanner.

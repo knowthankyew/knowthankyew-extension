@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { PageScanResult } from '../core/types';
 import { TrapCard } from './components/TrapCard';
 import { BurnButton } from './components/BurnButton';
+import { DiscoveredLinksCard } from './components/DiscoveredLinksCard';
 import { telemetry, recordScanMetrics } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
@@ -93,6 +94,20 @@ export const App: React.FC = () => {
           riskScore: 85,
           summary: { critical: 2, warning: 1, info: 0 },
           limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation.',
+          discoveredLinks: [
+            {
+              url: 'https://example.com/terms-of-service',
+              title: 'Terms of Service',
+              category: 'TERMS',
+              source: 'DOM_ANCHOR',
+            },
+            {
+              url: 'https://example.com/arbitration-clause',
+              title: 'Mandatory Binding Arbitration',
+              category: 'ARBITRATION',
+              source: 'DOM_ANCHOR',
+            },
+          ],
           matches: [
             {
               ruleId: 'AR-001',
@@ -140,6 +155,30 @@ export const App: React.FC = () => {
   useEffect(() => {
     performScan();
   }, [performScan]);
+
+  const handleNavigateToContract = (targetUrl: string) => {
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      if (chrome.tabs.create) {
+        chrome.tabs.create({ url: targetUrl, active: true }, () => {
+          window.close();
+        });
+        return;
+      }
+      if (chrome.tabs.query && chrome.tabs.update) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          const activeTabId = tabs[0]?.id;
+          if (activeTabId) {
+            chrome.tabs.update(activeTabId, { url: targetUrl });
+            window.close();
+          } else {
+            window.open(targetUrl, '_blank');
+          }
+        });
+        return;
+      }
+    }
+    window.open(targetUrl, '_blank');
+  };
 
   const handleBurnCompleted = () => {
     setScanResult(null);
@@ -358,6 +397,14 @@ export const App: React.FC = () => {
                 {scanResult.matches.length} Total
               </div>
             </div>
+
+            {/* Discovered Governing Agreements */}
+            {scanResult.discoveredLinks && scanResult.discoveredLinks.length > 0 && (
+              <DiscoveredLinksCard
+                links={scanResult.discoveredLinks}
+                onNavigate={handleNavigateToContract}
+              />
+            )}
 
             {/* Clause Findings */}
             {scanResult.matches.length === 0 ? (

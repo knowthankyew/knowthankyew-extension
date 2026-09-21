@@ -1,4 +1,5 @@
 import { extractPageLegalText } from './dom-extractor';
+import { discoverLegalLinks } from './link-detector';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
 
@@ -14,13 +15,17 @@ const DEBOUNCE_DELAY_MS = 400;
 const TEXT_DELTA_THRESHOLD = 25;
 
 /**
- * Executes a full scan of the active document's legal text.
+ * Executes a full scan of the active document's legal text and discovers governing links.
  * Caches the result and broadcasts the summary to the background service worker.
  */
 export function executeScan(): PageScanResult {
   const text = extractPageLegalText();
   const hostname = (typeof window !== 'undefined' && window.location?.hostname) || 'current-page';
+  const currentHref = (typeof window !== 'undefined' && window.location?.href) || '';
+  const discoveredLinks = discoverLegalLinks(typeof document !== 'undefined' ? document : undefined, currentHref);
+
   const result: PageScanResult = scanDocumentText(text, hostname);
+  result.discoveredLinks = discoveredLinks;
   cachedScanResult = result;
   lastExtractedTextLength = text.length;
 

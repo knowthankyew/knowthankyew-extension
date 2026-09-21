@@ -44,6 +44,13 @@ export interface EvaluationMatch {
   matchedSnippet: string;
 }
 
+export interface DiscoveredLegalLink {
+  url: string;
+  title: string;
+  category: 'TERMS' | 'PRIVACY' | 'BILLING' | 'ARBITRATION';
+  source: 'DOM_ANCHOR' | 'WELL_KNOWN';
+}
+
 export interface PageScanResult {
   timestamp: string;
   urlDomain: string;
@@ -56,4 +63,5 @@ export interface PageScanResult {
     info: number;
   };
   limitationsNotice: string;
+  discoveredLinks?: DiscoveredLegalLink[];
 }
