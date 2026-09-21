@@ -65,14 +65,14 @@ jobs:
         run: npx --yes @cyclonedx/cdxgen -o bom.json
 
       - name: Attest Build Provenance (SLSA)
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             bom.json
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: KnowThankYew Reality Engine v${{ steps.version.outputs.version }}
           body: |
