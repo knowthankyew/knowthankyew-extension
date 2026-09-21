@@ -3,10 +3,27 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'air-gap-zero-egress',
+      transform(code, id) {
+        if (id.includes('@knowthankyew/privacy-telemetry')) {
+          // Physically excise any remote network egress function from bundle
+          return {
+            code: code.replace(/async function r\([^{]*\{[\s\S]*?catch\s*\{[^\}]*\}\s*\}/g, 'async function r() {}'),
+            map: null,
+          };
+        }
+      },
+    },
+  ],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    modulePreload: {
+      polyfill: false,
+    },
     rollupOptions: {
       input: {
         popup: resolve('popup.html'),

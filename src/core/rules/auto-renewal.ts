@@ -16,7 +16,7 @@ export const autoRenewalRules: DetectionRule[] = [
     patterns: [
       /automatically\s+(?:renews?|renewing|extend(?:s|ed)?)[^.\n]{0,80}(?:until|unless|each|every|successive)/i,
       /renews?\s+automatically[^.\n]{0,80}(?:on\s+a|each|every|at\s+the\s+end|until|unless)/i,
-      /(?:subscription|membership|plan)\s+(?:will\s+)?automatically\s+(?:renews?|renewing)/i,
+      /(?:subscription|membership|plan)\s+(?:will\s+automatically|automatically)\s+(?:renews?|renewing)/i,
       /recurring\s+(?:billing|charge|subscription|fee)[^.\n]{0,80}(?:will\s+occur|will\s+be\s+billed|unless\s+you\s+cancel)/i,
       /subscription\s+will\s+continue\s+unless\s+(?:cancelled|canceled)/i,
       /continuous\s+service\s+(?:program|plan|agreement)/i
@@ -40,7 +40,7 @@ export const autoRenewalRules: DetectionRule[] = [
       /(?:cancel|terminate)\s+(?:by\s+calling|only\s+by\s+phone|via\s+telephone|by\s+written\s+notice\s+sent\s+to)/i,
       /(?:to\s+cancel|cancellation)[^.\n]{0,50}must\s+call/i,
       /must\s+call[^.\n]{0,50}(?:to\s+cancel|customer\s+support|business\s+hours)/i,
-      /to\s+cancel(?:,\s+please)?\s+(?:call|contact)/i,
+      /to\s+cancel\s+(?:please\s+call|call|contact)/i,
       /cancellation\s+(?:must\s+be\s+received|notice)\s+at\s+least\s+(?:30|60|90)\s+days\s+prior/i
     ],
     explanation: 'The agreement forces you to call customer support or mail physical letters to cancel a subscription initiated online.',

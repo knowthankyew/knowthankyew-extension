@@ -15,7 +15,7 @@ export const surveillanceRules: DetectionRule[] = [
     },
     patterns: [
       /share\s+(?:your\s+personal\s+information|your\s+data)[^.\n]{0,80}(?:advertisers|data\s+brokers|marketing\s+partners)[^.\n]{0,60}(?:targeted|cross-context)/i,
-      /we\s+may\s+sell(?:,\s+rent,?\s+or\s+trade)?[^.\n]{0,40}(?:your\s+information|user\s+data|personal\s+data)/i,
+      /we\s+may\s+(?:sell|rent|trade)[^.\n]{0,40}(?:your\s+information|user\s+data|personal\s+data)/i,
       /third\s+parties\s+may\s+collect\s+information\s+about\s+your\s+online\s+activities/i
     ],
     explanation: 'The policy states that your personal data and online habits may be sold, licensed, or shared with commercial data brokers or advertisers.',

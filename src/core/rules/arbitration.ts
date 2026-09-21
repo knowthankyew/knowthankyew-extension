@@ -14,8 +14,8 @@ export const arbitrationRules: DetectionRule[] = [
       plainExplanation: 'Enforceable under the Federal Arbitration Act (9 U.S.C. § 2). While lawful, it compels consumers to resolve disputes in private confidential forums instead of public courtrooms.'
     },
     patterns: [
-      /any\s+dispute(?:,\s+claim,?\s+or\s+controversy)?[^.\n]{0,80}shall\s+be\s+resolved\s+by\s+binding\s+arbitration/i,
-      /you\s+and\s+(?:the\s+company|we)\s+agree\s+that\s+any\s+(?:and\s+all\s+)?disputes?[^.\n]{0,80}resolved\s+exclusively[^.\n]{0,40}binding\s+arbitration/i,
+      /any\s+dispute[^.\n]{0,80}resolved\s+by\s+binding\s+arbitration/i,
+      /(?:you\s+and\s+(?:the\s+company|we)\s+agree|disputes?\s+resolved\s+exclusively)\s+by\s+binding\s+arbitration/i,
       /waive\s+(?:any\s+right\s+to\s+a|the\s+right\s+to\s+a)\s+jury\s+trial/i,
       /administered\s+by\s+the\s+american\s+arbitration\s+association/i,
       /administered\s+by\s+jams\s+(?:pursuant\s+to|under)/i
@@ -38,7 +38,7 @@ export const arbitrationRules: DetectionRule[] = [
     patterns: [
       /waive\s+(?:any\s+right\s+to\s+bring|the\s+right\s+to\s+pursue|any\s+right\s+to\s+participate\s+in)\s+(?:any\s+class|a\s+class\s+action|representative\s+action)/i,
       /no\s+arbitration\s+or\s+(?:proceeding|claim)\s+shall\s+be\s+joined\s+with\s+any\s+other/i,
-      /you\s+may\s+only\s+resolve\s+disputes\s+(?:with\s+us\s+)?on\s+an\s+individual\s+basis/i,
+      /you\s+may\s+only\s+resolve\s+disputes\s+(?:with\s+us\s+on|on)\s+an\s+individual\s+basis/i,
       /may\s+not\s+bring\s+a\s+claim\s+as\s+a\s+plaintiff\s+or\s+class\s+member\s+in\s+any\s+purported\s+class/i
     ],
     explanation: 'Forces every consumer into isolated individual dispute proceedings, preventing class-wide relief for systematic issues.',

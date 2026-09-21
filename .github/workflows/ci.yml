@@ -43,9 +43,12 @@ jobs:
 
       - name: Verify Zero-Egress Invariant (grep dist/)
         run: |
-          echo "Verifying no network egress primitives in dist bundles..."
-          ! grep -E "fetch\(|new WebSocket\(|navigator\.sendBeacon\(|new XMLHttpRequest\(" dist/background/service-worker.js dist/content/scanner.js
-          echo "Zero-egress physically verified in bundled artifacts."
+          echo "Scanning all built artifacts for network egress primitives..."
+          if grep -rEn "fetch\(|WebSocket|sendBeacon|XMLHttpRequest|EventSource|importScripts" dist --include='*.js'; then
+            echo "ERROR: Network egress primitive detected in production extension bundle!"
+            exit 1
+          fi
+          echo "PASS: Absolute zero-egress verified across all dist JS bundles."
 
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json

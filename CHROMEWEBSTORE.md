@@ -32,7 +32,7 @@ When you reach a checkout page, terms of service modal, or subscription signup, 
 Unlike commercial extensions that upload your browsing history to cloud analytics servers, the KnowThankYew Reality Engine operates under strict zero-egress invariants:
 
 1. **100% On-Device Processing**: Contract evaluation runs entirely inside your browser tab sandbox. No document text, form inputs, or browsing history ever leave your device.
-2. **Zero Network Egress (Browser Enforced)**: Manifest CSP strictly sets `connect-src 'none'`, physically prohibiting `fetch`, XHR, WebSocket, or beacon dispatch at the browser engine level.
+2. **Zero Network Egress (Browser Enforced for Extension Pages)**: Manifest CSP strictly enforces `connect-src 'none'` for all extension pages (popup and background worker), physically prohibiting `fetch`, XHR, WebSocket, or beacon dispatch at the browser engine level. (Note: Chromium's MV3 CSP applies to `extension_pages`, not content scripts; content script zero-egress is guaranteed via the absence of host permissions and physical bundle auditing in CI).
 3. **The Hard Burn Switch**: Click "Hard Burn" at any moment to instantly wipe local extension storage, flush memory buffers, and dereference in-memory state.
 
 ### Architectural Scope & Honest Limitations

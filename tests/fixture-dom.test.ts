@@ -7,7 +7,7 @@ import { resolve } from 'path';
 import { extractPageLegalText } from '../src/content/dom-extractor';
 import { scanDocumentText, segmentText, ALL_RULES } from '../src/core/engine';
 
-describe('E2E Fixture Page Scan & Zero-Egress Assertion (e2e-fixture.test.ts)', () => {
+describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
   it('extracts visible page text from a realistic checkout DOM fixture, stripping scripts and nav', () => {
     // Construct DOM fixture
     document.body.innerHTML = `

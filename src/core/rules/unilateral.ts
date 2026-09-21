@@ -34,7 +34,7 @@ export const unilateralRules: DetectionRule[] = [
       plainExplanation: 'Treating silence or normal app usage as affirmative assent to modified material terms is scrutinized as an unfair business practice.'
     },
     patterns: [
-      /(?:your\s+)?continued\s+use[^.\n]{0,60}(?:constitute|signif(?:y|ies))\s+(?:your\s+)?acceptance/i,
+      /continued\s+use[^.\n]{0,60}(?:constitutes?|signifies)\s+(?:your\s+acceptance|acceptance)/i,
       /by\s+continuing\s+to\s+(?:access|use)[^.\n]{0,60}agree\s+to\s+be\s+bound/i,
       /continued\s+use\s+following\s+any\s+updates\s+constitutes\s+binding\s+agreement/i
     ],
