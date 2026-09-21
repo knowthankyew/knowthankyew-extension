@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  validate:
+    name: Build, Audit, Test & Attest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Checkout Shared Privacy Telemetry
+        run: git clone --depth 1 https://github.com/knowthankyew/privacy-telemetry.git ../privacy-telemetry
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Audit Dependencies
+        run: npm audit --audit-level=high
+
+      - name: TypeScript Type Check
+        run: npx tsc --noEmit
+
+      - name: Run Test Suite (Vitest)
+        run: npm test
+
+      - name: Build Production Extension
+        run: npm run build
+
+      - name: Generate CycloneDX SBOM
+        run: npx --yes @cyclonedx/cdxgen -o bom.json
+
+      - name: Attest Build Provenance (SLSA)
+        uses: actions/attest-build-provenance@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          subject-path: 'bom.json'
+
+      - name: Upload Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowthankyew-extension-unpacked
+          path: dist/
+
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-knowthankyew-extension
+          path: bom.json
