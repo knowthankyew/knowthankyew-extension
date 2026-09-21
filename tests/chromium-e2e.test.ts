@@ -2,6 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import puppeteer, { Browser, Page } from 'puppeteer';
 import http from 'http';
 import { resolve } from 'path';
+import { existsSync } from 'fs';
+import { execSync } from 'child_process';
 
 describe('Real-Chromium E2E Browser & Network Interception Test (chromium-e2e.test.ts)', () => {
   let server: http.Server;
@@ -11,8 +13,12 @@ describe('Real-Chromium E2E Browser & Network Interception Test (chromium-e2e.te
   const recordedNetworkRequests: string[] = [];
 
   beforeAll(async () => {
-    // 1. Spin up a local fixture HTTP server
     distPath = resolve(__dirname, '../dist');
+    if (!existsSync(distPath) || !existsSync(resolve(distPath, 'manifest.json'))) {
+      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    }
+
+    // 1. Spin up a local fixture HTTP server
     server = http.createServer((req, res) => {
       if (req.url === '/checkout') {
         res.writeHead(200, { 'Content-Type': 'text/html' });

@@ -35,11 +35,11 @@ jobs:
       - name: TypeScript Type Check
         run: npx tsc --noEmit
 
-      - name: Run Test Suite (Vitest)
-        run: npm test
-
       - name: Build Production Extension
         run: npm run build
+
+      - name: Run Test Suite (Vitest)
+        run: npm test
 
       - name: Verify Zero-Egress Invariant (grep dist/)
         run: |
