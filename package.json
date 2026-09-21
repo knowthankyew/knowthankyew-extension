@@ -11,7 +11,8 @@
     "build:assets": "node scripts/render-store-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "demo": "python3 -m http.server 3000 --directory tests"
   },
   "dependencies": {
     "@knowthankyew/privacy-telemetry": "^1.0.0",
