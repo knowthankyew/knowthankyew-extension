@@ -28,8 +28,8 @@ The core reality engine is fully built, statically verified, and audited:
   - Finalize store copy from [`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) highlighting zero host permissions.
 - [x] **Static Privacy Policy Host**:
   - Deploy a static, cookie-less, zero-analytics privacy policy page (via GitHub Pages) required by Google Web Store Developer Program Policies.
-- [x] **Initial Web Store Submission**:
-  - Submit unpacked bundle for automated and human Chrome Web Store security review.
+- [x] **Web Store Review & Publication**:
+  - Successfully reviewed, approved, and published live on Chrome Web Store: [`https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl`](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl).
 
 ### Milestone 2: Edge Neural Synthesis Tier (v1.2.0)
 - [ ] **WebGPU / WASM ONNX Runtime Integration**:

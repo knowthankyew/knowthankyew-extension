@@ -23,32 +23,25 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 
 ---
 
-## How to Install in 60 Seconds (No Coding Required)
+## How to Install in 60 Seconds
 
-Until our Chrome Web Store listing goes live, you can install the extension in 3 simple steps:
+### Option A: One-Click Install (Official Chrome Web Store)
 
-### Step 1: Download the Pre-Built Package
-👉 **[Click Here to Download: knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)**  
-*(Or visit the [Official Releases Page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
+👉 **[Add to Chrome from the Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)**
 
-Double-click the downloaded `.zip` file to unzip it into a folder.
+Click **"Add to Chrome"** (or Brave / Edge / Opera), then pin the shield icon to your toolbar.
 
-> **Integrity Verification (Optional):**  
-> You can verify the build archive matches our signed release:  
-> `shasum -a 256 knowthankyew-extension-v1.1.0.zip`
+---
 
-### Step 2: Open Extensions in Chrome or Brave
-In your address bar, type:
-```text
-chrome://extensions
-```
-*(If you use Brave, you can also type `brave://extensions`)*
+### Option B: Offline / Unpacked Install (From Release Zip)
 
-### Step 3: Turn on Developer Mode & Load the Folder
-1. In the top-right corner, switch the **Developer mode** toggle to **ON**.
-2. Click the **Load unpacked** button in the top-left toolbar.
-3. Select the unzipped folder.
-4. **Done!** Click the puzzle piece icon on your browser toolbar and click the **Pin** icon next to **KnowThankYew Reality Engine**.
+If you prefer installing directly from source without using the store:
+
+1. **Download the Package**: 👉 **[knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)** *(or visit [Releases](https://github.com/knowthankyew/knowthankyew-extension/releases))*.
+2. **Unzip** the archive into a folder on your computer.
+3. Open `chrome://extensions` (or `brave://extensions`) in your browser.
+4. Turn on **Developer mode** (top-right toggle).
+5. Click **Load unpacked** and select the unzipped folder. Pin the shield icon to your toolbar.
 
 ---
 

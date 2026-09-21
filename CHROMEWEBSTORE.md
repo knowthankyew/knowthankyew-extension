@@ -8,6 +8,9 @@
 
 - **Extension Name**: KnowThankYew Reality Engine
 - **Short Name**: KnowThankYew
+- **Extension ID**: `pbgjjgggmeecalifcgggiondfminilnl`
+- **Store Status**: **LIVE & APPROVED**
+- **Live Chrome Web Store URL**: [https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
