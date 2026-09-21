@@ -20,15 +20,15 @@ The core reality engine is fully built, statically verified, and audited:
 ## 2. Near-Term Milestones
 
 ### Milestone 1: Chrome Web Store Packaging & Submission (v1.1.0)
-- [ ] **Automated Release Packaging in CI**:
+- [x] **Automated Release Packaging in CI**:
   - Add GitHub Actions step to package `dist/` into a pristine `knowthankyew-extension-v1.1.0.zip`.
   - Attach zip bundle directly to GitHub Releases alongside `bom.json`.
-- [ ] **Store Marketing & Listing Assets**:
+- [x] **Store Marketing & Listing Assets**:
   - Produce required store graphic assets: 1280x800 marquee promo tile, 440x280 small promo tile, verified crisp 16/48/128 icon assets.
   - Finalize store copy from [`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) highlighting zero host permissions.
-- [ ] **Static Privacy Policy Host**:
+- [x] **Static Privacy Policy Host**:
   - Deploy a static, cookie-less, zero-analytics privacy policy page (via GitHub Pages) required by Google Web Store Developer Program Policies.
-- [ ] **Initial Web Store Submission**:
+- [x] **Initial Web Store Submission**:
   - Submit unpacked bundle for automated and human Chrome Web Store security review.
 
 ### Milestone 2: Edge Neural Synthesis Tier (v1.2.0)

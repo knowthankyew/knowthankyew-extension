@@ -1,19 +1,18 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
   attestations: write
 
 jobs:
-  validate:
-    name: Build, Audit, Test & Attest
+  release:
+    name: Build, Attest & Publish GitHub Release
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +37,7 @@ jobs:
       - name: Build Production Extension
         run: npm run build
 
-      - name: Verify Zero-Egress Invariant (grep dist/)
+      - name: Verify Zero-Egress Invariant
         run: |
           echo "Scanning all built artifacts for network egress primitives..."
           if grep -rEn "fetch\(|WebSocket|sendBeacon|XMLHttpRequest|EventSource|importScripts" dist --include='*.js'; then
@@ -47,7 +46,7 @@ jobs:
           fi
           echo "PASS: Absolute zero-egress verified across all dist JS bundles."
 
-      - name: Run Test Suite (Vitest)
+      - name: Run Test Suite
         run: npm test
 
       - name: Extract Version
@@ -67,18 +66,37 @@ jobs:
 
       - name: Attest Build Provenance (SLSA)
         uses: actions/attest-build-provenance@v2
-        if: github.ref == 'refs/heads/main'
         with:
           subject-path: |
             bom.json
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
 
-      - name: Upload Store ZIP & Unpacked Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: knowthankyew-extension-production-package
-          path: |
+          name: KnowThankYew Reality Engine v${{ steps.version.outputs.version }}
+          body: |
+            ## KnowThankYew Reality Engine v${{ steps.version.outputs.version }}
+
+            ### Installation
+            1. Download `knowthankyew-extension-v${{ steps.version.outputs.version }}.zip` below
+            2. Unzip the downloaded file
+            3. Navigate to `chrome://extensions` (or `brave://extensions`)
+            4. Enable **Developer mode** (toggle in top-right)
+            5. Click **Load unpacked** and select the unzipped folder
+
+            ### Verification
+            - SHA256 checksum: see `SHA256SUMS`
+            - Software Bill of Materials: see `bom.json`
+            - SLSA build provenance attestation attached to this release
+
+            ### Chrome Web Store
+            _Coming soon — or install from source above._
+          files: |
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
             SHA256SUMS
             bom.json
-            dist/
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

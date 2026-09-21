@@ -87,3 +87,57 @@ The KnowThankYew Reality Engine is built on the principle that consumer protecti
 3. Zero Network Dispatch: The extension initiates no outbound network requests for analytics, user tracking, or document processing.
 4. Instant Hard Burn: Users can incinerate all local configuration and session state instantly via the "Hard Burn" button in the extension popup.
 ```
+
+---
+
+## 5. Submission Checklist (CWS Developer Dashboard)
+
+> Step-by-step guide to fill in every field in the Chrome Web Store Developer Dashboard.
+
+### Prerequisites
+- [ ] Register a CWS developer account ($5 one-time) at https://chrome.google.com/webstore/devconsole
+- [ ] Enable GitHub Pages in repo settings (Settings → Pages → Source: "GitHub Actions")
+- [ ] Verify privacy policy is live at `https://knowthankyew.github.io/knowthankyew-extension/privacy.html`
+
+### Step 1: Get the Store ZIP
+Download `knowthankyew-extension-v1.1.0.zip` from the latest [GitHub Release](https://github.com/knowthankyew/knowthankyew-extension/releases/latest), or build locally:
+```bash
+npm run package
+```
+
+### Step 2: Create New Item in Developer Dashboard
+1. Go to https://chrome.google.com/webstore/devconsole
+2. Click **"New Item"** → Upload `knowthankyew-extension-v1.1.0.zip`
+
+### Step 3: Fill in Store Listing Tab
+| Field | Value |
+|:--|:--|
+| **Extension Name** | KnowThankYew Reality Engine |
+| **Summary** | Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection. |
+| **Description** | _(Copy the full "Detailed Description" from Section 1 above)_ |
+| **Category** | Productivity |
+| **Language** | English (United States) |
+| **Icon** | Upload `public/icons/icon-128.png` |
+| **Screenshots** | Upload `assets/store/screenshot-1-findings.png`, `screenshot-2-privacy.png`, `screenshot-3-no-findings.png` |
+| **Small Promo Tile** | Upload `assets/store/promo-small-440x280.png` |
+| **Marquee Promo Tile** | Upload `assets/store/promo-marquee-1400x560.png` |
+| **Homepage URL** | `https://github.com/knowthankyew/knowthankyew-extension` |
+| **Support URL** | `https://github.com/knowthankyew/knowthankyew-extension/issues` |
+
+### Step 4: Fill in Privacy Tab
+| Field | Value |
+|:--|:--|
+| **Single Purpose** | "To analyze legal fine print, terms of service agreements, and checkout disclosure texts locally on the user's device, highlighting predatory subscription traps and forced arbitration waivers." |
+| **Privacy Policy URL** | `https://knowthankyew.github.io/knowthankyew-extension/privacy.html` |
+| **Permission Justifications** | _(Copy from Section 2 table above)_ |
+| **Data Use Disclosures** | All categories → **NO** (see Section 3 above) |
+
+### Step 5: Distribution Tab
+| Field | Value |
+|:--|:--|
+| **Visibility** | Public |
+| **Distribution** | All regions |
+
+### Step 6: Submit for Review
+Click **"Submit for Review"**. First submission typically takes 1–3 business days.
+
