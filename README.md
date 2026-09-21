@@ -28,9 +28,8 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 Until our Chrome Web Store listing goes live, you can install the extension in 3 simple steps:
 
 ### Step 1: Download the Pre-Built Package
-👉 **[Download the Latest Release (knowthankyew-extension-v1.0.0.zip)](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)**
-
-*(Or download `knowthankyew-extension-production-package` from the latest [GitHub Actions build](https://github.com/knowthankyew/knowthankyew-extension/actions)).*
+👉 **[Click Here to Download: knowthankyew-extension-v1.0.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.0.0/knowthankyew-extension-v1.0.0.zip)**  
+*(Or visit the [Official v1.0.0 Release Page](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)).*
 
 Double-click the downloaded `.zip` file to unzip it into a folder.
 

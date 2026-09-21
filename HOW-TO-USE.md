@@ -27,10 +27,11 @@ flowchart LR
 ```
 
 ### 1. Download
-Click this link to download the latest ready-to-run package:  
-👉 **[Download knowthankyew-extension-v1.0.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)**
+Click this link to download the pre-packaged zip file directly:  
+👉 **[Click Here to Download: knowthankyew-extension-v1.0.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.0.0/knowthankyew-extension-v1.0.0.zip)**  
+*(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases/latest)).*
 
-Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder named `knowthankyew-extension` or `dist`.
+Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.
 
 ### 2. Open Your Browser Extensions Page
 Open **Google Chrome**, **Brave**, or **Microsoft Edge**.  
