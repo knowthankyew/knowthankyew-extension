@@ -37,7 +37,7 @@ Click **"Add to Chrome"** (or Brave / Edge / Opera), then pin the shield icon to
 
 If you prefer installing directly from source without using the store:
 
-1. **Download the Package**: 👉 **[knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)** *(or visit [Releases](https://github.com/knowthankyew/knowthankyew-extension/releases))*.
+1. **Download the Package**: 👉 **[knowthankyew-extension-v1.2.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.2.0/knowthankyew-extension-v1.2.0.zip)** *(or visit [Releases](https://github.com/knowthankyew/knowthankyew-extension/releases))*.
 2. **Unzip** the archive into a folder on your computer.
 3. Open `chrome://extensions` (or `brave://extensions`) in your browser.
 4. Turn on **Developer mode** (top-right toggle).

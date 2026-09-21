@@ -1,6 +1,6 @@
 {
   "name": "knowthankyew-extension",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "Zero-egress, client-side browser reality engine detecting predatory subscription traps, arbitration waivers, and dark patterns in real-time",
   "type": "module",

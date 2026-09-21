@@ -28,7 +28,7 @@ flowchart LR
 
 ### 1. Download
 Click this link to download the pre-packaged zip file directly:  
-👉 **[Click Here to Download: knowthankyew-extension-v1.1.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.1.0/knowthankyew-extension-v1.1.0.zip)**  
+👉 **[Click Here to Download: knowthankyew-extension-v1.2.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.2.0/knowthankyew-extension-v1.2.0.zip)**  
 *(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
 
 Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.
@@ -99,8 +99,8 @@ Because other software retains your history or logs your activity to sell to adv
 #### Q: Does it cost money?
 **No.** KnowThankYew is 100% free and open source under the MIT License. It was built as a public service for consumer sovereignty.
 
-#### Q: Why isn't it in the official Chrome Web Store yet?
-We are currently undergoing the official Google Store review process for our **v1.1.0 release**. Loading it unpacked via the 60-second steps above gives you the exact same protection right now without waiting for Google's review queue.
+#### Q: Is it in the official Chrome Web Store?
+**Yes!** You can install with one click directly from the **[Official Chrome Web Store Listing](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)**. If you prefer loading offline from source, follow the 60-second steps above.
 
 ---
 
