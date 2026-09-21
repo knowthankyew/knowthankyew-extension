@@ -165,7 +165,7 @@
           <code>activeTab</code>: Grants temporary access to inspect the rendered text of the currently active tab <em>only when the user invokes the extension</em> (by opening the popup) or while actively reviewing checkout terms. Text is analyzed in volatile memory and never transmitted.
         </li>
         <li>
-          <code>storage</code>: Used exclusively to retain local user preferences (such as risk threshold settings) within the browser's local sandbox (<code>chrome.storage.local</code>). No identifiers or telemetry are synced to cloud storage.
+          <code>storage</code>: Requested to permit clearing the extension's local storage namespace during the Hard Burn routine and to support future local-only settings within the browser's local sandbox (<code>chrome.storage.local</code>). Telemetry, document excerpts, URLs, and scan results are never written to local storage or cloud sync.
         </li>
         <li>
           <code>scripting</code>: Used to execute the local document text extraction engine inside the active webpage context to evaluate visible terms and identify dark patterns.
@@ -179,9 +179,9 @@
         The extension includes local operational telemetry exclusively to power the in-popup <strong>Privacy Audit Modal</strong>, allowing you to inspect what metadata the application generates in real time:
       </p>
       <ul>
-        <li>Telemetry is stored strictly in a temporary, fixed-size circular memory buffer. It is never written to remote telemetry endpoints or cloud servers.</li>
+        <li>Telemetry is stored strictly in a temporary, fixed-size circular memory buffer. It is never written to remote telemetry endpoints, cloud servers, or local storage.</li>
         <li>
-          <strong>The "Burn Local Data" Button:</strong> When clicked, the extension immediately empties all in-memory buffers, clears <code>chrome.storage.local</code>, wipes toolbar badges, dereferences all cached DOM text strings for browser garbage collection, and locks the telemetry system into a permanent no-op tombstone for the remainder of the session.
+          <strong>The "Burn Local Data" Button:</strong> When clicked, the extension immediately empties its in-memory telemetry buffer, clears <code>chrome.storage.local</code>, wipes toolbar badges, commands open tabs to tear down any injected scanner instances and cached DOM state, and locks the telemetry system into a permanent no-op tombstone for the remainder of the session.
         </li>
       </ul>
     </section>

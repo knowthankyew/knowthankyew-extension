@@ -91,6 +91,27 @@ describe('Pillar 5: Amnesiac Hard Burn Invariant (burn.test.ts)', () => {
     expect(telemetry.getAuditLog().length).toBe(0);
   });
 
+  it('broadcasts KTY_HARD_BURN_DOM to all open tabs and tolerates non-fatal tab rejections', async () => {
+    (globalThis as any).chrome.tabs.query = vi.fn(async () => [
+      { id: 101 },
+      { id: 102 },
+      { id: undefined },
+      { id: 103 },
+    ]);
+    (globalThis as any).chrome.tabs.sendMessage = vi.fn(async (id: number) => {
+      if (id === 102) {
+        throw new Error('No receiver in tab 102');
+      }
+      tabMessages.push({ tabId: id, message: { type: 'KTY_HARD_BURN_DOM' } });
+    });
+
+    await expect(hardBurnAllData()).resolves.not.toThrow();
+    expect((globalThis as any).chrome.tabs.sendMessage).toHaveBeenCalledWith(101, { type: 'KTY_HARD_BURN_DOM' });
+    expect((globalThis as any).chrome.tabs.sendMessage).toHaveBeenCalledWith(102, { type: 'KTY_HARD_BURN_DOM' });
+    expect((globalThis as any).chrome.tabs.sendMessage).toHaveBeenCalledWith(103, { type: 'KTY_HARD_BURN_DOM' });
+    expect(tabMessages.map(t => t.tabId)).toEqual([101, 103]);
+  });
+
   it('handles gracefully when chrome API or tabs are missing/disconnected during burn', async () => {
     (globalThis as any).chrome = {
       storage: {

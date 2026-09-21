@@ -50,31 +50,40 @@ export function recordScanMetrics(summary: { critical: number; warning: number; 
 
 /**
  * Pillar 5 Invariant: The Hard Burn
- * Atomically purges memory buffers, clears local extension storage, and tombstones telemetry.
+ *
+ * Purges this context's in-memory telemetry, clears local extension storage,
+ * clears the toolbar badge, and asks every open tab to tear down any injected
+ * scanner state. Cleanup is intentionally best-effort across tabs because
+ * tabs may be restricted, closed, or missing the content script.
  */
 export async function hardBurnAllData(): Promise<void> {
-  // 1. Burn in-memory telemetry and session audit log
+  // 1. Burn in-memory telemetry and session audit log for this extension context.
   telemetry.burn();
 
-  // 2. Clear chrome.storage.local
+  // 2. Clear the extension's local storage namespace.
   if (typeof chrome !== 'undefined' && chrome.storage?.local) {
     await chrome.storage.local.clear();
   }
 
-  // 3. Clear action badges
+  // 3. Clear action badges.
   if (typeof chrome !== 'undefined' && chrome.action?.setBadgeText) {
     await chrome.action.setBadgeText({ text: '' });
   }
 
-  // 4. Command content scripts to dereference DOM highlights
+  // 4. Command every open tab to dereference DOM state and stop observation.
+  // Tabs without an injected content script reject sendMessage; those failures
+  // are expected and must not prevent cleanup in other tabs.
   if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
     try {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-      if (tabs[0]?.id) {
-        await chrome.tabs.sendMessage(tabs[0].id, { type: 'KTY_HARD_BURN_DOM' });
-      }
+      const tabs = await chrome.tabs.query({});
+      const burnMessage = { type: 'KTY_HARD_BURN_DOM' };
+      const notifications = tabs
+        .filter((tab) => typeof tab.id === 'number')
+        .map((tab) => chrome.tabs.sendMessage(tab.id as number, burnMessage));
+
+      await Promise.allSettled(notifications);
     } catch {
-      // Tab may not have content script injected; non-fatal
+      // The tabs API may be unavailable or disconnected; non-fatal.
     }
   }
 }

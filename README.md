@@ -16,10 +16,10 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 
 **KnowThankYew evens the odds.**
 
-1. **Zero-Privilege On-Demand Audits**: We never spy on your browsing in the background. When you reach a checkout, sign-up, or terms page, click the shield icon in your toolbar to instantly extract visible text and flag predatory clauses.
+1. **User-Initiated Audits**: The extension is not injected into every tab. When you reach a checkout, sign-up, or terms page, click the shield icon in your toolbar to inject the local scanner and analyze the visible fine print. After activation, that tab may be monitored for dynamically inserted terms until the scanner is stopped or the tab is closed.
 2. **Plain English Explanations**: Click any detected finding. It shows you the exact sentence they buried in the terms, what law or doctrine it touches, and what it actually means for your wallet.
 3. **Zero Data Leaves Your Machine**: We don't have servers. We don't have accounts. We don't have analytics. Pages are analyzed strictly in your browser's local sandbox and nowhere else.
-4. **The "Hard Burn" Red Button**: Finished buying? Click **"Burn Local Data"**. The extension wipes its own memory clean and goes into complete amnesia.
+4. **The "Hard Burn" Red Button**: Finished buying? Click **"Burn Local Data"**. The extension clears its in-memory telemetry, popup/content-script scan state, local extension storage, and toolbar badges, then asks every open tab to stop its injected scanner. Cleanup is best-effort for tabs that are unavailable or do not contain the scanner.
 
 ---
 
@@ -68,10 +68,11 @@ chrome://extensions
 
 Unlike other "privacy" extensions that quietly send your browsing habits to analytics servers, **KnowThankYew cannot transmit data over the network**:
 
-1. **Manifest-Level CSP**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser physically forbids extension pages (popup, background worker) from making outbound network calls.
-2. **Isolated Local Execution**: Scans run purely in the active tab's local context. Content scripts contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), verified via negative-control Chromium tests in CI.
-3. **No Cloud Sync**: All volatile states and metrics use `chrome.storage.local` exclusively, ensuring data is never synchronized to Google or browser cloud accounts.
-4. **Zero Cloud Infrastructure**: There is no remote backend, no user accounts, and no telemetry collection servers.
+1. **Manifest-Level CSP**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser physically forbids extension pages (popup, background worker) from making outbound network connections.
+2. **Isolated Local Execution**: Scans run purely in the active tab's local context. Content scripts contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), verified via negative-control tests.
+3. **Memory-Only Runtime State**: Operational telemetry is configured as `memory_only`; scan results are held in the popup and injected content-script contexts. The repository does not persist telemetry, document excerpts, URLs, or scan results to `chrome.storage.local`.
+4. **Local Storage Is Not a Telemetry Database**: The extension requests the `storage` permission so the hard-burn routine can clear the extension's local storage namespace and to permit future local-only settings. The current release does not use `chrome.storage.local` as the source of truth for telemetry or scan results.
+5. **Zero Cloud Infrastructure**: There is no remote backend, no user accounts, and no telemetry collection servers.
 
 Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github.io/knowthankyew-extension/)**.
 
@@ -82,9 +83,9 @@ Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github
 Want to test how it works right now?
 1. Open the live **[Interactive Test Fixture Page](https://knowthankyew.github.io/knowthankyew-extension/demo.html)** *(or run `npm run demo` locally)*.
 2. Click the KnowThankYew shield icon in your toolbar to scan the page.
-3. Review the plain-English breakdown of all 4 detected trap clauses.
-4. Click the blue button on the test page to dynamically inject a surprise clause, and hit **"↻ Rescan Tab"**.
-5. Click **"Burn Local Data"** to clear memory.
+3. Review the plain-English breakdown of all detected trap clauses.
+4. Click the blue button on the test page to dynamically inject a surprise clause. The activated tab's local `MutationObserver` may detect the change automatically; you can also hit **"↻ Rescan Tab"**.
+5. Click **"Burn Local Data"** to clear memory and request scanner teardown across open tabs.
 
 ---
 
