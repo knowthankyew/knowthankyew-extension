@@ -28,7 +28,7 @@ flowchart LR
 
 ### 1. Download
 Click this link to download the pre-packaged zip file directly:  
-👉 **[Click Here to Download: knowthankyew-extension-v1.2.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.2.0/knowthankyew-extension-v1.2.0.zip)**  
+👉 **[Click Here to Download: knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip)**  
 *(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
 
 Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.
@@ -73,18 +73,26 @@ To protect your privacy, KnowThankYew **never watches your tabs in the backgroun
 
 ---
 
-## 4. What is the Big Red "Burn Data" Button?
+## 4. Total Amnesia: Burning Data & Reclaiming Memory
+ 
+### A. Instant Tab Burn (From the Popup)
+At the bottom of the extension popup, you will see a red button that says **"Hard Burn"**:
+- Purges volatile memory buffers for that session.
+- Dereferences DOM text and removes any temporary highlights or counters.
+- Resets toolbar badge counters.
+- Locks that tab into complete amnesia.
 
-At the bottom of the extension popup, you will see a red button that says **"Burn Local Data"**.
-
-### What happens when you click it:
-- The extension immediately purges all in-memory buffers.
-- It removes any temporary highlights or counters from the page.
-- It resets its own memory to absolute zero.
-- It locks the extension into complete amnesia until you restart your browser.
+### B. Master Cross-Domain Burn (The Engine Dashboard)
+Used the extension across dozens of websites and want to reclaim memory or purge all state across every domain at once?
+1. Right-click the **KnowThankYew icon** on your browser toolbar $\rightarrow$ click **Options**.  
+   *(Or click the **⚙️ Dashboard** button in the top right of the popup).*
+2. A full-page **Engine Manager** tab will open up (styled like a VS Code extension manager).
+3. Check your **Storage Meter** (bytes in use) and **Active Telemetry Buffers**.
+4. Click the big red button: **"BURN ALL DATA ACROSS ALL DOMAINS"**.
+5. It atomically clears local storage, drains in-memory buffers, and broadcasts a shutdown command to all open tabs across every domain to disconnect dynamic page observers and drop cached results.
 
 **Why does this matter?**  
-Because other software retains your history or logs your activity to sell to advertisers. KnowThankYew gives you a physical self-destruct button for local application memory.
+Because other software retains your history or logs your activity to sell to advertisers. KnowThankYew gives you absolute data sovereignty and a physical self-destruct button.
 
 ---
 

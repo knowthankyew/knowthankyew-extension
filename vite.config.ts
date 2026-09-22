@@ -40,6 +40,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve('popup.html'),
+        options: resolve('options.html'),
         'background/service-worker': resolve('src/background/service-worker.ts'),
         'content/scanner': resolve('src/content/scanner.ts'),
       },

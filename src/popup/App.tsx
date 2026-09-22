@@ -212,22 +212,50 @@ export const App: React.FC = () => {
               Reality Engine • In-Browser Advocate
             </div>
           </div>
-          <div
-            style={{
-              padding: '3px 8px',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid #10b981',
-              borderRadius: '12px',
-              fontSize: '10px',
-              color: '#34d399',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-            Zero Egress
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div
+              style={{
+                padding: '3px 8px',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                border: '1px solid #10b981',
+                borderRadius: '12px',
+                fontSize: '10px',
+                color: '#34d399',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
+              Zero Egress
+            </div>
+            <button
+              onClick={() => {
+                if (typeof chrome !== 'undefined' && chrome.runtime?.openOptionsPage) {
+                  chrome.runtime.openOptionsPage();
+                } else {
+                  window.open('options.html', '_blank');
+                }
+              }}
+              title="Open Engine Dashboard & Cross-Domain Burn"
+              style={{
+                backgroundColor: '#1e293b',
+                border: '1px solid #334155',
+                borderRadius: '6px',
+                color: '#cbd5e1',
+                padding: '3px 8px',
+                fontSize: '10px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontFamily: 'inherit',
+              }}
+            >
+              ⚙️ Dashboard
+            </button>
           </div>
         </div>
 
