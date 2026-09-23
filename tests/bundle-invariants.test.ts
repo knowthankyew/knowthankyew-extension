@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readFileSync, readdirSync, statSync, existsSync, rmSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -7,8 +7,10 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure fresh standard production build exists for testing
-    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    // Ensure standard production build exists for testing without overwriting if already present
+    if (!existsSync(distDir) || !existsSync(resolve(distDir, 'manifest.json'))) {
+      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    }
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -67,12 +69,14 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
 
   it('verifies loopback client is actively preserved when VITE_LOCAL_ML_ENABLED=true is set', () => {
     const rootDir = resolve(__dirname, '..');
-    execSync('VITE_LOCAL_ML_ENABLED=true npx vite build', { cwd: rootDir, stdio: 'pipe' });
-    const jsFiles = getJsFilesRecursively(distDir);
-    const hasLoopbackClient = jsFiles.some(f => readFileSync(f, 'utf-8').includes('127.0.0.1:8420'));
-    expect(hasLoopbackClient).toBe(true);
-
-    // Rebuild standard production bundle to leave dist clean
-    execSync('npm run build', { cwd: rootDir, stdio: 'pipe' });
+    const testDistMl = resolve(__dirname, '../dist-test-ml');
+    try {
+      execSync('VITE_LOCAL_ML_ENABLED=true npx vite build --outDir dist-test-ml', { cwd: rootDir, stdio: 'pipe' });
+      const jsFiles = getJsFilesRecursively(testDistMl);
+      const hasLoopbackClient = jsFiles.some(f => readFileSync(f, 'utf-8').includes('127.0.0.1:8420'));
+      expect(hasLoopbackClient).toBe(true);
+    } finally {
+      rmSync(testDistMl, { recursive: true, force: true });
+    }
   });
 });

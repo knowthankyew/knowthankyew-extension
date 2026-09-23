@@ -54,13 +54,25 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
-      - name: Package Chrome Web Store ZIP Bundle
+      - name: Package Chrome Web Store ZIP Bundle (Zero-Egress Production)
         run: |
           cd dist
           zip -r ../knowthankyew-extension-v${{ steps.version.outputs.version }}.zip .
           cd ..
-          shasum -a 256 knowthankyew-extension-v${{ steps.version.outputs.version }}.zip > SHA256SUMS
-          echo "ZIP SHA256: $(cat SHA256SUMS)"
+
+      - name: Build & Package Local Assist Developer Bundle
+        run: |
+          VITE_LOCAL_ML_ENABLED=true npx vite build
+          cd dist
+          zip -r ../knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip .
+          cd ..
+          npm run build
+
+      - name: Generate Checksums
+        run: |
+          shasum -a 256 knowthankyew-extension-v${{ steps.version.outputs.version }}*.zip > SHA256SUMS
+          echo "ZIP Checksums:"
+          cat SHA256SUMS
 
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
@@ -72,6 +84,7 @@ jobs:
           subject-path: |
             bom.json
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip
 
       - name: Upload Store ZIP & Unpacked Artifacts
         uses: actions/upload-artifact@v7
@@ -79,6 +92,7 @@ jobs:
           name: knowthankyew-extension-production-package
           path: |
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip
             SHA256SUMS
             bom.json
             dist/
