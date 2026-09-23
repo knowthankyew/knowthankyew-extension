@@ -1,15 +1,7 @@
 import { DetectionRule, EvaluationMatch, PageScanResult } from './types';
-import { autoRenewalRules } from './rules/auto-renewal';
-import { arbitrationRules } from './rules/arbitration';
-import { unilateralRules } from './rules/unilateral';
-import { surveillanceRules } from './rules/surveillance';
+import { COMPILED_POLICY_RULES } from './policy-packs';
 
-export const ALL_RULES: DetectionRule[] = [
-  ...autoRenewalRules,
-  ...arbitrationRules,
-  ...unilateralRules,
-  ...surveillanceRules,
-];
+export const ALL_RULES: DetectionRule[] = COMPILED_POLICY_RULES;
 
 /**
  * Strips sensitive PII patterns like credit card numbers or emails from snippets

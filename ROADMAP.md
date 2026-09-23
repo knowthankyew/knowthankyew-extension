@@ -44,16 +44,23 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Nuclear Amnesia Across All Domains**:
   - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
 
-### Milestone 4: Edge Neural Synthesis Tier (v1.4.0)
+### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0)
+- [x] **Declarative JSON Policy Packs**:
+  - Decouple statutory rules into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation.
+- [x] **Automated Statutory Regulatory Monitor**:
+  - Weekly GitHub Action querying the official Federal Register API to detect rule amendments (ROSCA, Negative Option, Click-to-Cancel, Arbitration).
+  - Draft Pull Request workflow with official citation diffs for human attorney review.
+- [x] **2-Stage Legal Link Discovery Cascade**:
+  - Fast DOM heuristic extractor coupled with loopback semantic reranker (`http://127.0.0.1:8420`) to prioritize consumer agreements over merchant/courier terms.
+- [x] **Hard Burn Protocol Handshake**:
+  - Fire-and-forget `POST /burn` endpoint contract wiping external worker prompt context and KV cache on Nuclear Amnesia wipe.
+- [x] **Compile-Time Air-Gap Invariant Preservation**:
+  - `vite.config.ts` dead-code eliminates `fetch()` calls in production Chrome Web Store builds, preserving `connect-src 'none'`.
+- [ ] **Chrome Built-in Prompt API Provider (`ai.languageModel`)**:
+  - Add zero-setup in-browser Prompt API provider alongside loopback client.
 - [ ] **WebGPU / WASM ONNX Runtime Integration**:
   - Mount `onnxruntime-web` inside an MV3 `chrome.offscreen` canvas document or Web Worker.
   - Load the 157.2 MB INT8 quantized `SmolLM2-135M` model (trained and exported via `event-driven-ftaas`).
-- [ ] **Two-Tier Reality Engine**:
-  - **Tier 1 (Instant Heuristics)**: 37 static regex patterns execute in <5ms on visible DOM text.
-  - **Tier 2 (Neural Inference)**: When ambiguous legal language or obfuscated clauses are detected, the local edge model classifies the paragraph without sending a single byte over the wire.
-- [ ] **Cache Storage Management**:
-  - Cache the model weights in local browser `CacheStorage` on initial download.
-  - Wire Hard Burn routine to purge cached model weights if requested by the user.
 
 ### Milestone 3: International Jurisdiction Packs (v1.3.0)
 - [ ] **UK Digital Markets, Competition and Consumers Act 2024**:

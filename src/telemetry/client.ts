@@ -86,4 +86,11 @@ export async function hardBurnAllData(): Promise<void> {
       // The tabs API may be unavailable or disconnected; non-fatal.
     }
   }
+
+  // 5. Command local ML worker (if active) to burn in-memory session and prompt context (fire-and-forget)
+  import('../ml/local-ml-client')
+    .then(({ localMLClient }) => {
+      localMLClient.burn().catch(() => {});
+    })
+    .catch(() => {});
 }

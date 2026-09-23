@@ -28,6 +28,13 @@ export default defineConfig({
             map: null,
           };
         }
+        if (!process.env.VITEST && process.env.VITE_LOCAL_ML_ENABLED !== 'true' && id.includes('local-ml-client')) {
+          let modified = code.replace(/\bfetch\s*\(/g, 'void /* air-gap stripped */ (');
+          return {
+            code: modified,
+            map: null,
+          };
+        }
       },
     },
   ],
@@ -54,5 +61,7 @@ export default defineConfig({
   define: {
     // Compile-time tree shaking for OTLP exporter (Pillar 2 invariant)
     __OTEL_EXPORTER_ENDPOINT__: JSON.stringify(process.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT || ''),
+    // Compile-time dead-code elimination for Local ML Loopback client
+    __LOCAL_ML_ENABLED__: JSON.stringify(process.env.VITE_LOCAL_ML_ENABLED === 'true'),
   },
 });

@@ -12,6 +12,7 @@ export const OptionsApp: React.FC = () => {
   const [burned, setBurned] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [activeTabSection, setActiveTabSection] = useState<'memory' | 'pillars' | 'permissions'>('memory');
+  const [mlStatus, setMlStatus] = useState<'connected' | 'disconnected' | 'disabled'>('disabled');
 
   const refreshDiagnostics = useCallback(async () => {
     // 1. Query chrome.storage.local usage
@@ -56,6 +57,19 @@ export const OptionsApp: React.FC = () => {
     } catch {
       setTelemetrySpanCount(0);
       setAuditLogCount(0);
+    }
+
+    // 4. Local ML loopback worker status
+    try {
+      const { localMLClient } = await import('../ml/local-ml-client');
+      if (!localMLClient.isFeatureEnabled()) {
+        setMlStatus('disabled');
+      } else {
+        const isUp = await localMLClient.isAvailable();
+        setMlStatus(isUp ? 'connected' : 'disconnected');
+      }
+    } catch {
+      setMlStatus('disabled');
     }
   }, []);
 
@@ -423,6 +437,37 @@ export const OptionsApp: React.FC = () => {
               </div>
               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
                 Targeted during broadcast burn
+              </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: '#131b2e',
+                border: mlStatus === 'connected' ? '1px solid #10b981' : '1px solid #1e293b',
+                borderRadius: '8px',
+                padding: '18px',
+              }}
+            >
+              <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
+                Local ML Assist (127.0.0.1:8420)
+              </div>
+              <div
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 800,
+                  color: mlStatus === 'connected' ? '#34d399' : mlStatus === 'disconnected' ? '#f87171' : '#94a3b8',
+                  marginTop: '8px',
+                  fontFamily: 'ui-monospace, monospace',
+                }}
+              >
+                {mlStatus === 'connected' ? '● Connected' : mlStatus === 'disconnected' ? '○ Offline' : 'Air-Gapped'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
+                {mlStatus === 'connected'
+                  ? 'Loopback semantic reranker active'
+                  : mlStatus === 'disconnected'
+                  ? 'Run `npm run ml:serve` to connect'
+                  : 'Zero external network calls (Default)'}
               </div>
             </div>
           </div>
