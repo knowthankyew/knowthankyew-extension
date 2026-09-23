@@ -1,0 +1,198 @@
+{
+  "packId": "us-federal",
+  "name": "US Federal Statutory Policy Pack",
+  "version": "1.0.0",
+  "jurisdiction": "US Federal",
+  "description": "Statutory rules grounded in federal law: ROSCA, FTC Negative Option Rule, Federal Arbitration Act, and FTC Act Section 5.",
+  "rules": [
+    {
+      "id": "AR-001",
+      "title": "Negative Option Automatic Renewal",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "CRITICAL",
+      "statute": {
+        "code": "15 U.S.C. § 8403 (ROSCA) / 16 CFR Part 425",
+        "title": "Restore Online Shoppers Confidence Act & FTC Negative Option Rule",
+        "jurisdiction": "US Federal",
+        "plainExplanation": "Federal ROSCA and FTC Negative Option regulations require clear, conspicuous disclosure of recurring terms and explicit affirmative consumer consent prior to initial billing."
+      },
+      "patterns": [
+        "automatically\\s+(?:renews?|renewing|extend(?:s|ed)?)[^.\\n]{0,80}(?:until|unless|each|every|successive)",
+        "renews?\\s+automatically[^.\\n]{0,80}(?:on\\s+a|each|every|at\\s+the\\s+end|until|unless)",
+        "(?:subscription|membership|plan)\\s+(?:will\\s+automatically|automatically)\\s+(?:renews?|renewing)",
+        "recurring\\s+(?:billing|charge|subscription|fee)[^.\\n]{0,80}(?:will\\s+occur|will\\s+be\\s+billed|unless\\s+you\\s+cancel)",
+        "subscription\\s+will\\s+continue\\s+unless\\s+(?:cancelled|canceled)",
+        "continuous\\s+service\\s+(?:program|plan|agreement)"
+      ],
+      "explanation": "The agreement binds you to automated recurring charges that renew indefinitely until you affirmatively navigate their cancellation procedure.",
+      "recommendation": "Verify that clear, upfront billing disclosures and an online cancellation button are present before submitting payment.",
+      "tracking": {
+        "agency": "Federal Trade Commission",
+        "statuteCode": "15 U.S.C. § 8403",
+        "cfr": "16 CFR Part 425",
+        "apiKeywords": ["Negative Option", "ROSCA", "Automatic Renewal", "Click to Cancel"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "AR-002",
+      "title": "Asymmetrical Cancellation Dark Pattern (Call/Mail-Only)",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "CRITICAL",
+      "statute": {
+        "code": "15 U.S.C. § 45(a) (FTC Act § 5) / 16 CFR § 425.6",
+        "title": "FTC Click-to-Cancel Mandate & Deceptive Practices Rule",
+        "jurisdiction": "US Federal",
+        "plainExplanation": "If you subscribed online, FTC enforcement and Click-to-Cancel rules require that you must be allowed to cancel online through the same medium without having to call or mail."
+      },
+      "patterns": [
+        "(?:cancel|terminate)\\s+(?:by\\s+calling|only\\s+by\\s+phone|via\\s+telephone|by\\s+written\\s+notice\\s+sent\\s+to)",
+        "(?:to\\s+cancel|cancellation)[^.\\n]{0,50}must\\s+call",
+        "must\\s+call[^.\\n]{0,50}(?:to\\s+cancel|customer\\s+support|business\\s+hours)",
+        "to\\s+cancel\\s+(?:please\\s+call|call|contact)",
+        "cancellation\\s+(?:must\\s+be\\s+received|notice)\\s+at\\s+least\\s+(?:30|60|90)\\s+days\\s+prior"
+      ],
+      "explanation": "The agreement forces you to call customer support or mail physical letters to cancel a subscription initiated online.",
+      "recommendation": "Do not agree unless an immediate online cancellation button is available in your account dashboard.",
+      "tracking": {
+        "agency": "Federal Trade Commission",
+        "statuteCode": "15 U.S.C. § 45(a)",
+        "cfr": "16 CFR Part 425",
+        "apiKeywords": ["Click-to-Cancel", "Negative Option", "Cancellation", "Telephonic"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "ARB-001",
+      "title": "Mandatory Binding Arbitration & Jury Waiver",
+      "category": "ARBITRATION",
+      "classification": "RIGHTS_WAIVER",
+      "severity": "WARNING",
+      "statute": {
+        "code": "9 U.S.C. § 2 (FAA Enforcement) / U.S. Const. amend. VII",
+        "title": "Federal Arbitration Act & 7th Amendment Jury Right",
+        "jurisdiction": "US Federal",
+        "plainExplanation": "Enforceable under the Federal Arbitration Act (9 U.S.C. § 2). While lawful, it compels consumers to resolve disputes in private confidential forums instead of public courtrooms."
+      },
+      "patterns": [
+        "any\\s+dispute[^.\\n]{0,80}resolved\\s+by\\s+binding\\s+arbitration",
+        "(?:you\\s+and\\s+(?:the\\s+company|we)\\s+agree|disputes?\\s+resolved\\s+exclusively)\\s+by\\s+binding\\s+arbitration",
+        "waive\\s+(?:any\\s+right\\s+to\\s+a|the\\s+right\\s+to\\s+a)\\s+jury\\s+trial",
+        "administered\\s+by\\s+the\\s+american\\s+arbitration\\s+association",
+        "administered\\s+by\\s+jams\\s+(?:pursuant\\s+to|under)"
+      ],
+      "explanation": "Lawful under federal law, but you surrender your constitutional right to a jury trial and access to a public court of law if the company harms you.",
+      "recommendation": "Check whether the agreement includes a 30-day opt-out window to reject arbitration while maintaining your account.",
+      "tracking": {
+        "agency": "Consumer Financial Protection Bureau",
+        "statuteCode": "9 U.S.C. § 2",
+        "apiKeywords": ["Arbitration", "Mandatory Arbitration", "Dispute Resolution"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "ARB-002",
+      "title": "Class Action & Collective Lawsuit Waiver",
+      "category": "ARBITRATION",
+      "classification": "RIGHTS_WAIVER",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Fed. R. Civ. P. 23 / AT&T Mobility LLC v. Concepcion",
+        "title": "Class Action Ban & Representative Action Waiver",
+        "jurisdiction": "US Federal",
+        "plainExplanation": "Prevents consumers from joining together in collective lawsuits, shielding companies from aggregate accountability for widespread small-dollar overcharges."
+      },
+      "patterns": [
+        "waive\\s+(?:any\\s+right\\s+to\\s+bring|the\\s+right\\s+to\\s+pursue|any\\s+right\\s+to\\s+participate\\s+in)\\s+(?:any\\s+class|a\\s+class\\s+action|representative\\s+action)",
+        "no\\s+arbitration\\s+or\\s+(?:proceeding|claim)\\s+shall\\s+be\\s+joined\\s+with\\s+any\\s+other",
+        "you\\s+may\\s+only\\s+resolve\\s+disputes\\s+(?:with\\s+us\\s+on|on)\\s+an\\s+individual\\s+basis",
+        "may\\s+not\\s+bring\\s+a\\s+claim\\s+as\\s+a\\s+plaintiff\\s+or\\s+class\\s+member\\s+in\\s+any\\s+purported\\s+class"
+      ],
+      "explanation": "Forces every consumer into isolated individual dispute proceedings, preventing class-wide relief for systematic issues.",
+      "recommendation": "Understand that you cannot join a class settlement if the company engages in unauthorized billing.",
+      "tracking": {
+        "statuteCode": "Fed. R. Civ. P. 23",
+        "apiKeywords": ["Class Action Waiver", "Collective Action", "Representative Proceeding"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "ARB-003",
+      "title": "30-Day Written Mail Opt-Out Provision",
+      "category": "ARBITRATION",
+      "classification": "RIGHTS_WAIVER",
+      "severity": "INFO",
+      "statute": {
+        "code": "UCC § 2-302 / Procedural Arbitration Opt-Out",
+        "title": "Dispute Resolution Opt-Out Mechanism",
+        "jurisdiction": "Uniform Commercial Code",
+        "plainExplanation": "A provision allowing consumers to reject binding arbitration and preserve court access if notice is provided within a limited timeframe."
+      },
+      "patterns": [
+        "you\\s+have\\s+the\\s+right\\s+to\\s+opt\\s*-\\s*out\\s+of\\s+(?:this\\s+arbitration|the\\s+arbitration\\s+agreement)",
+        "opt-out\\s+notice\\s+must\\s+be\\s+(?:postmarked|received)\\s+within\\s+30\\s+days",
+        "must\\s+mail\\s+(?:a\\s+written|written)\\s+notice\\s+of\\s+opt-out"
+      ],
+      "explanation": "You have a legally protected window to preserve your court rights by sending written notice.",
+      "recommendation": "Exercise this right immediately upon opening your account if you wish to retain courtroom protections.",
+      "tracking": {
+        "statuteCode": "UCC § 2-302",
+        "apiKeywords": ["Arbitration Opt-Out", "Opt Out Notice"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "UNI-001",
+      "title": "Unilateral Contract Modification Without Prior Notice",
+      "category": "UNILATERAL_CHANGE",
+      "classification": "ONE_SIDED_DISCRETION",
+      "severity": "INFO",
+      "statute": {
+        "code": "Restatement (Second) of Contracts § 211 / Illusory Promise Doctrine",
+        "title": "Common Law Contract Modification Standards",
+        "jurisdiction": "US Common Law",
+        "plainExplanation": "While common in commercial terms, courts scrutinize clauses granting unlimited unilateral rights to alter material terms without advance notice or opt-out rights as potentially unenforceable illusory promises."
+      },
+      "patterns": [
+        "reserve\\s+the\\s+right\\s+to\\s+(?:modify|change|alter|update|amend)\\s+these\\s+terms[^.\\n]{0,60}(?:without\\s+notice|in\\s+our\\s+sole\\s+discretion)",
+        "we\\s+may\\s+(?:change|modify|amend)\\s+these\\s+terms\\s+in\\s+our\\s+sole\\s+discretion\\s+without\\s+liability",
+        "modifications\\s+are\\s+effective\\s+immediately\\s+upon\\s+posting"
+      ],
+      "explanation": "The platform claims the power to rewrite their agreement with you at any time without advance notice or affirmative re-consent.",
+      "recommendation": "Periodically monitor recurring pricing and terms directly rather than assuming terms remain fixed.",
+      "tracking": {
+        "statuteCode": "Restatement Contracts § 211",
+        "apiKeywords": ["Unilateral Modification", "Illusory Promise", "Sole Discretion"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "UNI-002",
+      "title": "Passive Deemed Consent via Continued Usage",
+      "category": "UNILATERAL_CHANGE",
+      "classification": "ONE_SIDED_DISCRETION",
+      "severity": "INFO",
+      "statute": {
+        "code": "15 U.S.C. § 45 (FTC Act § 5 - Deceptive Omissions)",
+        "title": "Inferred Consent & Unfair Trade Practice",
+        "jurisdiction": "US Federal",
+        "plainExplanation": "Treating silence or normal app usage as affirmative assent to modified material terms is scrutinized as an unfair business practice."
+      },
+      "patterns": [
+        "continued\\s+use[^.\\n]{0,60}(?:constitutes?|signifies)\\s+(?:your\\s+acceptance|acceptance)",
+        "by\\s+continuing\\s+to\\s+(?:access|use)[^.\\n]{0,60}agree\\s+to\\s+be\\s+bound",
+        "continued\\s+use\\s+following\\s+any\\s+updates\\s+constitutes\\s+binding\\s+agreement"
+      ],
+      "explanation": "Simply logging into your account is treated by the company as your legal signature accepting their newly revised terms.",
+      "recommendation": "Check policy revision dates if you notice billing or feature changes in your service.",
+      "tracking": {
+        "agency": "Federal Trade Commission",
+        "statuteCode": "15 U.S.C. § 45",
+        "apiKeywords": ["Deemed Assent", "Inferred Consent", "Unfair Terms"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    }
+  ]
+}

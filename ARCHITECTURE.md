@@ -42,6 +42,7 @@ The `storage` permission is retained so the hard-burn routine can clear the exte
 - **Manifest CSP:** `extension_pages` specifies `connect-src 'none'`, physically forbidding popup and background worker environments from initiating outbound network traffic.
 - **Content Script Isolation:** Content scripts run in an isolated execution world without network calls (`fetch`, `XMLHttpRequest`, `WebSocket`). Invariant verified via Puppeteer negative-control tests (`tests/chromium-e2e.test.ts`) asserting 0 egress packets during execution.
 - **OTLP Shims:** `vite.config.ts` ensures that unless an enterprise build explicitly injects `VITE_OTEL_EXPORTER_OTLP_ENDPOINT`, network telemetry exporter functions are excised at build time.
+- **Local ML Air-Gap Boundary:** Loopback communications (`http://127.0.0.1:8420`) are governed by compile-time flag `__LOCAL_ML_ENABLED__`. In standard production Chrome Web Store builds, the `air-gap-zero-egress` plugin physically strips all `fetch()` calls from `dist/`, guaranteeing that release builds maintain absolute zero-egress compliance with CSP `connect-src 'none'`.
 
 ### Pillar 3: Strict Fail-Closed Allowlisting
 All telemetry spans emit attributes validated against `SAFE_ALLOWLIST_KEYS` and `EXTENSION_ALLOWLIST_KEYS`. Arbitrary properties are silently stripped.
@@ -52,7 +53,20 @@ The content script executes all heuristic pattern matching locally in the tab. O
 ### Pillar 5: The Hard Burn
 A single invocation of `hardBurnAllData()` drains the in-memory telemetry buffer, clears the extension's `chrome.storage.local` namespace, clears toolbar badge indicators, and broadcasts `KTY_HARD_BURN_DOM` to every open tab. Each injected content script that receives the message disconnects its `MutationObserver`, clears its cached scan result, resets extraction state, and removes extension-owned DOM attributes.
 
-Hard burn is best-effort rather than transactional: tabs may be closed, restricted, or lack an injected content script, and those failures do not prevent cleanup of the other tabs or the extension context that initiated the burn. The popup, service worker, and content scripts are separate extension contexts, so their in-memory state is not one shared heap; the cross-tab message is the coordination mechanism for content-script teardown.
+When Local ML assistance is active, `hardBurnAllData()` additionally issues a fire-and-forget `POST /burn` command to the loopback worker (`http://127.0.0.1:8420/burn`), instructing the external process to purge in-memory prompt contexts and KV caches without blocking the instant browser-side DOM and storage wipe.
+
+Hard burn is best-effort rather than transactional: tabs may be closed, restricted, or lack an injected content script, and those failures do not prevent cleanup of the other tabs or the extension context that initiated the burn.
+
+### Upstream Regulatory Pipeline & Declarative Policy Packs
+Statutory rules are decoupled from TypeScript ASTs into declarative JSON policy packs (`src/core/policy-packs/us-federal.json` and `state-arl.json`).
+- **Declarative Structure:** Each rule contains standard classifications, plain explanations, regex pattern strings verified against ReDoS via `safe-regex`, and regulatory tracking metadata (`apiKeywords`, `statuteCode`, `lastVerifiedDate`).
+- **Federal Register Monitor:** A GitHub Action (`.github/workflows/legal-statute-monitor.yml`) calls `scripts/check-statutory-updates.mjs` against the public Federal Register API to detect published final rules and notices touching tracked citations (ROSCA, FTC Negative Option Rule, Click-to-Cancel, FAA Arbitration).
+- **Human-in-the-Loop Draft PR Gate:** The workflow generates a GitHub **Draft Pull Request** with official Federal Register links and abstracts rather than autonomously mutating rules or synthesizing patches, eliminating AI hallucination risks in statutory enforcement.
+
+### 2-Stage Legal Link Discovery Cascade
+Finding governing consumer contracts on multi-sided platforms (e.g., DoorDash Consumer vs. Dasher vs. Merchant terms) utilizes a 2-stage cascade:
+1. **Stage 1 (DOM Heuristics):** In-tab extractor scans `<a>` elements and well-known route maps locally in <2ms.
+2. **Stage 2 (Local ML Reranker):** When multiple candidate agreements exist and Local ML Assist is active, candidate titles/URLs are dispatched to `POST /classify-links` on loopback. The model promotes the true consumer agreement to the primary position. If the local worker is offline, the engine falls back seamlessly to heuristic priority sorting.
 
 ### Runtime Activation and Dynamic Observation
 The extension has no manifest-declared `content_scripts` entry. The popup injects `content/scanner.js` into the active tab only when the user invokes the extension. Once injected, the scanner performs an initial local scan and installs a debounced `MutationObserver` on that tab's document body to detect dynamically inserted terms, checkout modals, and asynchronous subscription clauses.
@@ -73,15 +87,21 @@ Consequently, reopening the popup or navigating away can discard context-local s
 
 ```
 knowthankyew-extension/
+├── .github/workflows/       # CI, Release, and Weekly Statutory Monitor workflows
 ├── manifest.json            # Manifest V3 configuration (activeTab, storage, scripting)
 ├── package.json             # React 19 + TypeScript + @knowthankyew/privacy-telemetry
-├── vite.config.ts           # Multi-input bundling for SW, Content Script, and Popup
+├── vite.config.ts           # Multi-input bundling with compile-time air-gap shims
 ├── public/                  # Manifest and generated PNG icons (16, 48, 128)
+├── scripts/                 # Asset generators & check-statutory-updates.mjs
 ├── src/
 │   ├── background/          # Ephemeral MV3 service worker
-│   ├── content/             # Isolated DOM extractor & scanner
-│   ├── core/                # Statutory rule definitions & evaluator
+│   ├── content/             # Isolated DOM extractor & 2-stage link discovery
+│   ├── core/
+│   │   ├── policy-packs/    # Declarative JSON statutory packs (us-federal, state-arl)
+│   │   ├── rules/           # Typed statutory rule definitions
+│   │   └── engine.ts        # Dynamic policy compiler & reality engine scanner
+│   ├── ml/                  # Local ML loopback client (127.0.0.1:8420) & /burn contract
 │   ├── telemetry/           # Privacy telemetry singleton & Hard Burn controller
 │   └── popup/               # React 19 popup UI & PrivacyAuditModal
-└── tests/                   # Vitest unit test suite (rules, engine, telemetry)
+└── tests/                   # Vitest suite (policy packs, ML client, ReDoS, Chromium E2E)
 ```

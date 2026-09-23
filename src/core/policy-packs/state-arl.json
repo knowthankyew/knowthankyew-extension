@@ -1,0 +1,86 @@
+{
+  "packId": "state-arl",
+  "name": "State Consumer Protection & ARL Policy Pack",
+  "version": "1.0.0",
+  "jurisdiction": "US State",
+  "description": "State statutory rules covering automatic renewals (California AB 2863, New York GBL § 527-a) and state privacy protections (CCPA/CPRA, Illinois BIPA).",
+  "rules": [
+    {
+      "id": "AR-003",
+      "title": "Post-Trial Immediate Conversion Charge",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Cal. Bus. & Prof. Code § 17602(a)(2) / N.Y. GBL § 527-a",
+        "title": "Free Trial Disclosure Mandate",
+        "jurisdiction": "California & New York",
+        "plainExplanation": "Companies cannot convert free or discounted trials into full-rate paid subscriptions without upfront, conspicuous disclosure of the price after trial."
+      },
+      "patterns": [
+        "(?:free|introductory|discounted)\\s+trial\\s+(?:will|shall)\\s+(?:automatically\\s+convert|be\\s+charged|transition)",
+        "upon\\s+the\\s+expiration\\s+of\\s+(?:the\\s+free\\s+trial|your\\s+trial),\\s+(?:you\\s+will\\s+be\\s+charged|your\\s+account\\s+will\\s+be\\s+billed)",
+        "after\\s+(?:your\\s+trial|the\\s+trial\\s+period),\\s+(?:the\\s+regular|standard)\\s+(?:rate|price|fee)\\s+will\\s+apply"
+      ],
+      "explanation": "A promotional or free trial immediately converts into a recurring subscription billing at full price.",
+      "recommendation": "Set a calendar alert or utilize a single-use virtual card before starting the promotional trial.",
+      "tracking": {
+        "jurisdiction": "California / New York",
+        "statuteCode": "Cal. Bus. & Prof. Code § 17602(a)(2)",
+        "apiKeywords": ["Automatic Renewal", "Free Trial Conversion", "AB 2863"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "SURV-001",
+      "title": "Third-Party Behavioral Data Sale & Advertising Sharing",
+      "category": "SURVEILLANCE",
+      "classification": "SURVEILLANCE_NOTICE",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Cal. Civ. Code § 1798.120 (CCPA/CPRA) / Multi-State Privacy",
+        "title": "Consumer Opt-Out of Data Sale & Cross-Context Sharing",
+        "jurisdiction": "California & Multi-State",
+        "plainExplanation": "Consumers possess an unconditional statutory right to direct businesses to cease selling or sharing their personal information for cross-context behavioral advertising."
+      },
+      "patterns": [
+        "share\\s+(?:your\\s+personal\\s+information|your\\s+data)[^.\\n]{0,80}(?:advertisers|data\\s+brokers|marketing\\s+partners)[^.\\n]{0,60}(?:targeted|cross-context)",
+        "we\\s+may\\s+(?:sell|rent|trade)[^.\\n]{0,40}(?:your\\s+information|user\\s+data|personal\\s+data)",
+        "third\\s+parties\\s+may\\s+collect\\s+information\\s+about\\s+your\\s+online\\s+activities"
+      ],
+      "explanation": "The policy states that your personal data and online habits may be sold, licensed, or shared with commercial data brokers or advertisers.",
+      "recommendation": "Look for a \"Do Not Sell or Share My Personal Information\" link in the page footer and exercise your statutory opt-out.",
+      "tracking": {
+        "jurisdiction": "California",
+        "statuteCode": "Cal. Civ. Code § 1798.120",
+        "apiKeywords": ["CCPA", "CPRA", "Cross-Context Behavioral Advertising", "Data Sale"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "SURV-002",
+      "title": "Continuous Background Location or Biometric Collection",
+      "category": "SURVEILLANCE",
+      "classification": "SURVEILLANCE_NOTICE",
+      "severity": "INFO",
+      "statute": {
+        "code": "740 ILCS 14/ (BIPA) / Cal. Civ. Code § 1798.140",
+        "title": "Biometric Information Privacy & Precise Geolocation",
+        "jurisdiction": "Illinois & California",
+        "plainExplanation": "Continuous collection of precise GPS location or biometric identifiers requires explicit written authorization and publicly available retention schedules."
+      },
+      "patterns": [
+        "collects?\\s+precise\\s+(?:geolocation|location\\s+data)[^.\\n]{0,60}(?:closed|background)",
+        "(?:voice\\s+recordings|facial\\s+geometry|biometric\\s+identifiers)[^.\\n]{0,60}(?:stored|analyzed)"
+      ],
+      "explanation": "The platform retains rights to track your precise physical coordinates or analyze biometric identifiers continuously.",
+      "recommendation": "Deny persistent location permissions in your browser unless strictly needed for local services.",
+      "tracking": {
+        "jurisdiction": "Illinois / California",
+        "statuteCode": "740 ILCS 14/",
+        "apiKeywords": ["BIPA", "Biometric Privacy", "Geolocation"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    }
+  ]
+}

@@ -12,6 +12,7 @@ export const App: React.FC = () => {
   const [activeHostname, setActiveHostname] = useState<string>('local-tab');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  const [isLocalMLActive, setIsLocalMLActive] = useState(false);
 
   const performScan = useCallback(async () => {
     setScanning(true);
@@ -154,6 +155,15 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     performScan();
+    try {
+      import('../ml/local-ml-client').then(({ localMLClient }) => {
+        if (localMLClient.isFeatureEnabled()) {
+          localMLClient.isAvailable().then(setIsLocalMLActive).catch(() => {});
+        }
+      }).catch(() => {});
+    } catch {
+      // non-fatal in restricted or offline contexts
+    }
   }, [performScan]);
 
   const handleNavigateToContract = (targetUrl: string) => {
@@ -216,19 +226,20 @@ export const App: React.FC = () => {
             <div
               style={{
                 padding: '3px 8px',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                border: '1px solid #10b981',
+                backgroundColor: isLocalMLActive ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.1)',
+                border: isLocalMLActive ? '1px solid #0284c7' : '1px solid #10b981',
                 borderRadius: '12px',
                 fontSize: '10px',
-                color: '#34d399',
+                color: isLocalMLActive ? '#38bdf8' : '#34d399',
                 fontWeight: 600,
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
               }}
+              title={isLocalMLActive ? 'Local ML Assist active on loopback (127.0.0.1:8420)' : 'Air-gapped 100% on-device heuristic engine'}
             >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-              Zero Egress
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isLocalMLActive ? '#38bdf8' : '#10b981' }} />
+              {isLocalMLActive ? 'Local Assist' : 'Zero Egress'}
             </div>
             <button
               onClick={() => {

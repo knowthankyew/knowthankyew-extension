@@ -277,3 +277,60 @@ export function discoverLegalLinks(
   // Cap at top 4 most relevant governing agreements
   return discovered.slice(0, 4);
 }
+
+/**
+ * Asynchronously discovers legal links using a 2-stage cascade:
+ * Stage 1: Fast heuristic extraction from DOM & well-known routes.
+ * Stage 2: When multiple candidate agreements exist, asks the local ML provider to semantically
+ * score and promote the primary consumer agreement over merchant/courier/internal agreements.
+ */
+export async function discoverLegalLinksWithML(
+  doc?: Document,
+  currentHref?: string,
+  mlProvider?: import('../ml/types').LocalMLProvider
+): Promise<DiscoveredLegalLink[]> {
+  const heuristicLinks = discoverLegalLinks(doc, currentHref);
+
+  if (!mlProvider || heuristicLinks.length <= 1) {
+    return heuristicLinks;
+  }
+
+  try {
+    const isAvail = await mlProvider.isAvailable();
+    if (!isAvail) {
+      return heuristicLinks;
+    }
+
+    let hostname = 'current-domain';
+    try {
+      hostname = new URL(currentHref || 'http://localhost').hostname;
+    } catch {
+      // ignore
+    }
+
+    const candidateItems = heuristicLinks.map((link, idx) => ({
+      id: idx + 1,
+      text: link.title,
+      href: link.url,
+    }));
+
+    const response = await mlProvider.classifyLinks({
+      domain: hostname,
+      pageType: 'home',
+      candidates: candidateItems,
+    });
+
+    if (response?.primaryConsumerTermsId) {
+      const matchIndex = heuristicLinks.findIndex((_, idx) => idx + 1 === response.primaryConsumerTermsId);
+      if (matchIndex > 0) {
+        // Promote the ML-selected primary contract to the top
+        const [promoted] = heuristicLinks.splice(matchIndex, 1);
+        heuristicLinks.unshift(promoted);
+      }
+    }
+
+    return heuristicLinks;
+  } catch {
+    return heuristicLinks;
+  }
+}

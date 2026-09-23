@@ -65,3 +65,35 @@ export interface PageScanResult {
   limitationsNotice: string;
   discoveredLinks?: DiscoveredLegalLink[];
 }
+
+export interface TrackingMetadata {
+  agency?: string;
+  docket?: string;
+  statuteCode?: string;
+  cfr?: string;
+  jurisdiction?: string;
+  apiKeywords: string[];
+  lastVerifiedDate: string;
+}
+
+export interface DeclarativeRule {
+  id: string;
+  title: string;
+  category: TrapCategory;
+  classification: LegalClassification;
+  severity: Severity;
+  statute: StatuteReference;
+  patterns: string[];
+  explanation: string;
+  recommendation: string;
+  tracking?: TrackingMetadata;
+}
+
+export interface PolicyPack {
+  packId: string;
+  name: string;
+  version: string;
+  jurisdiction: string;
+  description: string;
+  rules: DeclarativeRule[];
+}

@@ -1,0 +1,53 @@
+name: Statutory & Regulatory Monitor
+
+on:
+  # Manual dispatch only (not automatically run on a schedule)
+  workflow_dispatch:
+    inputs:
+      mock:
+        description: 'Simulate regulatory updates for pipeline testing'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  monitor:
+    name: Check Federal Register & State ARL Feeds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Query Federal Register & Regulatory APIs
+        id: check_statutes
+        run: |
+          if [ "${{ inputs.mock }}" = "true" ]; then
+            node scripts/check-statutory-updates.mjs --mock
+          else
+            node scripts/check-statutory-updates.mjs
+          fi
+
+      - name: Create Pull Request on Statutory Change
+        if: steps.check_statutes.outputs.has_updates == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(legal): statutory update notices detected by policy monitor'
+          branch: bot/statutory-update-${{ github.run_id }}
+          delete-branch: true
+          title: '[Legal Update] Regulatory & Statutory Changes Detected in Federal Feeds'
+          body-path: statutory-update-report.md
+          labels: |
+            statutory-review
+            needs-attorney-review
+            dependencies
+          draft: true
