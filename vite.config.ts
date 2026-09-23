@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     {
@@ -28,7 +28,7 @@ export default defineConfig({
             map: null,
           };
         }
-        if (!process.env.VITEST && process.env.VITE_LOCAL_ML_ENABLED !== 'true' && id.includes('local-ml-client')) {
+        if (mode !== 'test' && process.env.VITE_LOCAL_ML_ENABLED !== 'true' && id.includes('local-ml-client')) {
           let modified = code.replace(/\bfetch\s*\(/g, 'void /* air-gap stripped */ (');
           return {
             code: modified,
@@ -64,4 +64,4 @@ export default defineConfig({
     // Compile-time dead-code elimination for Local ML Loopback client
     __LOCAL_ML_ENABLED__: JSON.stringify(process.env.VITE_LOCAL_ML_ENABLED === 'true'),
   },
-});
+}));

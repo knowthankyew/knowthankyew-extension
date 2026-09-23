@@ -49,10 +49,21 @@ export interface BurnResponse {
   sessionPurged: boolean;
 }
 
+/**
+ * 4-state availability model for local neural reality engines (Gemini Nano / Chrome Prompt API / Loopback).
+ * - 'ready': Model loaded or loopback worker active and responsive.
+ * - 'downloading': Device qualifies but on-device weights are downloading.
+ * - 'unsupported': Device hardware/storage or Chrome version does not meet capabilities.
+ * - 'disabled': User has not opted into Local Assist.
+ */
+export type NeuralAvailabilityState = 'ready' | 'downloading' | 'unsupported' | 'disabled';
+
 export interface LocalMLProvider {
   isAvailable(): Promise<boolean>;
+  checkAvailability?(): Promise<NeuralAvailabilityState>;
   getHealth(): Promise<HealthResponse | null>;
   classifyLinks(request: ClassifyLinksRequest): Promise<ClassifyLinksResponse | null>;
   analyzeClause(request: AnalyzeClauseRequest): Promise<AnalyzeClauseResponse | null>;
   burn(): Promise<BurnResponse | null>;
 }
+

@@ -56,8 +56,10 @@ The core reality engine is fully built, statically verified, and audited:
   - Fire-and-forget `POST /burn` endpoint contract wiping external worker prompt context and KV cache on Nuclear Amnesia wipe.
 - [x] **Compile-Time Air-Gap Invariant Preservation**:
   - `vite.config.ts` dead-code eliminates `fetch()` calls in production Chrome Web Store builds, preserving `connect-src 'none'`.
-- [ ] **Chrome Built-in Prompt API Provider (`ai.languageModel`)**:
-  - Add zero-setup in-browser Prompt API provider alongside loopback client.
+- [ ] **Chrome Built-in Prompt API Provider (`ai.languageModel` / Gemini Nano)**:
+  - Add zero-setup in-browser Prompt API provider implementing `LocalMLProvider`.
+  - Implement 4-state availability model (`ready`, `downloading`, `unsupported`, `disabled`) reflecting Chrome version and device hardware capability gates.
+  - Enable mainstream CWS users to benefit from neural link disambiguation without running an external loopback daemon.
 - [ ] **WebGPU / WASM ONNX Runtime Integration**:
   - Mount `onnxruntime-web` inside an MV3 `chrome.offscreen` canvas document or Web Worker.
   - Load the 157.2 MB INT8 quantized `SmolLM2-135M` model (trained and exported via `event-driven-ftaas`).

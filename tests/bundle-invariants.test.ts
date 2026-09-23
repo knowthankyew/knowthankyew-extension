@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -7,10 +7,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure production build exists for testing
-    if (!existsSync(distDir) || !existsSync(resolve(distDir, 'manifest.json'))) {
-      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
-    }
+    // Ensure fresh standard production build exists for testing
+    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -65,5 +63,16 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     expect(manifest.version).toBe(pkg.version);
     expect(manifest.manifest_version).toBe(3);
     expect(manifest.content_security_policy.extension_pages).toContain("connect-src 'none'");
+  });
+
+  it('verifies loopback client is actively preserved when VITE_LOCAL_ML_ENABLED=true is set', () => {
+    const rootDir = resolve(__dirname, '..');
+    execSync('VITE_LOCAL_ML_ENABLED=true npx vite build', { cwd: rootDir, stdio: 'pipe' });
+    const jsFiles = getJsFilesRecursively(distDir);
+    const hasLoopbackClient = jsFiles.some(f => readFileSync(f, 'utf-8').includes('127.0.0.1:8420'));
+    expect(hasLoopbackClient).toBe(true);
+
+    // Rebuild standard production bundle to leave dist clean
+    execSync('npm run build', { cwd: rootDir, stdio: 'pipe' });
   });
 });
