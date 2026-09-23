@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: v1.3.0 Live on Chrome Web Store (Verified Zero-Egress, MIT, Automated SLSA Attestation)
+> **Status**: v1.4.0 Release Candidate (Verified Zero-Egress CWS Build + Local ML Assist Developer Build)
 
 ---
 
@@ -44,7 +44,7 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Nuclear Amnesia Across All Domains**:
   - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
 
-### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0)
+### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0) [Delivered - Release Candidate]
 - [x] **Declarative JSON Policy Packs**:
   - Decouple statutory rules into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation.
 - [x] **Automated Statutory Regulatory Monitor**:
