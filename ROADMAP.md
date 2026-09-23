@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: v1.0.0 Live (Verified Zero-Egress, MIT, Automated SLSA Attestation)
+> **Status**: v1.3.0 Live on Chrome Web Store (Verified Zero-Egress, MIT, Automated SLSA Attestation)
 
 ---
 
@@ -19,7 +19,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ## 2. Near-Term Milestones
 
-### Milestone 1: Chrome Web Store Packaging & Submission (v1.1.0)
+### Milestone 1: Chrome Web Store Packaging & Submission (v1.1.0) [Delivered]
 - [x] **Automated Release Packaging in CI**:
   - Add GitHub Actions step to package `dist/` into a pristine `knowthankyew-extension-v1.1.0.zip`.
   - Attach zip bundle directly to GitHub Releases alongside `bom.json`.
@@ -31,7 +31,20 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Web Store Review & Publication**:
   - Successfully reviewed, approved, and published live on Chrome Web Store: [`https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl`](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl).
 
-### Milestone 2: Edge Neural Synthesis Tier (v1.2.0)
+### Milestone 2: Automated Contract Discovery & 1-Click Audit (v1.2.0) [Delivered]
+- [x] **Governing Legal Link Discovery**:
+  - Automatically detect Terms of Service, Privacy Policies, Arbitration Clauses, and ROSCA disclosures in page footers and headers.
+  - Provide 1-click audit navigation and discovered links cards in the popup.
+- [x] **Dynamic Checkout MutationObserver**:
+  - Automatically re-evaluate fine print on dynamic DOM mutation (accordions, modal expansions).
+
+### Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (v1.3.0) [Delivered]
+- [x] **Full-Page Options Dashboard**:
+  - VS Code extension-styled options page with live memory/storage usage meters (`chrome.storage.local.getBytesInUse()`).
+- [x] **Nuclear Amnesia Across All Domains**:
+  - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
+
+### Milestone 4: Edge Neural Synthesis Tier (v1.4.0)
 - [ ] **WebGPU / WASM ONNX Runtime Integration**:
   - Mount `onnxruntime-web` inside an MV3 `chrome.offscreen` canvas document or Web Worker.
   - Load the 157.2 MB INT8 quantized `SmolLM2-135M` model (trained and exported via `event-driven-ftaas`).
