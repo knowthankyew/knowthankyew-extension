@@ -28,7 +28,7 @@ flowchart LR
 
 ### 1. Download
 Click this link to download the pre-packaged zip file directly:  
-👉 **[Click Here to Download: knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip)**  
+👉 **[Click Here to Download: knowthankyew-extension-v1.4.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.4.0/knowthankyew-extension-v1.4.0.zip)**  
 *(Or view the [GitHub Releases page](https://github.com/knowthankyew/knowthankyew-extension/releases)).*
 
 Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.

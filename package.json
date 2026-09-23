@@ -1,6 +1,6 @@
 {
   "name": "knowthankyew-extension",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Zero-egress, client-side browser reality engine detecting predatory subscription traps, arbitration waivers, and dark patterns in real-time",
   "type": "module",
@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "package": "npm run build && VERSION=$(node -p \"require('./package.json').version\") && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}.zip .) && shasum -a 256 knowthankyew-extension-v${VERSION}.zip > SHA256SUMS",
+    "package:all": "npm run build && VERSION=$(node -p \"require('./package.json').version\") && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}.zip .) && VITE_LOCAL_ML_ENABLED=true npx vite build && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}-local-assist.zip .) && npm run build && shasum -a 256 knowthankyew-extension-v${VERSION}*.zip > SHA256SUMS",
     "build:assets": "node scripts/render-store-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
