@@ -14,7 +14,7 @@ export const OptionsApp: React.FC = () => {
   const [activeTabSection, setActiveTabSection] = useState<'memory' | 'pillars' | 'permissions'>('memory');
   const [mlStatus, setMlStatus] = useState<'connected' | 'disconnected' | 'disabled'>('disabled');
 
-  const refreshDiagnostics = useCallback(async () => {
+  const refreshDiagnostics = useCallback(async (force = false) => {
     // 1. Query chrome.storage.local usage
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
       try {
@@ -65,7 +65,7 @@ export const OptionsApp: React.FC = () => {
       if (!localMLClient.isFeatureEnabled()) {
         setMlStatus('disabled');
       } else {
-        const isUp = await localMLClient.isAvailable();
+        const isUp = await localMLClient.isAvailable(force);
         setMlStatus(isUp ? 'connected' : 'disconnected');
       }
     } catch {
@@ -449,7 +449,7 @@ export const OptionsApp: React.FC = () => {
               }}
             >
               <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: 700 }}>
-                Local ML Assist (127.0.0.1:8420)
+                Local ML Assist
               </div>
               <div
                 style={{
@@ -464,9 +464,9 @@ export const OptionsApp: React.FC = () => {
               </div>
               <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
                 {mlStatus === 'connected'
-                  ? 'Loopback semantic reranker active'
+                  ? 'Loopback semantic reranker active (127.0.0.1:8420)'
                   : mlStatus === 'disconnected'
-                  ? 'Run `npm run ml:serve` to connect'
+                  ? 'Target: 127.0.0.1:8420 • Run `npm run ml:worker` to connect'
                   : 'Zero external network calls (Default)'}
               </div>
             </div>
@@ -562,7 +562,7 @@ export const OptionsApp: React.FC = () => {
               </button>
 
               <button
-                onClick={() => refreshDiagnostics()}
+                onClick={() => refreshDiagnostics(true)}
                 style={{
                   backgroundColor: '#1e293b',
                   border: '1px solid #334155',

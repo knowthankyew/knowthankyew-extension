@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KnowThankYew Reality Engine - Live Test Fixture</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --danger: #ef4444;
+      --btn: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2.5rem 1rem;
+    }
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    h1 { font-size: 1.75rem; margin-bottom: 0.5rem; color: #fff; }
+    p.lead { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+      font-weight: 600;
+    }
+    .terms {
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+    }
+    .terms p { margin-bottom: 0.75rem; }
+    .terms p:last-child { margin-bottom: 0; }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      background: var(--btn);
+      color: #022c22;
+      font-weight: 700;
+      padding: 0.85rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .dynamic-btn {
+      background: #3b82f6;
+      color: #ffffff;
+      margin-top: 1rem;
+    }
+    .badge-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .pill {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    #dynamicContainer {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge-bar">
+      <span class="pill">TEST FIXTURE PAGE</span>
+      <span class="pill">SIMULATED CHECKOUT</span>
+    </div>
+
+    <div class="card">
+      <h1>SaaS Cloud Pro - Order Review</h1>
+      <p class="lead">Simulated e-commerce checkout page embedded with standard dark-pattern terms.</p>
+
+      <div class="product-row">
+        <span>SaaS Cloud Pro (Monthly Plan)</span>
+        <span>$49.99 / mo</span>
+      </div>
+
+      <!-- Legal Fine Print Container -->
+      <div class="terms legal agreement" role="region" aria-label="Legal terms">
+        <p><strong>Terms of Purchase:</strong></p>
+        <p id="trap-auto-renewal">
+          By completing this transaction, you agree that your subscription will automatically renew each month for successive monthly periods at our then-standard rate until you cancel.
+        </p>
+        <p id="trap-cancel-difficulty">
+          To cancel your membership, you must call our customer service hotline during regular business hours Monday through Friday. Written notices or emails will not be accepted.
+        </p>
+        <p id="trap-arbitration">
+          Any dispute arising out of this agreement shall be resolved exclusively through binding arbitration administered by the American Arbitration Association, and you expressly waive any right to a jury trial.
+        </p>
+        <p id="trap-class-action">
+          You waive any right to bring or participate in any class action lawsuit, collective action, or representative proceeding against the company.
+        </p>
+        <p id="trap-unilateral-change">
+          We reserve the right to modify these terms, prices, and cancellation procedures at any time in our sole discretion without prior notice.
+        </p>
+        <p id="trap-surveillance">
+          We may share your personal information with third-party advertisers and data brokers for cross-context behavioral marketing purposes.
+        </p>
+      </div>
+
+      <button class="btn" onclick="alert('Demo checkout only!')">Complete Order ($49.99)</button>
+
+      <!-- Live MutationObserver test button -->
+      <button class="btn dynamic-btn" onclick="injectDynamicTerms()">
+        ⚡ Inject Dynamic Terms (Test MutationObserver)
+      </button>
+
+      <div id="dynamicContainer"></div>
+    </div>
+
+    <!-- Sample Footer Legal Navigation for Reality Engine Link Discovery -->
+    <footer style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 1.5rem;">
+      <p style="margin-bottom: 0.75rem;">Sample Legal Navigation for Reality Engine Contract Discovery:</p>
+      <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+        <a href="/terms-of-service" style="color: var(--primary); text-decoration: underline;">Terms of Service</a>
+        <a href="/dispute-arbitration" style="color: var(--primary); text-decoration: underline;">Dispute Resolution & Arbitration</a>
+        <a href="/subscription-billing" style="color: var(--primary); text-decoration: underline;">Subscription & Billing Terms</a>
+        <a href="/privacy-policy" style="color: var(--primary); text-decoration: underline;">Privacy Policy</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function injectDynamicTerms() {
+      const container = document.getElementById('dynamicContainer');
+      const div = document.createElement('div');
+      div.className = 'terms legal';
+      div.style.borderLeft = '4px solid #f59e0b';
+      div.style.marginTop = '1rem';
+      div.innerHTML = `
+        <p><strong>Dynamically Injected Upgrade Clause:</strong></p>
+        <p>Upon the expiration of the free trial period, your account will be billed the standard rate automatically unless you cancel 30 days prior.</p>
+      `;
+      container.appendChild(div);
+      console.log('Injected dynamic terms into DOM. MutationObserver will detect and re-scan.');
+    }
+  </script>
+</body>
+</html>

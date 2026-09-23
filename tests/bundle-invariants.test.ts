@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync, existsSync, rmSync } from 'fs';
+import { readFileSync, readdirSync, statSync, rmSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -7,10 +7,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure standard production build exists for testing without overwriting if already present
-    if (!existsSync(distDir) || !existsSync(resolve(distDir, 'manifest.json'))) {
-      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
-    }
+    // Ensure fresh standard production build exists for testing
+    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -75,6 +73,10 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       const jsFiles = getJsFilesRecursively(testDistMl);
       const hasLoopbackClient = jsFiles.some(f => readFileSync(f, 'utf-8').includes('127.0.0.1:8420'));
       expect(hasLoopbackClient).toBe(true);
+
+      const manifest = JSON.parse(readFileSync(resolve(testDistMl, 'manifest.json'), 'utf-8'));
+      expect(manifest.content_security_policy.extension_pages).toContain('127.0.0.1:8420');
+      expect(manifest.host_permissions).toContain('http://127.0.0.1:8420/*');
     } finally {
       rmSync(testDistMl, { recursive: true, force: true });
     }

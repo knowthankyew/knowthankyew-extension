@@ -83,6 +83,40 @@ export const App: React.FC = () => {
             setScanResult(result);
             recordScanMetrics(result.summary, duration);
             setScanning(false);
+
+            // Dynamically refresh ML availability and semantically rerank multi-sided candidate agreements
+            try {
+              const { localMLClient } = await import('../ml/local-ml-client');
+              if (localMLClient.isFeatureEnabled()) {
+                const isAvail = await localMLClient.isAvailable(true);
+                setIsLocalMLActive(isAvail);
+                if (isAvail && result.discoveredLinks && result.discoveredLinks.length > 1) {
+                  const candidateItems = result.discoveredLinks.map((link, idx) => ({
+                    id: idx + 1,
+                    text: link.title,
+                    href: link.url,
+                  }));
+                  const ranked = await localMLClient.classifyLinks({
+                    domain: activeHostname,
+                    pageType: 'checkout',
+                    candidates: candidateItems,
+                  });
+                  if (ranked?.primaryConsumerTermsId) {
+                    const matchIdx = result.discoveredLinks.findIndex(
+                      (_, idx) => idx + 1 === ranked.primaryConsumerTermsId
+                    );
+                    if (matchIdx > 0) {
+                      const links = [...result.discoveredLinks];
+                      const [promoted] = links.splice(matchIdx, 1);
+                      links.unshift(promoted);
+                      setScanResult((prev) => (prev ? { ...prev, discoveredLinks: links } : prev));
+                    }
+                  }
+                }
+              }
+            } catch {
+              // Non-blocking fallback
+            }
           }
         );
       } else {
@@ -158,7 +192,7 @@ export const App: React.FC = () => {
     try {
       import('../ml/local-ml-client').then(({ localMLClient }) => {
         if (localMLClient.isFeatureEnabled()) {
-          localMLClient.isAvailable().then(setIsLocalMLActive).catch(() => {});
+          localMLClient.isAvailable(true).then(setIsLocalMLActive).catch(() => {});
         }
       }).catch(() => {});
     } catch {
@@ -224,6 +258,7 @@ export const App: React.FC = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <div
+              data-testid="privacy-status-badge"
               style={{
                 padding: '3px 8px',
                 backgroundColor: isLocalMLActive ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.1)',

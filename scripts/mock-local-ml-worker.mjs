@@ -21,10 +21,11 @@ let inMemoryContextBytes = 1048576; // Simulated 1 MB context buffer
 let sessionActive = true;
 
 const server = http.createServer(async (req, res) => {
-  // Set CORS headers for local Chrome Extension access
+  // Set CORS & Private Network Access (PNA) headers for local Chrome Extension access
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Access-Control-Request-Private-Network');
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);

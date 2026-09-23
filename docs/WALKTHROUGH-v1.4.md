@@ -29,20 +29,20 @@ We have designed, implemented, and validated both tracks of the evolutionary roa
 
 ## 2. Test & Verification Results
 
-### Vitest Suite (62 / 62 Tests Passed)
-Ran `npm test` across all 13 test suites:
+### Vitest Suite (66 / 66 Tests Passed)
+Ran `npm test` across all 14 test suites:
 - **`policy-packs.test.ts`**: Verified all JSON policy packs load, contain valid citations and tracking metadata, and compile into safe `RegExp` instances.
 - **`redos-static.test.ts`**: Statically proved with `safe-regex` that all 37 regex patterns in the declarative policy packs are free of exponential backtracking.
 - **`local-ml-client.test.ts`**: Verified health checking, link classification, clause analysis, and `/burn` protocol dispatch.
 - **`link-detector-ml.test.ts`**: Verified that ambiguous legal links (e.g. DoorDash Merchant vs. Consumer terms) are reranked so the primary consumer contract is promoted.
-- **`bundle-invariants.test.ts`**: Statically verified 0 network primitives (`fetch`, `WebSocket`, `XMLHttpRequest`) in the compiled production bundle (`dist/`).
+- **`bundle-invariants.test.ts`**: Statically verified 0 network primitives (`fetch`, `WebSocket`, `XMLHttpRequest`) in the compiled production bundle (`dist/`), verified CSP `connect-src 'none'`, and proved loopback client/manifest preservation in developer builds.
 - **`chromium-e2e.test.ts`**: Puppeteer Chromium browser tests passed with 0 external egress packets and confirmed negative-control blocking under CSP `connect-src 'none'`.
+- **`chromium-local-ml-e2e.test.ts`**: Real Chromium browser test verifying end-to-end Local ML Assist activation, options page `● Connected` status, popup `● Local Assist` tooltipped badge, and loopback `/burn` handshake.
 
-### Production Build Verification
-Ran `npm run build`:
-- TypeScript typecheck passed (`tsc --noEmit`).
-- Production bundles cleanly generated in `dist/`.
-- Zero-egress check confirmed 100% compliant for Chrome Web Store distribution.
+### Production & Developer Build Verification
+- Ran `npm run build`: Standard zero-egress production build with CSP `connect-src 'none'` and zero host permissions.
+- Ran `npm run build:local-assist`: Developer build dynamically tailoring CSP `connect-src 'self' http://127.0.0.1:8420 http://localhost:8420` and `host_permissions: ["http://127.0.0.1:8420/*", "http://localhost:8420/*"]`.
+- Ran `npm run package:all`: Validated dual-zip packaging generating both release packages with SHA256 checksums.
 
 ### Regulatory Monitor Script
 Ran `node scripts/check-statutory-updates.mjs --mock`:

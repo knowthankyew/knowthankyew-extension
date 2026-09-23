@@ -31,25 +31,25 @@ export class LocalMLClient implements LocalMLProvider {
   /**
    * Checks if the local ML loopback service is currently reachable and responding to health pings.
    */
-  public async isAvailable(): Promise<boolean> {
+  public async isAvailable(force = false): Promise<boolean> {
     if (!this.isFeatureEnabled()) {
       return false;
     }
 
-    const health = await this.getHealth();
+    const health = await this.getHealth(force);
     return health !== null && (health.status === 'ok' || health.status === 'degraded');
   }
 
   /**
    * Pings the loopback worker for model health and latency metrics.
    */
-  public async getHealth(): Promise<HealthResponse | null> {
+  public async getHealth(force = false): Promise<HealthResponse | null> {
     if (!this.isFeatureEnabled()) {
       return null;
     }
 
     const now = Date.now();
-    if (this.cachedHealth && now - this.lastHealthCheck < this.healthTtlMs) {
+    if (!force && this.cachedHealth && now - this.lastHealthCheck < this.healthTtlMs) {
       return this.cachedHealth;
     }
 
@@ -57,7 +57,7 @@ export class LocalMLClient implements LocalMLProvider {
       const response = await fetch(`${this.baseUrl}/health`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(500),
+        signal: AbortSignal.timeout(1500),
       });
 
       if (!response.ok) {

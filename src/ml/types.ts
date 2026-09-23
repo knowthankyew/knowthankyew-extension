@@ -59,9 +59,9 @@ export interface BurnResponse {
 export type NeuralAvailabilityState = 'ready' | 'downloading' | 'unsupported' | 'disabled';
 
 export interface LocalMLProvider {
-  isAvailable(): Promise<boolean>;
+  isAvailable(force?: boolean): Promise<boolean>;
   checkAvailability?(): Promise<NeuralAvailabilityState>;
-  getHealth(): Promise<HealthResponse | null>;
+  getHealth(force?: boolean): Promise<HealthResponse | null>;
   classifyLinks(request: ClassifyLinksRequest): Promise<ClassifyLinksResponse | null>;
   analyzeClause(request: AnalyzeClauseRequest): Promise<AnalyzeClauseResponse | null>;
   burn(): Promise<BurnResponse | null>;
