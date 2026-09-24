@@ -1,8 +1,17 @@
 /**
  * Extracts candidate legal text, checkout disclaimers, and subscription terms
  * from the active webpage while ignoring navigation, script, and style noise.
+ * Deduplicates overlapping containers (e.g. main > form.checkout) to ensure
+ * text is extracted exactly once.
  */
-export function extractPageLegalText(): string {
+export function extractPageLegalText(
+  root?: Element | Document,
+  visited?: Set<Node>
+): string {
+  const targetDoc = typeof document !== 'undefined' ? document : null;
+  const targetRoot = root || targetDoc?.body;
+  if (!targetRoot) return '';
+
   // Elements likely to contain contracts, fine print, checkout forms, and modals
   const selectors = [
     'main',
@@ -25,18 +34,37 @@ export function extractPageLegalText(): string {
 
   const candidateNodes: Element[] = [];
   for (const sel of selectors) {
-    const nodes = document.querySelectorAll(sel);
-    nodes.forEach(n => candidateNodes.push(n));
+    const nodes = targetRoot.querySelectorAll(sel);
+    nodes.forEach(n => {
+      if (!candidateNodes.includes(n)) {
+        candidateNodes.push(n);
+      }
+    });
   }
 
-  // Fallback to document.body if specific containers are sparse
-  if (candidateNodes.length === 0 && document.body) {
-    candidateNodes.push(document.body);
+  // Fallback to targetRoot if specific containers are sparse
+  if (candidateNodes.length === 0) {
+    candidateNodes.push(targetRoot as Element);
   }
+
+  // Deduplicate overlapping ancestors/descendants: keep only topmost disjoint containers
+  const disjointNodes = candidateNodes.filter(node =>
+    !candidateNodes.some(other => other !== node && other.contains(node))
+  );
 
   const collectedStrings: string[] = [];
 
-  for (const node of candidateNodes) {
+  for (const node of disjointNodes) {
+    if (visited && visited.has(node)) {
+      continue;
+    }
+
+    if (visited) {
+      visited.add(node);
+      const descendants = node.querySelectorAll('*');
+      descendants.forEach(d => visited.add(d));
+    }
+
     // Clone and strip unwanted tags
     const clone = node.cloneNode(true) as HTMLElement;
     const unwanted = clone.querySelectorAll('script, style, noscript, svg, nav, footer, header');
@@ -51,3 +79,7 @@ export function extractPageLegalText(): string {
   // Combine and deduplicate redundant spans
   return collectedStrings.join('\n\n');
 }
+
+// Alias for spec compatibility
+export const extractPageText = extractPageLegalText;
+

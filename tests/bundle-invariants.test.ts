@@ -37,6 +37,7 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       /\bEventSource\b/,
       /\bimportScripts\s*\(/,
       /\/v1\/traces/,
+      /__KTY_TEST_HOOK_/,
     ];
 
     const violations: Array<{ file: string; pattern: string }> = [];
