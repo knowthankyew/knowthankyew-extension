@@ -21,7 +21,12 @@ export const App: React.FC = () => {
 
     try {
       if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tabs || tabs.length === 0) {
+          // Mobile Firefox (Fenix) bottom sheets do not have a desktop window context
+          tabs = await chrome.tabs.query({ active: true });
+        }
+        const tab = tabs[0];
         if (!tab || !tab.id) {
           setErrorMessage('No active tab detected');
           setScanning(false);

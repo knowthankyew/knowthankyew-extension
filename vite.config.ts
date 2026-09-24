@@ -5,7 +5,8 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 export default defineConfig(({ mode }) => {
   const isLocalMl = process.env.VITE_LOCAL_ML_ENABLED === 'true';
-  let outDir = 'dist';
+  const targetBrowser = process.env.TARGET_BROWSER || 'chrome';
+  let outDir = targetBrowser === 'firefox' ? 'dist-firefox' : 'dist';
 
   return {
     plugins: [
@@ -13,7 +14,7 @@ export default defineConfig(({ mode }) => {
       {
         name: 'air-gap-zero-egress',
         configResolved(config) {
-          outDir = config.build.outDir || 'dist';
+          outDir = config.build.outDir || (targetBrowser === 'firefox' ? 'dist-firefox' : 'dist');
         },
         transform(code, id) {
           if (id.includes('@knowthankyew/privacy-telemetry')) {
@@ -62,13 +63,28 @@ export default defineConfig(({ mode }) => {
               };
               delete manifest.host_permissions;
             }
+            if (targetBrowser === 'firefox') {
+              manifest.browser_specific_settings = {
+                gecko: {
+                  id: 'reality-engine@knowthankyew.org',
+                  strict_min_version: '115.0',
+                },
+                gecko_android: {
+                  strict_min_version: '115.0',
+                },
+              };
+              manifest.background = {
+                scripts: ['background/service-worker.js'],
+                type: 'module',
+              };
+            }
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
           }
         },
       },
     ],
   build: {
-    outDir: 'dist',
+    outDir: targetBrowser === 'firefox' ? 'dist-firefox' : 'dist',
     emptyOutDir: true,
     modulePreload: {
       polyfill: false,

@@ -82,4 +82,30 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       rmSync(testDistMl, { recursive: true, force: true });
     }
   });
+
+  it('verifies Firefox build target generates valid Gecko settings and background.scripts', () => {
+    const rootDir = resolve(__dirname, '..');
+    const testDistFfx = resolve(__dirname, '../dist-test-firefox');
+    try {
+      execSync('TARGET_BROWSER=firefox npx vite build --outDir dist-test-firefox', { cwd: rootDir, stdio: 'pipe' });
+      const manifest = JSON.parse(readFileSync(resolve(testDistFfx, 'manifest.json'), 'utf-8'));
+      expect(manifest.browser_specific_settings?.gecko?.id).toBe('reality-engine@knowthankyew.org');
+      expect(manifest.browser_specific_settings?.gecko_android?.strict_min_version).toBe('115.0');
+      expect(manifest.background?.scripts).toEqual(['background/service-worker.js']);
+      expect(manifest.background?.type).toBe('module');
+      expect(manifest.content_security_policy.extension_pages).toContain("connect-src 'none'");
+
+      const jsFiles = getJsFilesRecursively(testDistFfx);
+      expect(jsFiles.length).toBeGreaterThan(0);
+      const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
+      for (const filePath of jsFiles) {
+        const content = readFileSync(filePath, 'utf-8');
+        for (const pattern of forbiddenPatterns) {
+          expect(pattern.test(content)).toBe(false);
+        }
+      }
+    } finally {
+      rmSync(testDistFfx, { recursive: true, force: true });
+    }
+  });
 });

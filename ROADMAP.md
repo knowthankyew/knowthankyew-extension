@@ -77,10 +77,12 @@ The core reality engine is fully built, statically verified, and audited:
 - [ ] **In-Popup Jurisdiction Selector**:
   - Allow user to toggle between US Federal/State, UK, and EU regulatory frameworks.
 
-### Milestone 4: Cross-Browser Manifest Support (v1.4.0)
-- [ ] **Mozilla Firefox (Gecko)**:
-  - Build target with `browser_specific_settings` in `manifest.json`.
-  - Validate against Mozilla Add-on Policies (AMO).
+### Milestone 4: Cross-Browser Manifest Support (v1.4.0) [Delivered for Firefox]
+- [x] **Mozilla Firefox (Gecko & Firefox Android)**:
+  - Build target with `browser_specific_settings` in `manifest.json` (`npm run build:firefox` / `npm run package:firefox`).
+  - Mobile Firefox bottom sheet compatibility (`tabs.query` fallback without `currentWindow` dependency).
+  - Responsive mobile popup sheet viewport (`popup.html` responsive width).
+  - Packaged as `knowthankyew-extension-v1.4.0-firefox.zip` ready for AMO submission & mobile testing.
 - [ ] **Apple Safari (macOS / iOS)**:
   - Convert via `xcrun safari-web-extension-converter`.
   - Native macOS companion packaging.
