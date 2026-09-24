@@ -7,6 +7,13 @@
 [![CI](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
+[![Release: v1.3.0 Live](https://img.shields.io/badge/Release-v1.3.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
+[![v1.4.0 Status: ON HOLD](https://img.shields.io/badge/v1.4.0-ON%20HOLD-amber.svg)](ROADMAP.md)
+
+> [!IMPORTANT]
+> **Release Status & Roadmap Notice**:  
+> The official, approved production release published on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**.  
+> **v1.4.0 (including experimental Local ML Assist) is explicitly ON HOLD**. All engineering focus is dedicated to resolving, hardening, and verifying issues in the v1.3.0 baseline before adding local ML components.
 
 ---
 
@@ -37,7 +44,7 @@ Click **"Add to Chrome"** (or Brave / Edge / Opera), then pin the shield icon to
 
 If you prefer installing directly from source without using the store:
 
-1. **Download the Package**: 👉 **[knowthankyew-extension-v1.4.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.4.0/knowthankyew-extension-v1.4.0.zip)** *(or visit [Releases](https://github.com/knowthankyew/knowthankyew-extension/releases) for the developer Local Assist bundle)*.
+1. **Download the Package**: 👉 **[knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip)** *(Official CWS v1.3.0 baseline)*.
 2. **Unzip** the archive into a folder on your computer.
 3. Open `chrome://extensions` (or `brave://extensions`) in your browser.
 4. Turn on **Developer mode** (top-right toggle).

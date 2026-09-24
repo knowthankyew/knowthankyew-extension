@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: v1.4.0 Release Candidate (Verified Zero-Egress CWS Build + Local ML Assist Developer Build)
+> **Status**: **v1.3.0 Live & Published on Chrome Web Store • v1.4.0 ON HOLD**
 
 ---
 
@@ -38,13 +38,16 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Dynamic Checkout MutationObserver**:
   - Automatically re-evaluate fine print on dynamic DOM mutation (accordions, modal expansions).
 
-### Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (v1.3.0) [Delivered]
+### Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (v1.3.0) [Delivered - Live on CWS]
 - [x] **Full-Page Options Dashboard**:
   - VS Code extension-styled options page with live memory/storage usage meters (`chrome.storage.local.getBytesInUse()`).
 - [x] **Nuclear Amnesia Across All Domains**:
   - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
 
-### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0) [Delivered - Release Candidate]
+### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0) [ON HOLD]
+
+> [!IMPORTANT]
+> **ENGINEERING HOLD**: v1.4.0 development, release candidate packaging, and store submissions are paused. All engineering priority is focused on resolving and verifying any issues in the v1.3.0 baseline, ensuring absolute stability and publication integrity before adding experimental local ML assist.
 - [x] **Declarative JSON Policy Packs**:
   - Decouple statutory rules into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation.
 - [x] **Automated Statutory Regulatory Monitor**:

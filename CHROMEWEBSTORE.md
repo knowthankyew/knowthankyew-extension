@@ -14,7 +14,7 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.4.0`
+- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.4.0` (ON HOLD)
 - **Default Language**: English (United States)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
@@ -103,14 +103,14 @@ The KnowThankYew Reality Engine is built on the principle that consumer protecti
 - [ ] Verify privacy policy is live at `https://knowthankyew.github.io/knowthankyew-extension/privacy.html`
 
 ### Step 1: Get the Store ZIP
-Download `knowthankyew-extension-v1.4.0.zip` from the latest [GitHub Release](https://github.com/knowthankyew/knowthankyew-extension/releases/latest), or build locally:
+Download `knowthankyew-extension-v1.3.0.zip` from the official [v1.3.0 GitHub Release](https://github.com/knowthankyew/knowthankyew-extension/releases/tag/v1.3.0), or build locally:
 ```bash
 npm run package
 ```
 
 ### Step 2: Upload Updated Package in Developer Dashboard
 1. Go to https://chrome.google.com/webstore/devconsole
-2. Click on **KnowThankYew Reality Engine** → **Package** → **Upload new package** → Upload `knowthankyew-extension-v1.4.0.zip`
+2. Click on **KnowThankYew Reality Engine** → **Package** → **Upload new package** → Upload `knowthankyew-extension-v1.3.0.zip`
 
 ### Step 3: Fill in Store Listing Tab
 | Field | Value |
@@ -150,8 +150,8 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
-| **1.4.0** | September 23, 2026 | Decoupled declarative JSON policy packs (US Federal & State ARL), automated statutory regulatory monitor via Federal Register API, local ML reality engine architecture with 2-stage legal link reranking and atomic loopback `/burn` handshake, and formal dual-channel distribution security policy. |
-| **1.3.0** | September 22, 2026 | Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |
+| **1.4.0 (ON HOLD)** | September 23, 2026 | On hold pending resolution and publication of 1.3 baseline issues. (Decoupled declarative JSON policy packs, local ML reality engine architecture). |
+| **1.3.0 (LIVE)** | September 22, 2026 | **Live & Approved on Chrome Web Store**. Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |
 | **1.2.0** | September 21, 2026 | Automated governing terms link detection with 1-click contract navigation, dynamic checkout observer. Approved & Live in Chrome Web Store. |
 | **1.1.0** | September 20, 2026 | Initial public release with statutory rule matching (ROSCA, FAA, State ARL), atomic Hard Burn, zero-egress CSP enforcement. |
 
