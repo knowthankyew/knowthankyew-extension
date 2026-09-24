@@ -15,7 +15,7 @@
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
 - **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.4.0` (Release Candidate Ready for Manual Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v1.4.0.zip` (SHA256: `10a57de9538c57c076e1bc2d7a20f4eb003c5da59729560e3f58189316185f80`)
+- **Manual Upload ZIP**: `knowthankyew-extension-v1.4.0.zip` (SHA256: `749267e831da0a91f3f256681e94d7dafe6fd1f8339cc8d02a94528407a9fff0`)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
@@ -107,7 +107,7 @@ Locate `knowthankyew-extension-v1.4.0.zip` in the repository root or build local
 ```bash
 npm run package
 ```
-*(Package SHA256: `10a57de9538c57c076e1bc2d7a20f4eb003c5da59729560e3f58189316185f80`)*
+*(Package SHA256: `749267e831da0a91f3f256681e94d7dafe6fd1f8339cc8d02a94528407a9fff0`)*
 
 ### Step 2: Upload Updated Package in Developer Dashboard
 1. Go to https://chrome.google.com/webstore/devconsole
