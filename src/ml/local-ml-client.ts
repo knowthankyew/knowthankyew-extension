@@ -60,7 +60,7 @@ export class LocalMLClient implements LocalMLProvider {
         signal: AbortSignal.timeout(1500),
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         this.cachedHealth = null;
         return null;
       }
@@ -92,7 +92,7 @@ export class LocalMLClient implements LocalMLProvider {
         signal: AbortSignal.timeout(1500),
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         return null;
       }
 
@@ -118,7 +118,7 @@ export class LocalMLClient implements LocalMLProvider {
         signal: AbortSignal.timeout(3000),
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         return null;
       }
 
@@ -148,7 +148,7 @@ export class LocalMLClient implements LocalMLProvider {
         signal: AbortSignal.timeout(1000),
       });
 
-      if (!response.ok) {
+      if (!response?.ok) {
         return null;
       }
 

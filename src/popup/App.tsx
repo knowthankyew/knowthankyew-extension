@@ -259,25 +259,49 @@ export const App: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {(() => {
               const claims = telemetry.getPrivacyClaims();
+              const isEnterprise = !claims.isLocalOnlyHonest;
+              const badgeLabel = isEnterprise
+                ? claims.badgeLabel
+                : isLocalMLActive
+                ? 'Local Assist'
+                : 'Zero Egress';
+              const badgeColor = isEnterprise ? '#f59e0b' : isLocalMLActive ? '#38bdf8' : '#34d399';
+              const badgeBg = isEnterprise
+                ? 'rgba(245, 158, 11, 0.15)'
+                : isLocalMLActive
+                ? 'rgba(56, 189, 248, 0.15)'
+                : 'rgba(16, 185, 129, 0.1)';
+              const badgeBorder = isEnterprise
+                ? '1px solid #d97706'
+                : isLocalMLActive
+                ? '1px solid #0284c7'
+                : '1px solid #10b981';
+
               return (
                 <div
                   data-testid="privacy-status-badge"
                   style={{
                     padding: '3px 8px',
-                    backgroundColor: isLocalMLActive ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.1)',
-                    border: isLocalMLActive ? '1px solid #0284c7' : '1px solid #10b981',
+                    backgroundColor: badgeBg,
+                    border: badgeBorder,
                     borderRadius: '12px',
                     fontSize: '10px',
-                    color: isLocalMLActive ? '#38bdf8' : '#34d399',
+                    color: badgeColor,
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
                   }}
-                  title={isLocalMLActive ? 'Local ML Assist active on loopback (127.0.0.1:8420)' : (claims.modalStatusDescription || 'Air-gapped 100% on-device heuristic engine')}
+                  title={
+                    isEnterprise
+                      ? (claims.modalStatusDescription || 'Enterprise Telemetry Active (OTLP)')
+                      : isLocalMLActive
+                      ? 'Local ML Assist active on loopback (127.0.0.1:8420)'
+                      : (claims.modalStatusDescription || 'Air-gapped 100% on-device heuristic engine')
+                  }
                 >
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isLocalMLActive ? '#38bdf8' : '#10b981' }} />
-                  {isLocalMLActive ? 'Local Assist' : (claims.isLocalOnlyHonest ? 'Zero Egress' : claims.badgeLabel)}
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: badgeColor }} />
+                  {badgeLabel}
                 </div>
               );
             })()}

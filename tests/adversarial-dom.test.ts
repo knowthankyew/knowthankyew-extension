@@ -58,6 +58,13 @@ describe('adversarial DOM — extraction correctness', () => {
     expect(elapsed).toBeLessThan(100);
   });
 
+  it('strictly enforces 50,000-character safety ceiling when input exceeds limit', () => {
+    const oversized = 'a'.repeat(75_000);
+    document.body.innerHTML = `<div id="target">${oversized}</div>`;
+    const result = extractPageText(document.body);
+    expect(result.length).toBe(50_000);
+  });
+
   // --- Fixture 4: Many near-ceiling siblings (aggregate cost) ---
   it('bounds aggregate extraction cost across many medium-sized sibling nodes', () => {
     const chunk = 'automatic renewal '.repeat(2_000); // ~36KB per node

@@ -9,7 +9,7 @@ We have designed, implemented, and validated both tracks of the evolutionary roa
 ## 1. Changes Made
 
 ### Track 1: Upstream Regulatory Intelligence & Declarative Policy Packs
-- `src/core/policy-packs/us-federal.json`: Declarative JSON policy pack storing federal statutory rules for ROSCA (15 U.S.C. § 8403), FTC Negative Option & Click-to-Cancel (16 CFR Part 425), FAA Arbitration (9 U.S.C. § 2), and Class Action Waivers, annotated with API tracking metadata (`tracking.apiKeywords`).
+- `src/core/policy-packs/us-federal.json`: Declarative JSON policy pack storing federal statutory rules for ROSCA (15 U.S.C. § 8403), FTC Act § 5 Symmetrical Cancellation Enforcement, FAA Arbitration (9 U.S.C. § 2), and Class Action Waivers, annotated with API tracking metadata (`tracking.apiKeywords`).
 - `src/core/policy-packs/state-arl.json`: Declarative policy pack for state automatic renewal and privacy statutes (California AB 2863 / CCPA, New York GBL § 527-a, Illinois BIPA).
 - `src/core/policy-packs/index.ts`: Policy pack compiler converting declarative pattern strings into live, safe, case-insensitive `RegExp` instances and exposing `COMPILED_POLICY_RULES`.
 - `src/core/types.ts`: Added `TrackingMetadata`, `DeclarativeRule`, and `PolicyPack` interfaces.
@@ -21,7 +21,7 @@ We have designed, implemented, and validated both tracks of the evolutionary roa
 - `src/ml/types.ts`: Defined the service contracts for `HealthResponse`, `ClassifyLinksRequest`, `ClassifyLinksResponse`, `AnalyzeClauseRequest`, `AnalyzeClauseResponse`, and `BurnResponse`.
 - `src/ml/local-ml-client.ts`: Created `LocalMLClient` connecting to `http://127.0.0.1:8420` with short abort timeouts and full support for the `/burn` endpoint.
 - `src/content/link-detector.ts`: Implemented `discoverLegalLinksWithML()`—a 2-stage cascade where the fast heuristic DOM extractor gathers candidates and the local model promotes the primary consumer agreement to index 0.
-- `src/telemetry/client.ts`: Updated `hardBurnAllData()` to trigger `localMLClient.burn()` in a non-blocking fire-and-forget dispatch, commanding the local worker to wipe prompt contexts and KV caches without blocking browser DOM/storage teardown.
+- `src/telemetry/client.ts`: Updated `hardBurnAllData()` to await `localMLClient.burn()` during the amnesiac reset, commanding the local worker to wipe prompt contexts and KV caches before the function completes.
 - `vite.config.ts`: Added compile-time dead-code elimination (`__LOCAL_ML_ENABLED__`) and air-gap stripping during production builds, preserving the Zero-Egress Invariant in Chrome Web Store releases.
 - `src/popup/App.tsx` & `src/options/OptionsApp.tsx`: Added distinct UI privacy status ("Local Assist" cyan badge vs. "Zero Egress" green badge) and live diagnostics meters for the loopback worker.
 

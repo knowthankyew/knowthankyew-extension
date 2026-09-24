@@ -42,10 +42,10 @@
       "classification": "STATUTORY_VIOLATION",
       "severity": "CRITICAL",
       "statute": {
-        "code": "15 U.S.C. § 45(a) (FTC Act § 5) / 16 CFR § 425.6",
-        "title": "FTC Click-to-Cancel Mandate & Deceptive Practices Rule",
-        "jurisdiction": "US Federal",
-        "plainExplanation": "If you subscribed online, FTC enforcement and Click-to-Cancel rules require that you must be allowed to cancel online through the same medium without having to call or mail."
+        "code": "15 U.S.C. § 45(a) (FTC Act § 5 - Deceptive Omissions)",
+        "title": "FTC Symmetrical Cancellation Enforcement & State ARLs",
+        "jurisdiction": "US Federal & Multi-State",
+        "plainExplanation": "Under FTC Act Section 5 deceptive trade practice enforcement and state Automatic Renewal Laws, businesses cannot engineer asymmetrical cancellation obstacles (such as requiring a phone call or physical letter to cancel a service enrolled in online)."
       },
       "patterns": [
         "(?:cancel|terminate)\\s+(?:by\\s+calling|only\\s+by\\s+phone|via\\s+telephone|by\\s+written\\s+notice\\s+sent\\s+to)",
@@ -59,8 +59,7 @@
       "tracking": {
         "agency": "Federal Trade Commission",
         "statuteCode": "15 U.S.C. § 45(a)",
-        "cfr": "16 CFR Part 425",
-        "apiKeywords": ["Click-to-Cancel", "Negative Option", "Cancellation", "Telephonic"],
+        "apiKeywords": ["Negative Option", "Asymmetrical Cancellation", "Telephonic Obstacle", "ROSCA"],
         "lastVerifiedDate": "2026-09-01"
       }
     },

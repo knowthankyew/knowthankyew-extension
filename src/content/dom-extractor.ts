@@ -4,12 +4,23 @@
  * Deduplicates overlapping containers (e.g. main > form.checkout) to ensure
  * text is extracted exactly once.
  */
+export const MAX_EXTRACTED_CHAR_CEILING = 50_000;
+
 export function extractPageLegalText(
   root?: Element | Document,
   visited?: Set<Node>
 ): string {
   const targetDoc = typeof document !== 'undefined' ? document : null;
-  const targetRoot = root || targetDoc?.body;
+  let targetRoot: Element | null = null;
+  if (root) {
+    if ('body' in (root as Document) && (root as Document).body) {
+      targetRoot = (root as Document).body;
+    } else {
+      targetRoot = root as Element;
+    }
+  } else {
+    targetRoot = targetDoc?.body || null;
+  }
   if (!targetRoot) return '';
 
   // Elements likely to contain contracts, fine print, checkout forms, and modals
@@ -93,8 +104,12 @@ export function extractPageLegalText(
     }
   }
 
-  // Combine and deduplicate redundant spans
-  return collectedStrings.join('\n\n');
+  // Combine and deduplicate redundant spans with strict 50k safety ceiling
+  const combined = collectedStrings.join('\n\n');
+  if (combined.length > MAX_EXTRACTED_CHAR_CEILING) {
+    return combined.slice(0, MAX_EXTRACTED_CHAR_CEILING);
+  }
+  return combined;
 }
 
 // Alias for spec compatibility

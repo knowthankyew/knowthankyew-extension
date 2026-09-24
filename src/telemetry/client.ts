@@ -87,10 +87,11 @@ export async function hardBurnAllData(): Promise<void> {
     }
   }
 
-  // 5. Command local ML worker (if active) to burn in-memory session and prompt context (fire-and-forget)
-  import('../ml/local-ml-client')
-    .then(({ localMLClient }) => {
-      localMLClient.burn().catch(() => {});
-    })
-    .catch(() => {});
+  // 5. Command local ML worker (if active) to burn in-memory session and prompt context
+  try {
+    const { localMLClient } = await import('../ml/local-ml-client');
+    await localMLClient.burn();
+  } catch {
+    // Non-fatal if loopback worker is offline or unconfigured
+  }
 }
