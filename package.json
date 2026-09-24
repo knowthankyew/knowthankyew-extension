@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "record:demo": "node scripts/record-demo.js",
     "demo": "python3 -m http.server 3000 --directory tests"
   },
   "dependencies": {
