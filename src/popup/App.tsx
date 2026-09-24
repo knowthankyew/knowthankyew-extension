@@ -257,25 +257,30 @@ export const App: React.FC = () => {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div
-              data-testid="privacy-status-badge"
-              style={{
-                padding: '3px 8px',
-                backgroundColor: isLocalMLActive ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.1)',
-                border: isLocalMLActive ? '1px solid #0284c7' : '1px solid #10b981',
-                borderRadius: '12px',
-                fontSize: '10px',
-                color: isLocalMLActive ? '#38bdf8' : '#34d399',
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-              title={isLocalMLActive ? 'Local ML Assist active on loopback (127.0.0.1:8420)' : 'Air-gapped 100% on-device heuristic engine'}
-            >
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isLocalMLActive ? '#38bdf8' : '#10b981' }} />
-              {isLocalMLActive ? 'Local Assist' : 'Zero Egress'}
-            </div>
+            {(() => {
+              const claims = telemetry.getPrivacyClaims();
+              return (
+                <div
+                  data-testid="privacy-status-badge"
+                  style={{
+                    padding: '3px 8px',
+                    backgroundColor: isLocalMLActive ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.1)',
+                    border: isLocalMLActive ? '1px solid #0284c7' : '1px solid #10b981',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    color: isLocalMLActive ? '#38bdf8' : '#34d399',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                  title={isLocalMLActive ? 'Local ML Assist active on loopback (127.0.0.1:8420)' : (claims.modalStatusDescription || 'Air-gapped 100% on-device heuristic engine')}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isLocalMLActive ? '#38bdf8' : '#10b981' }} />
+                  {isLocalMLActive ? 'Local Assist' : (claims.isLocalOnlyHonest ? 'Zero Egress' : claims.badgeLabel)}
+                </div>
+              );
+            })()}
             <button
               onClick={() => {
                 if (typeof chrome !== 'undefined' && chrome.runtime?.openOptionsPage) {
