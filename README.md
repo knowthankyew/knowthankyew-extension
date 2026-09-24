@@ -8,12 +8,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![Release: v1.3.0 Live](https://img.shields.io/badge/Release-v1.3.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
-[![v1.4.0 Status: ON HOLD](https://img.shields.io/badge/v1.4.0-ON%20HOLD-amber.svg)](ROADMAP.md)
+[![v1.4.0: Release Candidate Ready](https://img.shields.io/badge/v1.4.0-Release%20Candidate%20Ready-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
 > **Release Status & Roadmap Notice**:  
-> The official, approved production release published on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**.  
-> **v1.4.0 (including experimental Local ML Assist) is explicitly ON HOLD**. All engineering focus is dedicated to resolving, hardening, and verifying issues in the v1.3.0 baseline before adding local ML components.
+> The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**.  
+> **v1.4.0 Release Candidate** is fully audited, verified across 85/85 tests, and packaged for manual Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`).
 
 ---
 

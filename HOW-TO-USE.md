@@ -28,8 +28,8 @@ flowchart LR
 
 ### 1. Download
 Click this link to download the pre-packaged zip file directly:  
-👉 **[Click Here to Download: knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip)**  
-*(Official Chrome Web Store v1.3.0 baseline release. Note: v1.4.0 is on hold pending resolution of 1.3 baseline issues).*
+👉 **[Click Here to Download: knowthankyew-extension-v1.4.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.4.0/knowthankyew-extension-v1.4.0.zip)** *(v1.4.0 Release Candidate package)*  
+*(Previous live Chrome Web Store baseline: [knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip))*.
 
 Once downloaded to your `Downloads` folder, double-click it to unzip. You will see a folder containing the extension.
 
