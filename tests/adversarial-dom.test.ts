@@ -35,6 +35,9 @@ describe('adversarial DOM — extraction correctness', () => {
   });
 
   // --- Fixture 2: Deep nesting (stack resilience, not just perf) ---
+  // Note: Tested at 500 levels because jsdom's own internal parser (_attach) is recursively
+  // implemented and blows Node's call stack on innerHTML assignment at 5,000 levels.
+  // Our iterative extractor operates in O(depth) time with zero recursion.
   it('handles deep nesting (500 levels) without stack overflow in jsdom or extractor', () => {
     let html = '<span>bottom</span>';
     for (let i = 0; i < 500; i++) {
@@ -64,5 +67,20 @@ describe('adversarial DOM — extraction correctness', () => {
     extractPageText(document.body);
     const elapsed = performance.now() - start;
     expect(elapsed).toBeLessThan(500);
+  });
+
+  // --- Fixture 5: Pathological overlapping selectors (O(n log n) sorting vs O(n²)) ---
+  it('efficiently filters deeply nested overlapping candidate nodes without quadratic blowup', () => {
+    let inner = '<p>Deeply buried binding arbitration agreement</p>';
+    for (let i = 0; i < 100; i++) {
+      inner = `<div class="terms checkout legal" id="nest-${i}">${inner}</div>`;
+    }
+    document.body.innerHTML = `<main>${inner}</main>`;
+    const start = performance.now();
+    const result = extractPageText(document.body);
+    const elapsed = performance.now() - start;
+    const occurrences = result.match(/Deeply buried binding arbitration agreement/g) ?? [];
+    expect(occurrences.length).toBe(1);
+    expect(elapsed).toBeLessThan(100);
   });
 });

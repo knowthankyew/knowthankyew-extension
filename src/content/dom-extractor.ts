@@ -47,10 +47,27 @@ export function extractPageLegalText(
     candidateNodes.push(targetRoot as Element);
   }
 
-  // Deduplicate overlapping ancestors/descendants: keep only topmost disjoint containers
-  const disjointNodes = candidateNodes.filter(node =>
-    !candidateNodes.some(other => other !== node && other.contains(node))
-  );
+  // Safety ceiling against adversarial pages with thousands of matching elements
+  const MAX_CANDIDATE_NODES = 150;
+  const cappedCandidates = candidateNodes.slice(0, MAX_CANDIDATE_NODES);
+
+  // Sort candidate nodes by document preorder so ancestors strictly precede descendants
+  cappedCandidates.sort((a, b) => {
+    if (a === b) return 0;
+    const position = a.compareDocumentPosition(b);
+    if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+    if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+    return 0;
+  });
+
+  // Single-pass disjoint root collection: skips any node contained inside an already-selected root
+  const disjointNodes: Element[] = [];
+  for (const node of cappedCandidates) {
+    const isContained = disjointNodes.some(root => root.contains(node));
+    if (!isContained) {
+      disjointNodes.push(node);
+    }
+  }
 
   const collectedStrings: string[] = [];
 
