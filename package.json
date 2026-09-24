@@ -10,7 +10,7 @@
     "build:firefox": "tsc && TARGET_BROWSER=firefox vite build",
     "build:local-assist": "tsc && VITE_LOCAL_ML_ENABLED=true vite build",
     "package": "npm run build && VERSION=$(node -p \"require('./package.json').version\") && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}.zip .) && shasum -a 256 knowthankyew-extension-v${VERSION}.zip > SHA256SUMS",
-    "package:firefox": "npm run build:firefox && VERSION=$(node -p \"require('./package.json').version\") && (cd dist-firefox && zip -r ../knowthankyew-extension-v${VERSION}-firefox.zip .) && shasum -a 256 knowthankyew-extension-v${VERSION}-firefox.zip >> SHA256SUMS",
+    "package:firefox": "npm run build:firefox && VERSION=$(node -p \"require('./package.json').version\") && (cd dist-firefox && zip -r ../knowthankyew-extension-v${VERSION}-firefox.zip .) && shasum -a 256 knowthankyew-extension-v${VERSION}*.zip > SHA256SUMS",
     "package:all": "npm run build && VERSION=$(node -p \"require('./package.json').version\") && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}.zip .) && VITE_LOCAL_ML_ENABLED=true npx vite build && (cd dist && zip -r ../knowthankyew-extension-v${VERSION}-local-assist.zip .) && npm run build && shasum -a 256 knowthankyew-extension-v${VERSION}*.zip > SHA256SUMS",
     "ml:worker": "node scripts/mock-local-ml-worker.mjs",
     "ml:serve": "node scripts/mock-local-ml-worker.mjs",

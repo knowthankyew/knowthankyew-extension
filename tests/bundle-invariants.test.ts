@@ -90,6 +90,7 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       execSync('TARGET_BROWSER=firefox npx vite build --outDir dist-test-firefox', { cwd: rootDir, stdio: 'pipe' });
       const manifest = JSON.parse(readFileSync(resolve(testDistFfx, 'manifest.json'), 'utf-8'));
       expect(manifest.browser_specific_settings?.gecko?.id).toBe('reality-engine@knowthankyew.org');
+      expect(manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required).toEqual(['none']);
       expect(manifest.browser_specific_settings?.gecko_android?.strict_min_version).toBe('115.0');
       expect(manifest.background?.scripts).toEqual(['background/service-worker.js']);
       expect(manifest.background?.type).toBe('module');

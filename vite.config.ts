@@ -68,6 +68,9 @@ export default defineConfig(({ mode }) => {
                 gecko: {
                   id: 'reality-engine@knowthankyew.org',
                   strict_min_version: '115.0',
+                  data_collection_permissions: {
+                    required: ['none'],
+                  },
                 },
                 gecko_android: {
                   strict_min_version: '115.0',
