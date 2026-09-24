@@ -50,13 +50,13 @@ async function main() {
   await page.screenshot({ path: resolve('assets/store/screenshot-1-findings.png'), type: 'png' });
   console.log('✓ Generated assets/store/screenshot-1-findings.png (1280×800)');
 
-  // Screenshot 2: "Zero-Egress Privacy Guarantee" — clean informational
+  // Screenshot 2: "Zero-Egress Security Invariant" — clean informational
   await page.setContent(buildScreenshotHTML({
-    title: 'Zero-Egress Privacy Guarantee',
+    title: 'Zero-Egress Security Invariant',
     subtitle: 'Your documents never leave your device. Enforced by the browser engine itself.',
     infoCards: [
       { icon: '🔒', title: 'Browser-Enforced Air Gap', desc: 'Manifest CSP declares connect-src \'none\'. The Chromium engine physically blocks all outbound network requests from extension pages.' },
-      { icon: '🚫', title: 'Zero Host Permissions', desc: 'No <all_urls>, no remote servers, no analytics endpoints. The extension literally cannot phone home.' },
+      { icon: '🚫', title: 'Zero Host Permissions', desc: 'No <all_urls>, no remote servers, no analytics endpoints. Outbound network egress from extension pages is physically dropped.' },
       { icon: '🧠', title: '100% On-Device Analysis', desc: 'All regex pattern matching and statutory rule evaluation runs locally in your browser tab sandbox.' },
       { icon: '🔥', title: 'Hard Burn Amnesia', desc: 'One click wipes all local storage, flushes memory buffers, and leaves the extension in complete amnesia.' },
     ],
