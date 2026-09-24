@@ -64,14 +64,14 @@ If you prefer installing directly from source without using the store:
 
 ---
 
-## How It Protects Your Privacy (The Zero-Egress Guarantee)
+## How It Protects Your Privacy (Zero-Egress Architecture & Security Boundaries)
 
-Unlike other "privacy" extensions that quietly send your browsing habits to analytics servers, **KnowThankYew cannot transmit data over the network**:
+The extension's network layer is physically incapable of transmitting page data from extension pages — enforced by Chromium's own CSP engine (`connect-src 'none'`), not by application policy. Every other privacy property (content-script isolation, Hard Burn completeness, AI-assist output integrity) is a matter of careful, tested engineering discipline, not physical law — and we document those boundaries explicitly:
 
-1. **Manifest-Level CSP**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser physically forbids extension pages (popup, background worker) from making outbound network connections.
-2. **Isolated Local Execution**: Scans run purely in the active tab's local context. Content scripts contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), verified via negative-control tests.
-3. **Memory-Only Runtime State**: Operational telemetry is configured as `memory_only`; scan results are held in the popup and injected content-script contexts. The repository does not persist telemetry, document excerpts, URLs, or scan results to `chrome.storage.local`.
-4. **Local Storage Is Not a Telemetry Database**: The extension requests the `storage` permission so the hard-burn routine can clear the extension's local storage namespace and to permit future local-only settings. The current release does not use `chrome.storage.local` as the source of truth for telemetry or scan results.
+1. **Manifest-Level CSP for Extension Pages**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser engine physically blocks extension pages (popup, background worker) from initiating outbound network connections.
+2. **Content Script Isolation & Auditing**: Scans run purely in the active tab's local context via `chrome.scripting.executeScript`. Content scripts run in an isolated execution world and contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), enforced by compile-time exclusion and CI negative-control network interception tests.
+3. **Memory-Only Runtime State**: Operational telemetry runs strictly in `memory_only` mode; scan results are held in volatile memory. The extension does not persist telemetry, document excerpts, URLs, or scan results to `chrome.storage.local`.
+4. **Local Storage Namespace**: The extension requests the `storage` permission solely so the Hard Burn routine can purge extension storage and to support local user preferences. It is not used as a telemetry database.
 5. **Zero Cloud Infrastructure**: There is no remote backend, no user accounts, and no telemetry collection servers.
 
 Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github.io/knowthankyew-extension/)**.
