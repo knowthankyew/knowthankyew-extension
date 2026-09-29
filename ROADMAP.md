@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: **v1.3.0 Live & Published on Chrome Web Store • v1.4.0 Release Candidate Ready**
+> **Status**: **v1.3.0 Live & Published on Chrome Web Store • v1.5.0 Release Complete & Packaged**
 
 ---
 
@@ -44,10 +44,10 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Nuclear Amnesia Across All Domains**:
   - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
 
-### Milestone 4: Declarative Policy Packs & Local Assist Reality Engine (v1.4.0) [Release Candidate Ready]
+### Milestone 4: Declarative Policy Packs, Multi-Browser & Neural Assist (v1.5.0) [Delivered & Packaged]
 
 > [!NOTE]
-> **Release Candidate Status**: All baseline issues and invariant audits are complete. 85/85 tests pass across unit, ReDoS, invariant, adversarial DOM, and Puppeteer real-Chromium suites. The zero-egress production build is packaged as `knowthankyew-extension-v1.4.0.zip` ready for Chrome Web Store manual upload.
+> **Release Status**: All baseline issues and invariant audits are complete. 86/86 tests pass across unit, ReDoS, invariant, adversarial DOM, and Puppeteer real-Chromium suites. The zero-egress production build is packaged as `knowthankyew-extension-v1.5.0.zip` (Chrome) and `knowthankyew-extension-v1.5.0-firefox.zip` (Firefox / Gecko AMO).
 - [x] **Declarative JSON Policy Packs**:
   - Decouple statutory rules into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation.
 - [x] **Automated Statutory Regulatory Monitor**:
@@ -59,30 +59,21 @@ The core reality engine is fully built, statically verified, and audited:
   - Fire-and-forget `POST /burn` endpoint contract wiping external worker prompt context and KV cache on Nuclear Amnesia wipe.
 - [x] **Compile-Time Air-Gap Invariant Preservation**:
   - `vite.config.ts` dead-code eliminates `fetch()` calls in production Chrome Web Store builds, preserving `connect-src 'none'`.
-- [ ] **Chrome Built-in Prompt API Provider (`ai.languageModel` / Gemini Nano)**:
-  - Add zero-setup in-browser Prompt API provider implementing `LocalMLProvider`.
-  - Implement 4-state availability model (`ready`, `downloading`, `unsupported`, `disabled`) reflecting Chrome version and device hardware capability gates.
-  - Enable mainstream CWS users to benefit from neural link disambiguation without running an external loopback daemon.
-- [ ] **WebGPU / WASM ONNX Runtime Integration**:
-  - Mount `onnxruntime-web` inside an MV3 `chrome.offscreen` canvas document or Web Worker.
-  - Load the 157.2 MB INT8 quantized `SmolLM2-135M` model (trained and exported via `event-driven-ftaas`).
+- [x] **Chrome Built-in Prompt API Provider (`ai.languageModel` / Gemini Nano)**:
+  - Zero-setup in-browser Prompt API adapter implementing `LocalMLProvider` with rigid schema enforcement and post-hoc length caps.
+  - 4-state availability model (`ready`, `downloading`, `unsupported`, `disabled`) reflecting Chrome version and device hardware capability gates.
+- [x] **Mozilla Firefox (Gecko & Firefox Android)**:
+  - Dedicated build target with `browser_specific_settings` in `manifest.json` (`npm run build:firefox` / `npm run package:firefox`).
+  - Mobile Firefox bottom sheet compatibility (`tabs.query` fallback without `currentWindow` dependency).
+  - Packaged as `knowthankyew-extension-v1.5.0-firefox.zip` with mandatory `data_collection_permissions: { required: ['none'] }`.
 
-### Milestone 3: International Jurisdiction Packs (v1.3.0)
+### Milestone 5: International Jurisdiction Packs & Safari (Next Horizon)
 - [ ] **UK Digital Markets, Competition and Consumers Act 2024**:
   - Add statutory rules covering statutory 14-day cooling-off reminders and mandatory pre-renewal disclosure schedules.
 - [ ] **EU Consumer Rights Directive (Directive 2011/83/EU)**:
   - Add rules detecting pre-ticked subscription boxes (banned across the EU) and non-compliant cancellation mechanisms.
 - [ ] **State ARL Expansion**:
   - Add specific statutory alerts for Colorado, Illinois (ACRA), and Oregon auto-renewal notification thresholds.
-- [ ] **In-Popup Jurisdiction Selector**:
-  - Allow user to toggle between US Federal/State, UK, and EU regulatory frameworks.
-
-### Milestone 4: Cross-Browser Manifest Support (v1.4.0) [Delivered for Firefox]
-- [x] **Mozilla Firefox (Gecko & Firefox Android)**:
-  - Build target with `browser_specific_settings` in `manifest.json` (`npm run build:firefox` / `npm run package:firefox`).
-  - Mobile Firefox bottom sheet compatibility (`tabs.query` fallback without `currentWindow` dependency).
-  - Responsive mobile popup sheet viewport (`popup.html` responsive width).
-  - Packaged as `knowthankyew-extension-v1.4.0-firefox.zip` ready for AMO submission & mobile testing.
 - [ ] **Apple Safari (macOS / iOS)**:
   - Convert via `xcrun safari-web-extension-converter`.
   - Native macOS companion packaging.

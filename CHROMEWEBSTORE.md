@@ -14,8 +14,8 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.4.0` (Release Candidate Ready for Manual Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v1.4.0.zip` (SHA256: `209ef4b55879bc081ad30ade8d342934e71f1a1dd28a1e0c36e1c48cd1bde3cc`)
+- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.5.0` (Release Complete & Packaged for Upload)
+- **Manual Upload ZIP**: `knowthankyew-extension-v1.5.0.zip` (SHA256: `49153a4c586afce14bb117bb2791ab04572d4f30966a8994c43e6f4628b951c6`)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
@@ -151,6 +151,7 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
+| **1.5.0** | September 29, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.5.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`). Integrated declarative JSON policy packs, zero-setup Chrome Built-in Prompt API adapter (Gemini Nano / `ai.languageModel`), 50k character DOM extraction ceiling, OTLP enterprise badge preservation, and 86/86 verified passing tests. |
 | **1.4.0 (Release Candidate)** | September 24, 2026 | Prepared for Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`). Resolved baseline issues, aligned statutory policy packs with current ROSCA / FTC Act § 5 / State ARL law, 50k char DOM extraction ceiling, OTLP enterprise badge preservation, and 85/85 tests passing. |
 | **1.3.0 (LIVE)** | September 22, 2026 | **Live & Approved on Chrome Web Store**. Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |
 | **1.2.0** | September 21, 2026 | Automated governing terms link detection with 1-click contract navigation, dynamic checkout observer. Approved & Live in Chrome Web Store. |
