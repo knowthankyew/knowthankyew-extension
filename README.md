@@ -8,12 +8,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![Release: v1.3.0 Live](https://img.shields.io/badge/Release-v1.3.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
-[![v1.4.0: Release Candidate Ready](https://img.shields.io/badge/v1.4.0-Release%20Candidate%20Ready-success.svg)](ROADMAP.md)
+[![v1.5.0: Release Complete](https://img.shields.io/badge/v1.5.0-Release%20Complete-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
 > **Release Status & Roadmap Notice**:  
 > The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**.  
-> **v1.4.0 Release Candidate** is fully audited, verified across 85/85 tests, and packaged for manual Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`).
+> **v1.5.0 Release Complete** is fully audited, verified across 86/86 tests, and packaged across all targets: Chrome Web Store (`knowthankyew-extension-v1.5.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`), and Developer Local ML Assist (`knowthankyew-extension-v1.5.0-local-assist.zip`).
 
 ---
 
