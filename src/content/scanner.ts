@@ -2,6 +2,7 @@ import { extractPageLegalText } from './dom-extractor';
 import { discoverLegalLinks } from './link-detector';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
+import { subscribeAmnesiaMesh } from '../telemetry/amnesia-mesh';
 
 let cachedScanResult: PageScanResult | null = null;
 let lastExtractedTextLength = 0;
@@ -132,6 +133,26 @@ if (typeof document !== 'undefined') {
   }
 }
 
+export function performDomHardBurn(): void {
+  // Disconnect observer and cease all monitoring
+  stopDynamicObserver();
+  cachedScanResult = null;
+  lastExtractedTextLength = 0;
+
+  // Clear any active highlights or injected attributes
+  if (typeof document !== 'undefined') {
+    const highlights = document.querySelectorAll('[data-kty-trap]');
+    highlights.forEach(el => el.removeAttribute('data-kty-trap'));
+  }
+}
+
+// Connect to the distributed amnesia mesh for instant cross-tab DOM teardown
+if (typeof window !== 'undefined') {
+  subscribeAmnesiaMesh(() => {
+    performDomHardBurn();
+  });
+}
+
 // Listen for explicit commands from popup or service worker
 if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -147,14 +168,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
     }
 
     if (message?.type === 'KTY_HARD_BURN_DOM') {
-      // Disconnect observer and cease all monitoring
-      stopDynamicObserver();
-      cachedScanResult = null;
-      lastExtractedTextLength = 0;
-
-      // Clear any active highlights or injected attributes
-      const highlights = document.querySelectorAll('[data-kty-trap]');
-      highlights.forEach(el => el.removeAttribute('data-kty-trap'));
+      performDomHardBurn();
       sendResponse({ success: true, message: 'DOM references and observer terminated' });
       return true;
     }

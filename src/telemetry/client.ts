@@ -48,17 +48,21 @@ export function recordScanMetrics(summary: { critical: number; warning: number; 
   );
 }
 
+import { broadcastAmnesiaMeshBurn } from './amnesia-mesh';
+
 /**
  * Pillar 5 Invariant: The Hard Burn
  *
  * Purges this context's in-memory telemetry, clears local extension storage,
- * clears the toolbar badge, and asks every open tab to tear down any injected
- * scanner state. Cleanup is intentionally best-effort across tabs because
- * tabs may be restricted, closed, or missing the content script.
+ * clears the toolbar badge, commands every open tab to tear down injected DOM state,
+ * and broadcasts an atomic amnesia signal across all open contexts via BroadcastChannel.
  */
 export async function hardBurnAllData(): Promise<void> {
   // 1. Burn in-memory telemetry and session audit log for this extension context.
   telemetry.burn();
+
+  // 1b. Broadcast atomic amnesia signal across cross-tab mesh
+  broadcastAmnesiaMeshBurn();
 
   // 2. Clear the extension's local storage namespace.
   if (typeof chrome !== 'undefined' && chrome.storage?.local) {

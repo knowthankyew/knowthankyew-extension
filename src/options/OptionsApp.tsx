@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { hardBurnAllData, telemetry } from '../telemetry/client';
+import { subscribeAmnesiaMesh } from '../telemetry/amnesia-mesh';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
 export const OptionsApp: React.FC = () => {
@@ -75,6 +76,12 @@ export const OptionsApp: React.FC = () => {
 
   useEffect(() => {
     refreshDiagnostics();
+    const unsubscribe = subscribeAmnesiaMesh(() => {
+      setBurned(true);
+      refreshDiagnostics();
+      setTimeout(() => setBurned(false), 4000);
+    });
+    return unsubscribe;
   }, [refreshDiagnostics]);
 
   const handleBurnAll = async () => {
