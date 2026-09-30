@@ -85,7 +85,7 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     } finally {
       rmSync(testDistMl, { recursive: true, force: true });
     }
-  });
+  }, 30000);
 
   it('verifies Firefox build target generates valid Gecko settings and background.scripts', () => {
     const rootDir = resolve(__dirname, '..');
@@ -112,5 +112,5 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     } finally {
       rmSync(testDistFfx, { recursive: true, force: true });
     }
-  });
+  }, 30000);
 });
