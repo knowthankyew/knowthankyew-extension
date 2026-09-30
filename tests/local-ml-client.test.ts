@@ -127,4 +127,72 @@ describe('Local ML Loopback Client & /burn Protocol Handshake (local-ml-client.t
       })
     );
   });
+
+  describe('Edge-case & Failure Handling (Q-TEST-04)', () => {
+    it('returns null on non-200 HTTP responses (404, 500, 503)', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+        json: async () => ({ error: 'Inference worker crashed' }),
+      });
+
+      const isUp = await client.isAvailable(true);
+      expect(isUp).toBe(false);
+
+      const health = await client.getHealth(true);
+      expect(health).toBeNull();
+
+      const classified = await client.classifyLinks({
+        domain: 'example.com',
+        pageType: 'checkout',
+        candidates: [{ id: 1, text: 'Terms', href: 'https://example.com/terms' }],
+      });
+      expect(classified).toBeNull();
+
+      const analyzed = await client.analyzeClause({
+        clauseText: 'Sample clause',
+      });
+      expect(analyzed).toBeNull();
+
+      const burnRes = await client.burn();
+      expect(burnRes).toBeNull();
+    });
+
+    it('returns null and recovers gracefully when worker returns malformed JSON', async () => {
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON at position 0');
+        },
+      });
+
+      const health = await client.getHealth(true);
+      expect(health).toBeNull();
+
+      const classified = await client.classifyLinks({
+        domain: 'example.com',
+        pageType: 'checkout',
+        candidates: [{ id: 1, text: 'Terms', href: 'https://example.com/terms' }],
+      });
+      expect(classified).toBeNull();
+    });
+
+    it('returns null and does not throw on network timeout or abort', async () => {
+      globalThis.fetch = vi.fn().mockRejectedValue(
+        new DOMException('The operation was aborted due to timeout', 'TimeoutError')
+      );
+
+      const isUp = await client.isAvailable(true);
+      expect(isUp).toBe(false);
+
+      const analyzed = await client.analyzeClause({
+        clauseText: 'Binding arbitration clause',
+      });
+      expect(analyzed).toBeNull();
+
+      const burnRes = await client.burn();
+      expect(burnRes).toBeNull();
+    });
+  });
 });

@@ -44,10 +44,12 @@ export function extractPageLegalText(
   ];
 
   const candidateNodes: Element[] = [];
+  const seen = new WeakSet<Element>();
   for (const sel of selectors) {
     const nodes = targetRoot.querySelectorAll(sel);
     nodes.forEach(n => {
-      if (!candidateNodes.includes(n)) {
+      if (!seen.has(n)) {
+        seen.add(n);
         candidateNodes.push(n);
       }
     });

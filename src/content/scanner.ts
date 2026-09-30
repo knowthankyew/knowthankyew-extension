@@ -119,7 +119,11 @@ export function stopDynamicObserver(): void {
   }
 }
 
-// Auto-start observer if document is ready in browser context
+/**
+ * Intentional content script lifecycle activation:
+ * Content scripts execute in the tab's isolated world upon injection and must automatically
+ * bind the DOM MutationObserver and execute an initial scan when the document is ready.
+ */
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {

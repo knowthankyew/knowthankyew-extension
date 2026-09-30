@@ -143,24 +143,25 @@ describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
     expect(manifest.permissions).not.toContain('<all_urls>');
     expect(manifest.permissions).not.toContain('*://*/*');
 
-    // 2. If dist exists, inspect built bundles for network egress
+    // 2. Inspect built bundles for network egress (fails loud if dist not built)
     const distPath = resolve(__dirname, '../dist');
-    if (existsSync(distPath)) {
-      const checkBundle = (filePath: string) => {
-        const content = readFileSync(filePath, 'utf8');
-        // No network egress primitives allowed in bundled output
-        expect(content).not.toMatch(/fetch\s*\(/);
-        expect(content).not.toMatch(/new\s+WebSocket\s*\(/);
-        expect(content).not.toMatch(/navigator\.sendBeacon\s*\(/);
-        expect(content).not.toMatch(/new\s+XMLHttpRequest\s*\(/);
-      };
+    expect(existsSync(distPath), 'Expected dist directory to exist for bundle checks. Run npm run build first.').toBe(true);
 
-      const workerPath = resolve(distPath, 'background/service-worker.js');
-      if (existsSync(workerPath)) checkBundle(workerPath);
+    const checkBundle = (filePath: string) => {
+      expect(existsSync(filePath), `Expected bundle ${filePath} to exist`).toBe(true);
+      const content = readFileSync(filePath, 'utf8');
+      // No network egress primitives allowed in bundled output
+      expect(content).not.toMatch(/fetch\s*\(/);
+      expect(content).not.toMatch(/new\s+WebSocket\s*\(/);
+      expect(content).not.toMatch(/navigator\.sendBeacon\s*\(/);
+      expect(content).not.toMatch(/new\s+XMLHttpRequest\s*\(/);
+    };
 
-      const scannerPath = resolve(distPath, 'content/scanner.js');
-      if (existsSync(scannerPath)) checkBundle(scannerPath);
-    }
+    const workerPath = resolve(distPath, 'background/service-worker.js');
+    checkBundle(workerPath);
+
+    const scannerPath = resolve(distPath, 'content/scanner.js');
+    checkBundle(scannerPath);
   });
 
   it('dynamically observes DOM mutations and re-scans when checkout clauses are injected', async () => {

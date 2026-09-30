@@ -63,4 +63,46 @@ describe('Surveillance & Data Brokerage Rule Pack', () => {
     const matched = rule.patterns.some(p => p.test(text));
     expect(matched).toBe(true);
   });
+
+  it('detects continuous background biometric or location collection', () => {
+    const text = 'We collect precise geolocation data in the background while the application is closed.';
+    const rule = ALL_RULES.find(r => r.id === 'SURV-002')!;
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+});
+
+describe('Arbitration Opt-Out Provision (ARB-003)', () => {
+  it('detects 30-day arbitration opt-out provisions', () => {
+    const text = 'You have the right to opt-out of this arbitration agreement by mailing a written notice within 30 days.';
+    const rule = ALL_RULES.find(r => r.id === 'ARB-003')!;
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+});
+
+describe('Negative Tests: False Positive Prevention', () => {
+  it('does NOT trigger on standard benign cancellation language', () => {
+    const text = 'You may cancel your subscription at any time through your online account settings. No fees or penalties apply.';
+    for (const rule of ALL_RULES) {
+      const matched = rule.patterns.some(p => p.test(text));
+      expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match benign cancellation language`).toBe(false);
+    }
+  });
+
+  it('does NOT trigger on standard privacy-respecting data policy', () => {
+    const text = 'We do not sell or share your personal data with third parties. Your information is stored securely and deleted upon account closure.';
+    for (const rule of ALL_RULES) {
+      const matched = rule.patterns.some(p => p.test(text));
+      expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match privacy-respecting policy`).toBe(false);
+    }
+  });
+
+  it('does NOT trigger on standard refund policy language', () => {
+    const text = 'If you are not satisfied with your purchase, you may request a full refund within 30 days. Contact our support team via email or chat for assistance.';
+    for (const rule of ALL_RULES) {
+      const matched = rule.patterns.some(p => p.test(text));
+      expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match standard refund policy`).toBe(false);
+    }
+  });
 });

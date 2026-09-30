@@ -14,6 +14,82 @@ export const App: React.FC = () => {
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [isLocalMLActive, setIsLocalMLActive] = useState(false);
 
+  /**
+   * Injects the content script into a tab and retries the scan request.
+   * Returns the scan result on success, or null if the tab is restricted.
+   */
+  const injectAndRetryScan = async (
+    tabId: number,
+    startTime: number
+  ): Promise<{ result: PageScanResult; duration: number } | null> => {
+    try {
+      if (!chrome.scripting?.executeScript) return null;
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content/scanner.js'],
+      });
+      return await new Promise((resolve) => {
+        chrome.tabs.sendMessage(
+          tabId,
+          { type: 'KTY_REQUEST_PAGE_SCAN' },
+          (retryRes) => {
+            const duration = Math.round(performance.now() - startTime);
+            if (retryRes && retryRes.success) {
+              resolve({ result: retryRes.data, duration });
+            } else {
+              resolve(null);
+            }
+          }
+        );
+      });
+    } catch {
+      // Restricted page (chrome://, edge://, etc.)
+      return null;
+    }
+  };
+
+  /**
+   * Dynamically refreshes ML availability and semantically reranks
+   * multi-sided candidate agreements (e.g. Consumer vs. Merchant vs. Courier terms).
+   * Non-blocking: failures fall back silently to heuristic ordering.
+   */
+  const attemptMLRerank = async (result: PageScanResult, hostname: string): Promise<void> => {
+    try {
+      const { localMLClient } = await import('../ml/local-ml-client');
+      if (!localMLClient.isFeatureEnabled()) return;
+
+      const isAvail = await localMLClient.isAvailable(true);
+      setIsLocalMLActive(isAvail);
+
+      if (!isAvail || !result.discoveredLinks || result.discoveredLinks.length <= 1) return;
+
+      const candidateItems = result.discoveredLinks.map((link, idx) => ({
+        id: idx + 1,
+        text: link.title,
+        href: link.url,
+      }));
+      const ranked = await localMLClient.classifyLinks({
+        domain: hostname,
+        pageType: 'checkout',
+        candidates: candidateItems,
+      });
+
+      if (ranked?.primaryConsumerTermsId) {
+        const matchIdx = result.discoveredLinks.findIndex(
+          (_, idx) => idx + 1 === ranked.primaryConsumerTermsId
+        );
+        if (matchIdx > 0) {
+          const links = [...result.discoveredLinks];
+          const [promoted] = links.splice(matchIdx, 1);
+          links.unshift(promoted);
+          setScanResult((prev) => (prev ? { ...prev, discoveredLinks: links } : prev));
+        }
+      }
+    } catch {
+      // Non-blocking fallback
+    }
+  };
+
   const performScan = useCallback(async () => {
     setScanning(true);
     setErrorMessage(null);
@@ -33,12 +109,13 @@ export const App: React.FC = () => {
           return;
         }
 
+        let hostname = 'browser-tab';
         try {
-          const url = new URL(tab.url || 'http://localhost');
-          setActiveHostname(url.hostname);
+          hostname = new URL(tab.url || 'http://localhost').hostname;
         } catch {
-          setActiveHostname('browser-tab');
+          // keep default
         }
+        setActiveHostname(hostname);
 
         // Send scan request to content script, with automatic script injection fallback
         chrome.tabs.sendMessage(
@@ -47,39 +124,18 @@ export const App: React.FC = () => {
           async (response) => {
             if (chrome.runtime.lastError || !response || !response.success) {
               // Try on-demand injection via chrome.scripting
-              try {
-                if (chrome.scripting?.executeScript && tab.id) {
-                  await chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    files: ['content/scanner.js'],
-                  });
-                  // Retry scan request after injection
-                  chrome.tabs.sendMessage(
-                    tab.id,
-                    { type: 'KTY_REQUEST_PAGE_SCAN' },
-                    (retryRes) => {
-                      const duration = Math.round(performance.now() - startTime);
-                      if (retryRes && retryRes.success) {
-                        setScanResult(retryRes.data);
-                        recordScanMetrics(retryRes.data.summary, duration);
-                      } else {
-                        setErrorMessage(
-                          'Cannot scan restricted browser system page. Navigate to an HTTP/HTTPS checkout or terms page.'
-                        );
-                      }
-                      setScanning(false);
-                    }
-                  );
-                  return;
-                }
-              } catch {
-                // Restricted page (chrome://, edge://, etc.)
+              const retryResult = await injectAndRetryScan(tab.id!, startTime);
+              if (retryResult) {
+                setScanResult(retryResult.result);
+                recordScanMetrics(retryResult.result.summary, retryResult.duration);
+                setScanning(false);
+                await attemptMLRerank(retryResult.result, hostname);
+              } else {
+                setErrorMessage(
+                  'Cannot scan restricted browser system page or protected URL. Navigate to an active checkout, terms, or subscription agreement page.'
+                );
+                setScanning(false);
               }
-
-              setErrorMessage(
-                'Cannot scan restricted browser system page or protected URL. Navigate to an active checkout, terms, or subscription agreement page.'
-              );
-              setScanning(false);
               return;
             }
 
@@ -89,39 +145,7 @@ export const App: React.FC = () => {
             recordScanMetrics(result.summary, duration);
             setScanning(false);
 
-            // Dynamically refresh ML availability and semantically rerank multi-sided candidate agreements
-            try {
-              const { localMLClient } = await import('../ml/local-ml-client');
-              if (localMLClient.isFeatureEnabled()) {
-                const isAvail = await localMLClient.isAvailable(true);
-                setIsLocalMLActive(isAvail);
-                if (isAvail && result.discoveredLinks && result.discoveredLinks.length > 1) {
-                  const candidateItems = result.discoveredLinks.map((link, idx) => ({
-                    id: idx + 1,
-                    text: link.title,
-                    href: link.url,
-                  }));
-                  const ranked = await localMLClient.classifyLinks({
-                    domain: activeHostname,
-                    pageType: 'checkout',
-                    candidates: candidateItems,
-                  });
-                  if (ranked?.primaryConsumerTermsId) {
-                    const matchIdx = result.discoveredLinks.findIndex(
-                      (_, idx) => idx + 1 === ranked.primaryConsumerTermsId
-                    );
-                    if (matchIdx > 0) {
-                      const links = [...result.discoveredLinks];
-                      const [promoted] = links.splice(matchIdx, 1);
-                      links.unshift(promoted);
-                      setScanResult((prev) => (prev ? { ...prev, discoveredLinks: links } : prev));
-                    }
-                  }
-                }
-              }
-            } catch {
-              // Non-blocking fallback
-            }
+            await attemptMLRerank(result, hostname);
           }
         );
       } else {

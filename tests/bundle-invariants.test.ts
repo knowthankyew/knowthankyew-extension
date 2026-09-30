@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync, rmSync } from 'fs';
+import { readFileSync, readdirSync, statSync, rmSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -8,7 +8,9 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
 
   beforeAll(() => {
     // Ensure fresh standard production build exists for testing
-    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    if (!existsSync(distDir) || !existsSync(resolve(distDir, 'manifest.json')) || !existsSync(resolve(distDir, 'background/service-worker.js'))) {
+      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    }
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -28,6 +30,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   it('verifies 100% absence of network egress primitives across all compiled JS files', () => {
     const jsFiles = getJsFilesRecursively(distDir);
     expect(jsFiles.length).toBeGreaterThan(0);
+    const hasScanner = jsFiles.some(f => f.endsWith('scanner.js'));
+    expect(hasScanner, 'Expected dist/content/scanner.js to be compiled and verified').toBe(true);
 
     const forbiddenPatterns = [
       /\bfetch\s*\(/,

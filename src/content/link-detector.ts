@@ -4,6 +4,7 @@ interface WellKnownEntry {
   path: string;
   title: string;
   category: 'TERMS' | 'PRIVACY' | 'BILLING' | 'ARBITRATION';
+  lastVerified?: string;
 }
 
 /**
@@ -12,47 +13,47 @@ interface WellKnownEntry {
  */
 export const WELL_KNOWN_LEGAL_MAP: Record<string, WellKnownEntry[]> = {
   'fiverr.com': [
-    { path: '/terms_of_service', title: 'Terms of Service', category: 'TERMS' },
-    { path: '/privacy-policy', title: 'Privacy Policy', category: 'PRIVACY' },
+    { path: '/terms_of_service', title: 'Terms of Service', category: 'TERMS', lastVerified: '2026-09-01' },
+    { path: '/privacy-policy', title: 'Privacy Policy', category: 'PRIVACY', lastVerified: '2026-09-01' },
   ],
   'doordash.com': [
-    { path: '/consumers/s/terms-and-conditions-us', title: 'Consumer Terms & Conditions', category: 'TERMS' },
+    { path: '/consumers/s/terms-and-conditions-us', title: 'Consumer Terms & Conditions', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'spotify.com': [
-    { path: '/legal/end-user-agreement/', title: 'End User Agreement', category: 'TERMS' },
+    { path: '/legal/end-user-agreement/', title: 'End User Agreement', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'netflix.com': [
-    { path: '/legal/termsofuse', title: 'Terms of Use', category: 'TERMS' },
+    { path: '/legal/termsofuse', title: 'Terms of Use', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'paypal.com': [
-    { path: '/us/legalhub/useragreement-full', title: 'User Agreement', category: 'TERMS' },
+    { path: '/us/legalhub/useragreement-full', title: 'User Agreement', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'uber.com': [
-    { path: '/legal/en/document/?name=general-terms-of-use', title: 'General Terms of Use', category: 'TERMS' },
+    { path: '/legal/en/document/?name=general-terms-of-use', title: 'General Terms of Use', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'airbnb.com': [
-    { path: '/help/article/2908', title: 'Terms of Service', category: 'TERMS' },
+    { path: '/help/article/2908', title: 'Terms of Service', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'reddit.com': [
-    { path: '/policies/user-agreement', title: 'User Agreement', category: 'TERMS' },
+    { path: '/policies/user-agreement', title: 'User Agreement', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'amazon.com': [
-    { path: '/gp/help/customer/display.html?nodeId=GLSBYFE9MGKKQWW4', title: 'Conditions of Use', category: 'TERMS' },
+    { path: '/gp/help/customer/display.html?nodeId=GLSBYFE9MGKKQWW4', title: 'Conditions of Use', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'adobe.com': [
-    { path: '/legal/terms.html', title: 'General Terms of Use', category: 'TERMS' },
+    { path: '/legal/terms.html', title: 'General Terms of Use', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'instacart.com': [
-    { path: '/terms', title: 'Terms of Service', category: 'TERMS' },
+    { path: '/terms', title: 'Terms of Service', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'chegg.com': [
-    { path: '/termsofuse', title: 'Terms of Use', category: 'TERMS' },
+    { path: '/termsofuse', title: 'Terms of Use', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'hulu.com': [
-    { path: '/terms', title: 'Subscriber Agreement', category: 'TERMS' },
+    { path: '/terms', title: 'Subscriber Agreement', category: 'TERMS', lastVerified: '2026-09-01' },
   ],
   'nytimes.com': [
-    { path: '/subscription-terms', title: 'Subscriber Terms', category: 'BILLING' },
+    { path: '/subscription-terms', title: 'Subscriber Terms', category: 'BILLING', lastVerified: '2026-09-01' },
   ],
 };
 
