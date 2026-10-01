@@ -19,20 +19,12 @@ export const OptionsApp: React.FC = () => {
     if (typeof chrome !== 'undefined' && chrome.storage?.local) {
       try {
         if (chrome.storage.local.getBytesInUse) {
-          const bytes = await new Promise<number>((resolve) => {
-            chrome.storage.local.getBytesInUse(null, (b) => {
-              resolve(b || 0);
-            });
-          });
-          setStorageBytes(bytes);
+          const bytes = await chrome.storage.local.getBytesInUse(null);
+          setStorageBytes(bytes || 0);
         }
 
-        const allItems = await new Promise<Record<string, unknown>>((resolve) => {
-          chrome.storage.local.get(null, (items) => {
-            resolve(items || {});
-          });
-        });
-        setStorageKeys(Object.keys(allItems));
+        const allItems = await chrome.storage.local.get(null);
+        setStorageKeys(Object.keys(allItems || {}));
       } catch {
         // Fallback for mocked or non-extension environments
         setStorageBytes(0);

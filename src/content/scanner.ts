@@ -231,16 +231,25 @@ export function stopDynamicObserver(): void {
  * Intentional content script lifecycle activation:
  * Content scripts execute in the tab's isolated world upon injection and must automatically
  * bind the DOM MutationObserver and execute an initial scan when the document is ready.
+ * Guarded by idempotency sentinel to prevent duplicate observers on re-injection.
  */
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+const KTY_INIT_KEY = '__kty_scanner_initialized__';
+const isAlreadyInitialized = typeof window !== 'undefined' && Boolean((window as any)[KTY_INIT_KEY]);
+
+if (!isAlreadyInitialized) {
+  if (typeof window !== 'undefined') {
+    (window as any)[KTY_INIT_KEY] = true;
+  }
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        startDynamicObserver();
+        executeScan();
+      });
+    } else {
       startDynamicObserver();
       executeScan();
-    });
-  } else {
-    startDynamicObserver();
-    executeScan();
+    }
   }
 }
 
@@ -280,38 +289,43 @@ export function handleHardBurnDOM(): void {
   }
 }
 
-// Primary transport: Listen for explicit commands from popup or service worker
-if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message?.type === 'KTY_REQUEST_PAGE_SCAN') {
-      try {
-        const result = executeScan();
-        sendResponse({ success: true, data: result });
-      } catch (err: unknown) {
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        sendResponse({ success: false, error: errorMsg });
+// Primary transport: Listen for explicit commands from popup or service worker (guarded against duplicate registration)
+const KTY_LISTENERS_KEY = '__kty_listeners_bound__';
+if (typeof window !== 'undefined' && !(window as any)[KTY_LISTENERS_KEY]) {
+  (window as any)[KTY_LISTENERS_KEY] = true;
+
+  if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === 'KTY_REQUEST_PAGE_SCAN') {
+        try {
+          const result = executeScan();
+          sendResponse({ success: true, data: result });
+        } catch (err: unknown) {
+          const errorMsg = err instanceof Error ? err.message : String(err);
+          sendResponse({ success: false, error: errorMsg });
+        }
+        return true; // Keep message channel open for async response
       }
-      return true; // Keep message channel open for async response
-    }
 
-    if (message?.type === 'KTY_HARD_BURN_DOM') {
-      handleHardBurnDOM();
-      sendResponse({ success: true, message: 'DOM references and observer terminated' });
-      return true;
-    }
-  });
-}
-
-// Secondary transport: BroadcastChannel coordinator for multi-context amnesia
-if (!burnBroadcastChannel && typeof BroadcastChannel !== 'undefined') {
-  try {
-    burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
-    burnBroadcastChannel.onmessage = (event) => {
-      if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+      if (message?.type === 'KTY_HARD_BURN_DOM') {
         handleHardBurnDOM();
+        sendResponse({ success: true, message: 'DOM references and observer terminated' });
+        return true;
       }
-    };
-  } catch {
-    // Non-fatal if BroadcastChannel is restricted in current context
+    });
+  }
+
+  // Secondary transport: BroadcastChannel coordinator for multi-context amnesia
+  if (!burnBroadcastChannel && typeof BroadcastChannel !== 'undefined') {
+    try {
+      burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
+      burnBroadcastChannel.onmessage = (event) => {
+        if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+          handleHardBurnDOM();
+        }
+      };
+    } catch {
+      // Non-fatal if BroadcastChannel is restricted in current context
+    }
   }
 }

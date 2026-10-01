@@ -1,24 +1,20 @@
 import React from 'react';
-import { Severity, LegalClassification } from '../../core/types';
+import { Severity } from '../../core/types';
 
 interface SeverityBadgeProps {
   severity: Severity;
-  classification?: LegalClassification;
 }
 
-export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity, classification }) => {
+export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity }) => {
   const getClassificationLabel = () => {
-    switch (classification) {
-      case 'STATUTORY_VIOLATION':
-        return 'UNLAWFUL PRACTICE';
-      case 'RIGHTS_WAIVER':
-        return 'RIGHTS WAIVER (LAWFUL)';
-      case 'ONE_SIDED_DISCRETION':
-        return 'ONE-SIDED TERM';
-      case 'SURVEILLANCE_NOTICE':
-        return 'DATA BROKERAGE';
+    switch (severity) {
+      case 'CRITICAL':
+        return 'Watch out';
+      case 'WARNING':
+        return 'This is a problem';
+      case 'INFO':
       default:
-        return severity === 'CRITICAL' ? 'CRITICAL TRAP' : severity === 'WARNING' ? 'HIGH RISK' : 'ADVISORY';
+        return 'FYI';
     }
   };
 

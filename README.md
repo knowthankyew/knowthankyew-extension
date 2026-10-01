@@ -7,13 +7,13 @@
 [![CI](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml/badge.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
-[![Release: v1.3.0 Live](https://img.shields.io/badge/Release-v1.3.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
-[![Firefox AMO: v1.6.0 Approved](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Approved)-orange.svg)](https://addons.mozilla.org)
+[![Release: v1.6.0 Live](https://img.shields.io/badge/Release-v1.6.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
+[![Firefox AMO: v1.6.0 Live](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Live)-orange.svg)](https://addons.mozilla.org)
 [![v2.0.0: Release Complete](https://img.shields.io/badge/v2.0.0-Release%20Complete%20%26%20Packaged-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
 > **Release Status & Roadmap Notice**:  
-> The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**. **v1.6.0** is approved and live on Mozilla AMO.  
+> The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.6.0**. **v1.6.0** is also live on Mozilla AMO.  
 > **v2.0.0 Release Complete & Packaged** delivers Closed Shadow DOM inline visual defense overlays next to deceptive consent checkboxes, international statutory packs (UK DMCC 2024, EU CRD 2011/83/EU, expanded State ARLs for CO, IL, OR), Safari build pipeline, and 125/125 verified passing tests. Packaged across all targets: Chrome Web Store (`knowthankyew-extension-v2.0.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v2.0.0-firefox.zip`), Apple Safari (`knowthankyew-extension-v2.0.0-safari.zip`), and Developer Local ML Assist (`knowthankyew-extension-v2.0.0-local-assist.zip`).
 
 ---

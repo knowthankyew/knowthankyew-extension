@@ -75,11 +75,11 @@ export function extractPageLegalText(
 
   // Single-pass disjoint root collection: skips any node contained inside an already-selected root
   const disjointNodes: Element[] = [];
-  for (const node of cappedCandidates) {
-    const isContained = disjointNodes.some(root => root.contains(node));
-    if (!isContained) {
-      disjointNodes.push(node);
+  outer: for (const node of cappedCandidates) {
+    for (const root of disjointNodes) {
+      if (root.contains(node)) continue outer;
     }
+    disjointNodes.push(node);
   }
 
   const collectedStrings: string[] = [];

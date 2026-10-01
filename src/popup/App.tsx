@@ -6,6 +6,9 @@ import { DiscoveredLinksCard } from './components/DiscoveredLinksCard';
 import { telemetry, recordScanMetrics } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
+import { ChromePromptAPIAdapter } from '../ml/chrome-ai-adapter';
+import { NanoCapabilityState } from '../ml/nano-types';
+
 export const App: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [scanResult, setScanResult] = useState<PageScanResult | null>(null);
@@ -13,6 +16,7 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [isLocalMLActive, setIsLocalMLActive] = useState(false);
+  const [nanoState, setNanoState] = useState<NanoCapabilityState | null>(null);
 
   /**
    * Injects the content script into a tab and retries the scan request.
@@ -218,6 +222,12 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     performScan();
+    try {
+      const adapter = new ChromePromptAPIAdapter(true);
+      adapter.getStatus().then((report) => setNanoState(report.state)).catch(() => {});
+    } catch {
+      // non-fatal
+    }
     try {
       import('../ml/local-ml-client').then(({ localMLClient }) => {
         if (localMLClient.isFeatureEnabled()) {
@@ -500,7 +510,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <span style={{ color: '#ef4444', marginRight: '4px' }}>●</span>
-                {scanResult.summary.critical} Critical
+                {scanResult.summary.critical} Watch out
               </div>
               <div
                 style={{
@@ -513,7 +523,7 @@ export const App: React.FC = () => {
                 }}
               >
                 <span style={{ color: '#f59e0b', marginRight: '4px' }}>●</span>
-                {scanResult.summary.warning} Warning
+                {scanResult.summary.warning} Problem
               </div>
               <div
                 style={{
@@ -565,8 +575,59 @@ export const App: React.FC = () => {
               </div>
             ) : (
               scanResult.matches.map((match) => (
-                <TrapCard key={match.ruleId} match={match} />
+                <TrapCard key={match.ruleId} match={match} sourceDomain={activeHostname} />
               ))
+            )}
+
+            {/* Browser Support & Local ML Upgrade Notice */}
+            {(nanoState === 'unsupported-browser' || nanoState === 'unsupported-hardware') && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  marginBottom: '10px',
+                  padding: '10px 12px',
+                  backgroundColor: '#0c1322',
+                  border: '1px solid #1e293b',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  lineHeight: 1.45,
+                  color: '#94a3b8',
+                }}
+              >
+                <div style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: '4px' }}>
+                  Plain Language AI Summaries
+                </div>
+                <div>
+                  Plain language summaries use Chrome's built-in Prompt API — AI that runs entirely on your device.
+                  Your browser doesn't support it yet.
+                </div>
+                <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <a
+                    href="https://developer.chrome.com/docs/ai/prompt-api"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 500 }}
+                  >
+                    → How to enable on Chrome
+                  </a>
+                  <a
+                    href="https://github.com/knowthankyew/knowthankyew-extension/blob/main/LOCAL-ML-SETUP.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 500 }}
+                  >
+                    → Run a local model on Firefox/Safari
+                  </a>
+                  <a
+                    href="https://www.w3.org/groups/wg/webmachinelearning/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 500 }}
+                  >
+                    → window.ai browser support status (W3C WebML)
+                  </a>
+                </div>
+              </div>
             )}
           </>
         ) : null}

@@ -1,13 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EvaluationMatch } from '../../core/types';
 import { SeverityBadge } from './SeverityBadge';
+import { ChromePromptAPIAdapter } from '../../ml/chrome-ai-adapter';
+import { ClauseSummary } from '../../ml/nano-types';
 
 interface TrapCardProps {
   match: EvaluationMatch;
+  sourceDomain?: string;
 }
 
-export const TrapCard: React.FC<TrapCardProps> = ({ match }) => {
+export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain }) => {
   const [expanded, setExpanded] = useState(false);
+  const [nanoSummary, setNanoSummary] = useState<ClauseSummary | null>(null);
+
+  useEffect(() => {
+    let isCancelled = false;
+    const adapter = new ChromePromptAPIAdapter(true);
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const status = await adapter.getStatus();
+        if (!status.isAvailable || isCancelled) return;
+        const summary = await adapter.summarizeTrapClause(
+          match.matchedSnippet,
+          match.category,
+          controller.signal
+        );
+        if (!isCancelled && summary) {
+          setNanoSummary(summary);
+        }
+      } catch {
+        // Fall back cleanly to heuristic explanation with zero error state or user disruption
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+      controller.abort();
+      adapter.burn();
+    };
+  }, [match.matchedSnippet, match.category]);
+
+  const plainLanguageText = nanoSummary?.obligationSummary || match.explanation;
+
+  // Calendar reminder generator for auto-renewal traps (zero new permissions, standard link)
+  const isAutoRenewal = match.category === 'AUTO_RENEWAL';
+  let calendarUrl = '';
+  if (isAutoRenewal) {
+    const domain = sourceDomain || 'Subscription';
+    const now = new Date();
+    // Default reminder date: 25 days from today (before typical 30-day renewal cycle)
+    const reminderDate = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
+    const startIso = reminderDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const endDate = new Date(reminderDate.getTime() + 60 * 60 * 1000);
+    const endIso = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    const eventTitle = encodeURIComponent(`Cancel ${domain} subscription before renewal`);
+    const eventDetails = encodeURIComponent(
+      `Reminder from KnowThankYew:\n${plainLanguageText}\n\nReview your subscription settings or bank card before the recurring billing date.`
+    );
+    calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startIso}/${endIso}&details=${eventDetails}`;
+  }
 
   return (
     <div
@@ -40,30 +94,35 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match }) => {
         >
           {match.title}
         </h3>
-        <SeverityBadge severity={match.severity} classification={match.classification} />
+        <SeverityBadge severity={match.severity} />
       </div>
 
-      <div
-        style={{
-          fontSize: '10px',
-          color: '#38bdf8',
-          fontFamily: 'ui-monospace, monospace',
-          marginBottom: '8px',
-        }}
-      >
-        ⚖️ {match.statute.code} ({match.statute.jurisdiction})
-      </div>
-
+      {/* Plain English Translation (Nano On-Device or Rule Explanation Fallback) */}
       <p
         style={{
-          fontSize: '12px',
-          color: '#cbd5e1',
-          margin: '0 0 8px 0',
-          lineHeight: 1.4,
+          fontSize: '12.5px',
+          color: '#e2e8f0',
+          margin: '0 0 10px 0',
+          lineHeight: 1.45,
+          fontWeight: 500,
         }}
       >
-        {match.explanation}
+        {plainLanguageText}
       </p>
+
+      {/* Surrendered rights line if detected by Nano */}
+      {nanoSummary?.rightsWaived && (
+        <div
+          style={{
+            fontSize: '11px',
+            color: '#f87171',
+            marginBottom: '8px',
+            lineHeight: 1.35,
+          }}
+        >
+          <strong>Rights surrendered:</strong> {nanoSummary.rightsWaived}
+        </div>
+      )}
 
       <div
         style={{
@@ -73,12 +132,40 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match }) => {
           borderRadius: '2px',
           fontSize: '11px',
           color: '#fbbf24',
-          marginBottom: '8px',
+          marginBottom: '10px',
           lineHeight: 1.3,
         }}
       >
         <strong>Advocate Tip:</strong> {match.recommendation}
       </div>
+
+      {/* Calendar reminder button for recurring billing traps */}
+      {isAutoRenewal && calendarUrl && (
+        <div style={{ marginBottom: '10px' }}>
+          <a
+            href={calendarUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '5px 10px',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              border: '1px solid #0284c7',
+              borderRadius: '4px',
+              color: '#38bdf8',
+              fontSize: '11px',
+              fontWeight: 600,
+              textDecoration: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            <span>📅</span>
+            <span>Remind me to cancel in 25 days</span>
+          </a>
+        </div>
+      )}
 
       <div>
         <button

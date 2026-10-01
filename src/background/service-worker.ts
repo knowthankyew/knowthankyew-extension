@@ -29,8 +29,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   if (message?.type === 'KTY_TRIGGER_HARD_BURN') {
     (async () => {
-      await hardBurnAllData();
-      sendResponse({ status: 'burned', success: true });
+      try {
+        await hardBurnAllData();
+        sendResponse({ status: 'burned', success: true });
+      } catch (err) {
+        sendResponse({ status: 'error', success: false, error: String(err) });
+      }
     })();
     return true; // Keep channel open
   }
