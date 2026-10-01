@@ -1,7 +1,9 @@
 name: Statutory & Regulatory Monitor
 
 on:
-  # Manual dispatch only (not automatically run on a schedule)
+  schedule:
+    # Run weekly every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       mock:
@@ -16,7 +18,7 @@ permissions:
 
 jobs:
   monitor:
-    name: Check Federal Register & State ARL Feeds
+    name: Check Federal Register, EUR-Lex & UK Legislation Feeds
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +30,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Query Federal Register & Regulatory APIs
+      - name: Query Federal Register, EUR-Lex & UK Regulatory APIs
         id: check_statutes
         run: |
           if [ "${{ inputs.mock }}" = "true" ]; then
@@ -44,7 +46,7 @@ jobs:
           commit-message: 'chore(legal): statutory update notices detected by policy monitor'
           branch: bot/statutory-update-${{ github.run_id }}
           delete-branch: true
-          title: '[Legal Update] Regulatory & Statutory Changes Detected in Federal Feeds'
+          title: '[Legal Update] Regulatory & Statutory Changes Detected in US, UK & EU Feeds'
           body-path: statutory-update-report.md
           labels: |
             statutory-review
