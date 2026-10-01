@@ -7,12 +7,45 @@ let cachedScanResult: PageScanResult | null = null;
 let lastExtractedTextLength = 0;
 let mutationObserver: MutationObserver | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-let scanCountInWindow = 0;
-let windowResetTimer: ReturnType<typeof setTimeout> | null = null;
+export const BUCKET_CAPACITY = 15;
+export const TOKEN_REFILL_INTERVAL_MS = 4000; // 1 token every 4s = 15 tokens/min steady state
+export const DEBOUNCE_DELAY_MS = 400;
+export const TEXT_DELTA_THRESHOLD = 25;
 
-const MAX_AUTO_SCANS_PER_MINUTE = 15;
-const DEBOUNCE_DELAY_MS = 400;
-const TEXT_DELTA_THRESHOLD = 25;
+let tokens = BUCKET_CAPACITY;
+let lastRefillTimestamp = Date.now();
+
+export function replenishTokens(now: number = Date.now()): void {
+  const elapsed = now - lastRefillTimestamp;
+  if (elapsed >= TOKEN_REFILL_INTERVAL_MS) {
+    const addedTokens = Math.floor(elapsed / TOKEN_REFILL_INTERVAL_MS);
+    tokens = Math.min(BUCKET_CAPACITY, tokens + addedTokens);
+    if (tokens === BUCKET_CAPACITY) {
+      lastRefillTimestamp = now;
+    } else {
+      lastRefillTimestamp += addedTokens * TOKEN_REFILL_INTERVAL_MS;
+    }
+  }
+}
+
+export function consumeScanToken(now: number = Date.now()): boolean {
+  replenishTokens(now);
+  if (tokens >= 1) {
+    tokens -= 1;
+    return true;
+  }
+  return false;
+}
+
+export function getTokenCount(now: number = Date.now()): number {
+  replenishTokens(now);
+  return tokens;
+}
+
+export function resetTokenBucket(): void {
+  tokens = BUCKET_CAPACITY;
+  lastRefillTimestamp = Date.now();
+}
 
 /**
  * Executes a full scan of the active document's legal text and discovers governing links.
@@ -74,23 +107,18 @@ export function startDynamicObserver(): void {
     }
 
     debounceTimer = setTimeout(() => {
-      if (scanCountInWindow >= MAX_AUTO_SCANS_PER_MINUTE) {
-        return; // Throttled to prevent CPU runaway on chaotic dynamic pages
-      }
-
       const currentText = extractPageLegalText();
       const lengthDelta = Math.abs(currentText.length - lastExtractedTextLength);
 
-      if (lengthDelta >= TEXT_DELTA_THRESHOLD) {
-        scanCountInWindow++;
-        if (!windowResetTimer) {
-          windowResetTimer = setTimeout(() => {
-            scanCountInWindow = 0;
-            windowResetTimer = null;
-          }, 60000);
-        }
-        executeScan();
+      if (lengthDelta < TEXT_DELTA_THRESHOLD) {
+        return; // Sub-threshold text mutation; ignore
       }
+
+      if (!consumeScanToken()) {
+        return; // Throttled by token bucket to prevent CPU runaway on chaotic dynamic pages
+      }
+
+      executeScan();
     }, DEBOUNCE_DELAY_MS);
   });
 
@@ -102,7 +130,7 @@ export function startDynamicObserver(): void {
 }
 
 /**
- * Ceases DOM observation and clears all debounced timers.
+ * Ceases DOM observation, clears debounced timers, and resets the throttle token bucket.
  */
 export function stopDynamicObserver(): void {
   if (mutationObserver) {
@@ -113,10 +141,7 @@ export function stopDynamicObserver(): void {
     clearTimeout(debounceTimer);
     debounceTimer = null;
   }
-  if (windowResetTimer) {
-    clearTimeout(windowResetTimer);
-    windowResetTimer = null;
-  }
+  resetTokenBucket();
 }
 
 /**
@@ -136,7 +161,36 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// Listen for explicit commands from popup or service worker
+let burnBroadcastChannel: BroadcastChannel | null = null;
+
+/**
+ * Idempotent DOM teardown and sanitization handler.
+ * Executed on receiving KTY_HARD_BURN_DOM via chrome.runtime.onMessage OR BroadcastChannel.
+ */
+export function handleHardBurnDOM(): void {
+  // Disconnect observer and cease all monitoring
+  stopDynamicObserver();
+  cachedScanResult = null;
+  lastExtractedTextLength = 0;
+
+  // Clear any active highlights or injected attributes
+  if (typeof document !== 'undefined') {
+    const highlights = document.querySelectorAll('[data-kty-trap]');
+    highlights.forEach(el => el.removeAttribute('data-kty-trap'));
+  }
+
+  // Close BroadcastChannel to release event handlers and isolate frame
+  if (burnBroadcastChannel) {
+    try {
+      burnBroadcastChannel.close();
+    } catch {
+      // Non-fatal if channel already closed
+    }
+    burnBroadcastChannel = null;
+  }
+}
+
+// Primary transport: Listen for explicit commands from popup or service worker
 if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === 'KTY_REQUEST_PAGE_SCAN') {
@@ -151,16 +205,23 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
     }
 
     if (message?.type === 'KTY_HARD_BURN_DOM') {
-      // Disconnect observer and cease all monitoring
-      stopDynamicObserver();
-      cachedScanResult = null;
-      lastExtractedTextLength = 0;
-
-      // Clear any active highlights or injected attributes
-      const highlights = document.querySelectorAll('[data-kty-trap]');
-      highlights.forEach(el => el.removeAttribute('data-kty-trap'));
+      handleHardBurnDOM();
       sendResponse({ success: true, message: 'DOM references and observer terminated' });
       return true;
     }
   });
+}
+
+// Secondary transport: BroadcastChannel coordinator for multi-context amnesia
+if (typeof BroadcastChannel !== 'undefined') {
+  try {
+    burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
+    burnBroadcastChannel.onmessage = (event) => {
+      if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+        handleHardBurnDOM();
+      }
+    };
+  } catch {
+    // Non-fatal if BroadcastChannel is restricted in current context
+  }
 }

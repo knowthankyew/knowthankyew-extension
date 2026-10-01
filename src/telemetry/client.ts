@@ -71,12 +71,26 @@ export async function hardBurnAllData(): Promise<void> {
   }
 
   // 4. Command every open tab to dereference DOM state and stop observation.
-  // Tabs without an injected content script reject sendMessage; those failures
-  // are expected and must not prevent cleanup in other tabs.
+  // Dual-transport amnesia:
+  // Primary transport: chrome.tabs.sendMessage across all queryable tabs.
+  // Secondary transport: BroadcastChannel('kty_hard_burn') to guarantee simultaneous
+  // cross-context sanitization across detached frames, cross-origin child documents,
+  // and partitioned worker environments (e.g. Safari).
+  const burnMessage = { type: 'KTY_HARD_BURN_DOM' };
+
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      const channel = new BroadcastChannel('kty_hard_burn');
+      channel.postMessage(burnMessage);
+      channel.close();
+    } catch {
+      // BroadcastChannel may throw if restricted or suspended; non-fatal fallback.
+    }
+  }
+
   if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
     try {
       const tabs = await chrome.tabs.query({});
-      const burnMessage = { type: 'KTY_HARD_BURN_DOM' };
       const notifications = tabs
         .filter((tab) => typeof tab.id === 'number')
         .map((tab) => chrome.tabs.sendMessage(tab.id as number, burnMessage));

@@ -14,8 +14,8 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.5.0` (Release Complete & Packaged for Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v1.5.0.zip` (SHA256: `85bd46608f105146c241dbe2c40042baa92d3db6c0b844c785bb22215a4e9fef`)
+- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.6.0` (Release Complete & Packaged for Upload)
+- **Manual Upload ZIP**: `knowthankyew-extension-v1.6.0.zip` (SHA256: `73e11a96912a050cafe089f7f7e9b21877ecfeea003d9bd49b52108f260704e8`)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
@@ -151,6 +151,7 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
+| **1.6.0** | October 1, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.6.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`). Implemented Multi-Tab Session Amnesia dual-broadcast transport (`BroadcastChannel` + `chrome.tabs.sendMessage`), token-bucket MutationObserver throttling (15 capacity / 1 refill per 4s) to eliminate SPA scan starvation, senior code audit hardening, and 100+ verified passing tests. |
 | **1.5.0** | September 29, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.5.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`). Integrated declarative JSON policy packs, zero-setup Chrome Built-in Prompt API adapter (Gemini Nano / `ai.languageModel`), 50k character DOM extraction ceiling, OTLP enterprise badge preservation, senior code audit hardening, and 98/98 verified passing tests. |
 | **1.4.0 (Release Candidate)** | September 24, 2026 | Prepared for Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`). Resolved baseline issues, aligned statutory policy packs with current ROSCA / FTC Act § 5 / State ARL law, 50k char DOM extraction ceiling, OTLP enterprise badge preservation, and 85/85 tests passing. |
 | **1.3.0 (LIVE)** | September 22, 2026 | **Live & Approved on Chrome Web Store**. Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |

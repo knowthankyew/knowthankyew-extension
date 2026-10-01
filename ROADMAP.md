@@ -1,14 +1,15 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: **v1.3.0 Live & Published on Chrome Web Store • v1.5.0 Release Complete & Packaged**
+> **Status**: **v1.3.0 Live on Chrome Web Store · v1.5.0 Release Complete & Packaged · v1.6.0 Hardened & Verified**
 
 ---
 
-## 1. Current State: v1.0.0 Foundation (Delivered)
+## Delivered: v1.0.0 Foundation
 
 The core reality engine is fully built, statically verified, and audited:
-- [x] **Zero-Egress Invariant**: Enforced via Manifest V3 `extension_pages` CSP (`connect-src 'none'`) and fail-closed CI grep over all distribution JS bundles.
+
+- [x] **Zero-Egress Invariant**: Enforced via Manifest V3 `extension_pages` CSP (`connect-src 'none'`), compile-time dead-code elimination, and fail-closed CI bundle grep over all distribution JS.
 - [x] **Amnesiac Hard Burn**: Destroys volatile in-memory circular buffers, wipes `chrome.storage.local`, clears toolbar badges, and sets permanent tombstone traps.
 - [x] **ROSCA & Rights-Waiver Grounding**: 37 heuristic pattern matchers rooted in ROSCA 15 U.S.C. § 8403, California AB 2863, New York GBL § 527-a, and FAA § 2 rights-waiver classifications.
 - [x] **Static ReDoS Elimination**: 100% of regular expression patterns statically verified with `safe-regex`.
@@ -17,72 +18,101 @@ The core reality engine is fully built, statically verified, and audited:
 
 ---
 
-## 2. Near-Term Milestones
+## Milestone 1: Chrome Web Store Packaging & Submission (`v1.1.0`) ✅
 
-### Milestone 1: Chrome Web Store Packaging & Submission (v1.1.0) [Delivered]
-- [x] **Automated Release Packaging in CI**:
-  - Add GitHub Actions step to package `dist/` into a pristine `knowthankyew-extension-v1.1.0.zip`.
-  - Attach zip bundle directly to GitHub Releases alongside `bom.json`.
-- [x] **Store Marketing & Listing Assets**:
-  - Produce required store graphic assets: 1280x800 marquee promo tile, 440x280 small promo tile, verified crisp 16/48/128 icon assets.
-  - Finalize store copy from [`CHROMEWEBSTORE.md`](CHROMEWEBSTORE.md) highlighting zero host permissions.
-- [x] **Static Privacy Policy Host**:
-  - Deploy a static, cookie-less, zero-analytics privacy policy page (via GitHub Pages) required by Google Web Store Developer Program Policies.
-- [x] **Web Store Review & Publication**:
-  - Successfully reviewed, approved, and published live on Chrome Web Store: [`https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl`](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl).
-
-### Milestone 2: Automated Contract Discovery & 1-Click Audit (v1.2.0) [Delivered]
-- [x] **Governing Legal Link Discovery**:
-  - Automatically detect Terms of Service, Privacy Policies, Arbitration Clauses, and ROSCA disclosures in page footers and headers.
-  - Provide 1-click audit navigation and discovered links cards in the popup.
-- [x] **Dynamic Checkout MutationObserver**:
-  - Automatically re-evaluate fine print on dynamic DOM mutation (accordions, modal expansions).
-
-### Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (v1.3.0) [Delivered - Live on CWS]
-- [x] **Full-Page Options Dashboard**:
-  - VS Code extension-styled options page with live memory/storage usage meters (`chrome.storage.local.getBytesInUse()`).
-- [x] **Nuclear Amnesia Across All Domains**:
-  - Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting DOM observer teardown across all open tabs.
-
-### Milestone 4: Declarative Policy Packs, Multi-Browser & Neural Assist (v1.5.0) [Delivered & Packaged]
-
-> [!NOTE]
-> **Release Status**: All baseline issues and invariant audits are complete. 86/86 tests pass across unit, ReDoS, invariant, adversarial DOM, and Puppeteer real-Chromium suites. The zero-egress production build is packaged as `knowthankyew-extension-v1.5.0.zip` (Chrome) and `knowthankyew-extension-v1.5.0-firefox.zip` (Firefox / Gecko AMO).
-- [x] **Declarative JSON Policy Packs**:
-  - Decouple statutory rules into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation.
-- [x] **Automated Statutory Regulatory Monitor**:
-  - Weekly GitHub Action querying the official Federal Register API to detect rule amendments (ROSCA, Negative Option, Click-to-Cancel, Arbitration).
-  - Draft Pull Request workflow with official citation diffs for human attorney review.
-- [x] **2-Stage Legal Link Discovery Cascade**:
-  - Fast DOM heuristic extractor coupled with loopback semantic reranker (`http://127.0.0.1:8420`) to prioritize consumer agreements over merchant/courier terms.
-- [x] **Hard Burn Protocol Handshake**:
-  - Fire-and-forget `POST /burn` endpoint contract wiping external worker prompt context and KV cache on Nuclear Amnesia wipe.
-- [x] **Compile-Time Air-Gap Invariant Preservation**:
-  - `vite.config.ts` dead-code eliminates `fetch()` calls in production Chrome Web Store builds, preserving `connect-src 'none'`.
-- [x] **Chrome Built-in Prompt API Provider (`ai.languageModel` / Gemini Nano)**:
-  - Zero-setup in-browser Prompt API adapter implementing `LocalMLProvider` with rigid schema enforcement and post-hoc length caps.
-  - 4-state availability model (`ready`, `downloading`, `unsupported`, `disabled`) reflecting Chrome version and device hardware capability gates.
-- [x] **Mozilla Firefox (Gecko & Firefox Android)**:
-  - Dedicated build target with `browser_specific_settings` in `manifest.json` (`npm run build:firefox` / `npm run package:firefox`).
-  - Mobile Firefox bottom sheet compatibility (`tabs.query` fallback without `currentWindow` dependency).
-  - Packaged as `knowthankyew-extension-v1.5.0-firefox.zip` with mandatory `data_collection_permissions: { required: ['none'] }`.
-
-### Milestone 5: International Jurisdiction Packs & Safari (Next Horizon)
-- [ ] **UK Digital Markets, Competition and Consumers Act 2024**:
-  - Add statutory rules covering statutory 14-day cooling-off reminders and mandatory pre-renewal disclosure schedules.
-- [ ] **EU Consumer Rights Directive (Directive 2011/83/EU)**:
-  - Add rules detecting pre-ticked subscription boxes (banned across the EU) and non-compliant cancellation mechanisms.
-- [ ] **State ARL Expansion**:
-  - Add specific statutory alerts for Colorado, Illinois (ACRA), and Oregon auto-renewal notification thresholds.
-- [ ] **Apple Safari (macOS / iOS)**:
-  - Convert via `xcrun safari-web-extension-converter`.
-  - Native macOS companion packaging.
+- [x] **Automated Release Packaging in CI**: GitHub Actions packages `dist/` into `knowthankyew-extension-v1.1.0.zip` attached to GitHub Releases alongside `bom.json`.
+- [x] **Store Marketing & Listing Assets**: 1280×800 marquee promo tile, 440×280 small promo tile, verified 16/48/128 icon assets.
+- [x] **Static Privacy Policy Host**: Cookie-less, zero-analytics privacy policy page via GitHub Pages.
+- [x] **Web Store Review & Publication**: Reviewed, approved, and published live — [`knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl`](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl).
 
 ---
 
-## 3. Long-Term Vision: v2.0.0 (Ambient Consumer Defense)
-- [ ] **Context-Aware Inline Visual Indicators**:
-  - Inject subtle, non-intrusive red/amber shield indicators directly beside predatory consent checkboxes and deceptive terms toggles.
-  - Pure CSS styling with zero host page layout disruption.
-- [ ] **Multi-Tab Session Amnesia Coordinator**:
-  - Broadcast Hard Burn events across all open browser windows via `chrome.runtime.onMessage` to guarantee simultaneous cross-tab sanitization.
+## Milestone 2: Automated Contract Discovery & 1-Click Audit (`v1.2.0`) ✅
+
+- [x] **Governing Legal Link Discovery**: Automatically detect Terms of Service, Privacy Policies, Arbitration Clauses, and ROSCA disclosures in page footers and headers. 1-click audit navigation in the popup.
+- [x] **Dynamic Checkout MutationObserver**: Automatically re-evaluates fine print on dynamic DOM mutation (accordions, modal expansions, client-rendered checkout flows).
+
+---
+
+## Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (`v1.3.0`) ✅ — Live on Chrome Web Store
+
+- [x] **Full-Page Options Dashboard**: VS Code-styled options page with live memory/storage usage meters (`chrome.storage.local.getBytesInUse()`).
+- [x] **Nuclear Amnesia Across All Domains**: Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting `KTY_HARD_BURN_DOM` observer teardown across all open tabs.
+
+---
+
+## Milestone 4: Declarative Policy Packs, Multi-Browser & Neural Assist (`v1.5.0`) ✅ — Packaged & Release-Ready
+
+> **Release Status**: 86/86 baseline tests pass across unit, ReDoS, invariant, adversarial DOM, and Puppeteer real-Chromium suites. Packaged as `knowthankyew-extension-v1.5.0.zip` (Chrome) and `knowthankyew-extension-v1.5.0-firefox.zip` (Firefox / Gecko AMO).
+
+- [x] **Declarative JSON Policy Packs**: Statutory rules decoupled into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation at build time.
+- [x] **Automated Statutory Regulatory Monitor**: Weekly GitHub Action querying the Federal Register API to detect rule amendments (ROSCA, Negative Option, Click-to-Cancel, Arbitration). Generates Draft Pull Requests with official citation diffs for human review — no autonomous rule mutations.
+- [x] **2-Stage Legal Link Discovery Cascade**: Fast DOM heuristic extractor coupled with optional loopback semantic reranker (`http://127.0.0.1:8420`) to prioritize consumer agreements over merchant/courier terms.
+- [x] **Hard Burn Protocol Handshake**: Fire-and-forget `POST /burn` wiping external worker prompt context and KV cache on Nuclear Amnesia.
+- [x] **Compile-Time Air-Gap Invariant Preservation**: `vite.config.ts` dead-code eliminates `fetch()` calls in production Chrome Web Store builds, preserving `connect-src 'none'`.
+- [x] **Chrome Built-in Prompt API Provider (`ai.languageModel` / Gemini Nano)**: Zero-setup in-browser adapter implementing `LocalMLProvider` with rigid schema enforcement and post-hoc length caps. 4-state availability model (`ready`, `downloading`, `unsupported`, `disabled`).
+- [x] **Mozilla Firefox (Gecko & Firefox Android)**: Dedicated build target with `browser_specific_settings` in `manifest.json`. Mobile Firefox bottom sheet compatibility. Packaged as `knowthankyew-extension-v1.5.0-firefox.zip`.
+
+---
+
+## Milestone 5: Hardening, Multi-Tab Amnesia & Code Quality (`v1.6.0`) ✅
+
+- [x] **Multi-Tab Session Amnesia Coordinator**: Dual-broadcast Hard Burn via `chrome.tabs.sendMessage` (primary Chromium path) **and** `BroadcastChannel('kty_hard_burn')` (secondary cross-context path covering Safari's partitioned worker contexts and detached frames) with idempotent DOM handler in `src/content/scanner.ts`.
+- [x] **Token Bucket Scanner Throttle** *(Q-SCAN-01)*: Replaced fixed 60-second window in `src/content/scanner.ts` with a token bucket (capacity: 15 tokens, refill rate: 1 token per 4,000ms = 15/min steady state). Eliminates cliff-edge scan starvation on dynamic single-page applications while enforcing anti-abuse boundaries.
+- [x] **`performScan()` refactor** *(Q-UI-01)*: Landed in commit `c0bd121`. Modularized into `injectAndRetryScan()` and `attemptMLRerank()` in `src/popup/App.tsx`, reducing `performScan` complexity and enabling isolated testing.
+- [x] **`WeakSet` deduplication** *(Q-DOM-01)*: Landed in commit `c0bd121`. Replaced $O(n)$ array lookup in `src/content/dom-extractor.ts` with $O(1)$ `WeakSet` deduplication.
+- [x] **Missing policy rule tests** *(Q-TEST-01)*: Landed in commit `c0bd121`. Added positive tests for `ARB-003` and `SURV-002` + 3 benign control tests in `tests/rules.test.ts`.
+- [x] **Throttle unit & stress tests** *(Q-TEST-02)*: Added in commit `c0bd121` and updated for token-bucket refill verification in `tests/scanner-throttle.test.ts`.
+- [x] **Loopback ML error handling tests** *(Q-TEST-04)*: Landed in commit `c0bd121`. Added tests covering non-200 responses (404, 500, 503), malformed JSON, and timeout handlers in `tests/local-ml-client.test.ts`.
+- [x] **`lastVerified` timestamps on `WELL_KNOWN_LEGAL_MAP`** *(Q-LINK-01)*: Landed in commit `c0bd121`. Added ISO audit timestamps to all 14 routes in `src/content/link-detector.ts`.
+- [x] **Fail-loud bundle and scanner egress verification** *(Q-BUILD-01, Q-TEST-03)*: Landed in commit `c0bd121` in `tests/fixture-dom.test.ts` and `tests/bundle-invariants.test.ts`.
+
+---
+
+## Milestone 6: International Jurisdiction Packs, Safari & Inline Defense (`v2.0.0`)
+
+**Why this is a major version**: Two simultaneous product-changing shifts — ambient inline visual indicators (new UX surface and trust model) and international regulatory coverage (new user base outside the US) — merit a major version bump. The ongoing operational commitment of monitoring EUR-Lex and UK legislation.gov.uk is a new maintenance boundary that does not exist in 1.x.
+
+### New UX Surface
+
+- [ ] **Context-Aware Inline Visual Indicators**: Shield badges injected directly adjacent to predatory consent checkboxes and deceptive terms toggles *before* form submission — shifting the extension from a toolbar alert panel to an ambient, frontline visual layer. Implemented inside a **closed Shadow DOM** to guarantee complete CSS isolation from host-page styles. SPA resilience strategy (reconnecting injected indicators after framework re-renders) will be finalized during the v2.0 sprint based on findings from Milestone 5's MutationObserver work.
+
+### International Jurisdiction Packs
+
+- [ ] **UK Digital Markets, Competition and Consumers Act 2024**: Statutory rules covering mandatory 14-day cooling-off reminders and pre-renewal disclosure schedules under the DMCC Act.
+- [ ] **EU Consumer Rights Directive (Directive 2011/83/EU)**: Rules detecting pre-ticked subscription boxes (banned across all EU member states) and non-compliant cancellation mechanisms. Note: the extension *detects* non-compliant mechanisms — it does not enforce or block them.
+- [ ] **State ARL Expansion**: Specific statutory alerts for Colorado, Illinois (ACRA 815 ILCS 601), and Oregon auto-renewal notification thresholds not currently covered by `state-arl.json`.
+
+### New Distribution Channel
+
+- [ ] **Apple Safari (macOS / iOS)**: Convert the Chrome extension via `xcrun safari-web-extension-converter`. Native macOS App Sandbox companion packaging. App Store distribution pipeline including Apple's required privacy manifest (`NSPrivacyTrackedDataTypes` declarations). iOS Safari compatibility testing.
+
+### Regulatory Upkeep Infrastructure
+
+- [ ] **Automated Regulatory Upkeep for International Packs**: Extend the existing weekly Federal Register GitHub Action to additionally monitor **EUR-Lex** (EU Official Journal API, `/ELI` endpoint) and **UK legislation.gov.uk** (SPARQL endpoint) for amendments to covered directives and acts. Auto-draft PRs with official citation diffs and amendment abstracts for human review — same human-in-the-loop pattern as the existing Federal Register monitor. No autonomous rule mutations.
+
+---
+
+## Architecture Notes for v2.0.0
+
+### Inline Indicators: Trust Model Shift
+
+The inline visual indicators feature represents a meaningful trust model change from v1.x. Content scripts currently *read* from the host page DOM passively. Inline indicators *write* to the host page DOM. Key design constraints for the v2.0 sprint:
+
+- **Shadow DOM (closed mode required)**: Host-page CSS must not leak into indicators. `attachShadow({ mode: 'closed' })` is the baseline. Open mode is explicitly not acceptable.
+- **MutationObserver resilience**: SPA frameworks (React, Next.js, Vue) re-render subtrees and will overwrite injected indicators. The existing `scanner.ts` MutationObserver infrastructure from v1.x should be extended to detect when indicator anchor elements are re-rendered and re-inject accordingly.
+- **Layout safety**: Injected elements must not shift host-page layout. `position: absolute` overlay approach preferred over layout-participating inserts.
+- **Selector targeting strategy**: Heuristics for locating predatory checkboxes (common `name` attribute patterns, adjacent text matching existing policy pack patterns) must be designed to fail silently — missing an indicator is acceptable; breaking a checkout form is not.
+
+### Safari: Build Pipeline Delta
+
+The `xcrun safari-web-extension-converter` output is an Xcode project wrapping the existing MV3 extension. Key deltas from the existing Chrome/Firefox pipeline:
+
+- `BroadcastChannel` support: Verify Safari 16+ support for the `kty_hard_burn` channel added in v1.6.0.
+- `browser_specific_settings` in manifest: Extend the existing Firefox `closeBundle()` hook in `vite.config.ts` to also emit a Safari-compatible manifest variant.
+- App Sandbox entitlements: The Xcode wrapper requires explicit entitlements for `com.apple.security.network.client` if Local Assist loopback is ever enabled in a Safari build. Consumer builds with `connect-src 'none'` require no network entitlements — document this explicitly.
+- `NSPrivacyTrackedDataTypes`: Apple's required privacy manifest must declare zero tracked data types for the consumer build. This is provably accurate and should be documented with a reference to the `bundle-invariants.test.ts` zero-egress verification.
+
+---
+
+*Architecture and roadmap maintained by the `knowthankyew` project. Implementation coded by Gemini. Reviewed by Kiro (Claude).*

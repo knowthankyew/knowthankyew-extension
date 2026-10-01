@@ -133,4 +133,66 @@ describe('Pillar 5: Amnesiac Hard Burn Invariant (burn.test.ts)', () => {
     await expect(hardBurnAllData()).resolves.not.toThrow();
     expect(telemetry.getBufferedSpans().length).toBe(0);
   });
+
+  it('coordinates cross-context amnesia via BroadcastChannel("kty_hard_burn")', async () => {
+    const postMessageSpy = vi.fn();
+    const closeSpy = vi.fn();
+    let channelName = '';
+
+    class MockBroadcastChannel {
+      constructor(name: string) {
+        channelName = name;
+      }
+      postMessage(msg: any) {
+        postMessageSpy(msg);
+      }
+      close() {
+        closeSpy();
+      }
+    }
+
+    const originalBroadcastChannel = (globalThis as any).BroadcastChannel;
+    (globalThis as any).BroadcastChannel = MockBroadcastChannel;
+
+    try {
+      await hardBurnAllData();
+
+      expect(channelName).toBe('kty_hard_burn');
+      expect(postMessageSpy).toHaveBeenCalledWith({ type: 'KTY_HARD_BURN_DOM' });
+      expect(closeSpy).toHaveBeenCalled();
+    } finally {
+      (globalThis as any).BroadcastChannel = originalBroadcastChannel;
+    }
+  });
+
+  it('resiliently completes hard burn even if BroadcastChannel throws an exception', async () => {
+    class FailingBroadcastChannel {
+      constructor() {
+        throw new Error('BroadcastChannel restricted by sandbox');
+      }
+    }
+
+    const originalBroadcastChannel = (globalThis as any).BroadcastChannel;
+    (globalThis as any).BroadcastChannel = FailingBroadcastChannel;
+
+    try {
+      await expect(hardBurnAllData()).resolves.not.toThrow();
+      expect(chrome.storage.local.clear).toHaveBeenCalled();
+      expect(badgeText).toBe('');
+    } finally {
+      (globalThis as any).BroadcastChannel = originalBroadcastChannel;
+    }
+  });
+
+  it('scanner handleHardBurnDOM is strictly idempotent when receiving dual-broadcast messages', async () => {
+    const { handleHardBurnDOM, getCachedScanResult } = await import('../src/content/scanner');
+
+    // Simulate receiving KTY_HARD_BURN_DOM over BroadcastChannel
+    expect(() => handleHardBurnDOM()).not.toThrow();
+    expect(getCachedScanResult()).toBeNull();
+
+    // Simulate receiving redundant KTY_HARD_BURN_DOM over chrome.tabs.sendMessage milliseconds later
+    expect(() => handleHardBurnDOM()).not.toThrow();
+    expect(getCachedScanResult()).toBeNull();
+  });
 });

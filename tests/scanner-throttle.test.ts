@@ -1,26 +1,26 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  BUCKET_CAPACITY,
+  TOKEN_REFILL_INTERVAL_MS,
+  DEBOUNCE_DELAY_MS,
+  TEXT_DELTA_THRESHOLD,
+  consumeScanToken,
+  getTokenCount,
+  resetTokenBucket,
+} from '../src/content/scanner';
 
 /**
- * Tests the MutationObserver throttle logic in scanner.ts:
+ * Tests the Token-Bucket MutationObserver throttle logic in scanner.ts:
  * - 400ms debounce delay between mutation batches
- * - 15 scans/minute max rate limit (scanCountInWindow)
+ * - 15 token capacity ceiling (steady-state 15 scans/minute)
+ * - 1 token refill every 4,000ms (eliminates cliff-edge exhaustion on SPAs)
  * - 25-character text delta threshold (only rescans on meaningful content changes)
  */
 
-// Mock chrome API (required for module-level side effects if scanner is ever imported)
-vi.stubGlobal('chrome', {
-  runtime: {
-    sendMessage: vi.fn().mockResolvedValue(undefined),
-    onMessage: {
-      addListener: vi.fn(),
-    },
-  },
-});
-
-// We'll test the throttle constants and behavior via direct module interaction
-describe('MutationObserver Throttle Behavior', () => {
+describe('MutationObserver Token-Bucket Throttle Behavior (scanner-throttle.test.ts)', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    resetTokenBucket();
   });
 
   afterEach(() => {
@@ -28,139 +28,111 @@ describe('MutationObserver Throttle Behavior', () => {
     vi.restoreAllMocks();
   });
 
-  it('enforces the MAX_AUTO_SCANS_PER_MINUTE (15) throttle ceiling', () => {
-    // Directly test the throttle logic extracted from scanner.ts
-    const MAX_AUTO_SCANS_PER_MINUTE = 15;
-    const TEXT_DELTA_THRESHOLD = 25;
+  it('enforces the burst ceiling (15 tokens) and throttles the 16th immediate scan', () => {
+    expect(getTokenCount()).toBe(BUCKET_CAPACITY);
 
-    let scanCount = 0;
-    let windowResetTimer: ReturnType<typeof setTimeout> | null = null;
-    let lastTextLength = 0;
-
-    // Simulate the throttle logic from scanner.ts lines 76-93
-    function simulateMutationScan(newTextLength: number) {
-      const lengthDelta = Math.abs(newTextLength - lastTextLength);
-      if (lengthDelta < TEXT_DELTA_THRESHOLD) return false;
-
-      if (scanCount >= MAX_AUTO_SCANS_PER_MINUTE) {
-        return false; // Throttled
-      }
-
-      scanCount++;
-      lastTextLength = newTextLength;
-      if (!windowResetTimer) {
-        windowResetTimer = setTimeout(() => {
-          scanCount = 0;
-          windowResetTimer = null;
-        }, 60000);
-      }
-      return true; // Scan executed
-    }
-
-    // Fire 20 rapid mutations with meaningful text changes
     let executedScans = 0;
-    for (let i = 0; i < 20; i++) {
-      // Each mutation adds 100 chars (well above the 25-char delta threshold)
-      const newLength = (i + 1) * 100;
-      if (simulateMutationScan(newLength)) {
+    // Attempt 15 scans immediately
+    for (let i = 0; i < 15; i++) {
+      if (consumeScanToken()) {
         executedScans++;
       }
     }
 
-    // Only 15 of the 20 should have executed
     expect(executedScans).toBe(15);
-    expect(scanCount).toBe(15);
+    expect(getTokenCount()).toBe(0);
 
-    // The remaining 5 should have been throttled
-    const throttledResult = simulateMutationScan(2200);
-    expect(throttledResult).toBe(false);
-
-    // After 60 seconds, the window resets
-    vi.advanceTimersByTime(60000);
-    expect(scanCount).toBe(0); // Reset occurred
-
-    // Now scans should work again
-    const postResetResult = simulateMutationScan(2500);
-    expect(postResetResult).toBe(true);
+    // 16th scan with 0 elapsed time must be throttled
+    const throttled = consumeScanToken();
+    expect(throttled).toBe(false);
   });
 
-  it('ignores mutations below the TEXT_DELTA_THRESHOLD (25 chars)', () => {
-    const TEXT_DELTA_THRESHOLD = 25;
-    let lastTextLength = 1000;
-    let scanCount = 0;
+  it('smoothly replenishes tokens at 1 token per 4,000ms interval', () => {
+    expect(TOKEN_REFILL_INTERVAL_MS).toBe(4000);
 
-    function simulateDeltaCheck(newTextLength: number): boolean {
+    // Exhaust all 15 tokens
+    for (let i = 0; i < 15; i++) {
+      expect(consumeScanToken()).toBe(true);
+    }
+    expect(getTokenCount()).toBe(0);
+    expect(consumeScanToken()).toBe(false);
+
+    // Advance 3,999ms (TOKEN_REFILL_INTERVAL_MS - 1) — still not enough for a full token
+    vi.advanceTimersByTime(TOKEN_REFILL_INTERVAL_MS - 1);
+    expect(getTokenCount(Date.now())).toBe(0);
+    expect(consumeScanToken(Date.now())).toBe(false);
+
+    // Advance 1ms (total TOKEN_REFILL_INTERVAL_MS) — exactly 1 token replenished
+    vi.advanceTimersByTime(1);
+    expect(getTokenCount(Date.now())).toBe(1);
+    expect(consumeScanToken(Date.now())).toBe(true);
+    expect(getTokenCount(Date.now())).toBe(0);
+
+    // Advance 3 refill intervals — exactly 3 tokens replenished
+    vi.advanceTimersByTime(TOKEN_REFILL_INTERVAL_MS * 3);
+    expect(getTokenCount(Date.now())).toBe(3);
+
+    // Consume all 3
+    expect(consumeScanToken(Date.now())).toBe(true);
+    expect(consumeScanToken(Date.now())).toBe(true);
+    expect(consumeScanToken(Date.now())).toBe(true);
+    expect(consumeScanToken(Date.now())).toBe(false);
+  });
+
+  it('caps token replenishment at BUCKET_CAPACITY (15) and never overflows', () => {
+    // Reset to full
+    resetTokenBucket();
+    expect(getTokenCount()).toBe(15);
+
+    // Advance 10 minutes into the future without consuming
+    vi.advanceTimersByTime(600000);
+
+    // Must still be capped at 15
+    expect(getTokenCount(Date.now())).toBe(15);
+
+    // Only 15 scans can burst
+    let successfulScans = 0;
+    for (let i = 0; i < 20; i++) {
+      if (consumeScanToken(Date.now())) {
+        successfulScans++;
+      }
+    }
+    expect(successfulScans).toBe(15);
+  });
+
+  it('ignores mutations below the TEXT_DELTA_THRESHOLD (25 chars) without consuming tokens', () => {
+    let lastTextLength = 1000;
+
+    function simulateMutationAttempt(newTextLength: number): boolean {
       const lengthDelta = Math.abs(newTextLength - lastTextLength);
-      if (lengthDelta < TEXT_DELTA_THRESHOLD) return false;
-      scanCount++;
-      lastTextLength = newTextLength;
-      return true;
+      if (lengthDelta < TEXT_DELTA_THRESHOLD) {
+        return false; // Sub-threshold
+      }
+      const tokenGranted = consumeScanToken(Date.now());
+      if (tokenGranted) {
+        lastTextLength = newTextLength;
+      }
+      return tokenGranted;
     }
 
-    // Small change (5 chars) — should be ignored
-    expect(simulateDeltaCheck(1005)).toBe(false);
-    expect(scanCount).toBe(0);
+    // Small change (5 chars) — ignored, token not consumed
+    expect(simulateMutationAttempt(1005)).toBe(false);
+    expect(getTokenCount(Date.now())).toBe(15);
 
     // Another small change (24 chars) — still below threshold
-    expect(simulateDeltaCheck(1024)).toBe(false);
-    expect(scanCount).toBe(0);
+    expect(simulateMutationAttempt(1024)).toBe(false);
+    expect(getTokenCount(Date.now())).toBe(15);
 
-    // Exact threshold (25 chars) — should trigger
-    expect(simulateDeltaCheck(1025)).toBe(true);
-    expect(scanCount).toBe(1);
+    // Exact threshold (25 chars) — triggers scan and consumes 1 token
+    expect(simulateMutationAttempt(1025)).toBe(true);
+    expect(getTokenCount(Date.now())).toBe(14);
 
-    // Large change (500 chars) — should trigger
-    expect(simulateDeltaCheck(1525)).toBe(true);
-    expect(scanCount).toBe(2);
-  });
-
-  it('resets scan count after the 60-second window expires', () => {
-    const MAX_AUTO_SCANS_PER_MINUTE = 15;
-    let scanCount = 0;
-    let windowResetTimer: ReturnType<typeof setTimeout> | null = null;
-    let lastTextLength = 0;
-
-    function simulateScan(newTextLength: number): boolean {
-      const lengthDelta = Math.abs(newTextLength - lastTextLength);
-      if (lengthDelta < 25) return false;
-      if (scanCount >= MAX_AUTO_SCANS_PER_MINUTE) return false;
-
-      scanCount++;
-      lastTextLength = newTextLength;
-      if (!windowResetTimer) {
-        windowResetTimer = setTimeout(() => {
-          scanCount = 0;
-          windowResetTimer = null;
-        }, 60000);
-      }
-      return true;
-    }
-
-    // Exhaust the budget
-    for (let i = 0; i < 15; i++) {
-      simulateScan((i + 1) * 100);
-    }
-    expect(scanCount).toBe(15);
-
-    // Blocked at 15
-    expect(simulateScan(1600)).toBe(false);
-
-    // Advance 30 seconds — still blocked (window is 60s)
-    vi.advanceTimersByTime(30000);
-    expect(scanCount).toBe(15);
-    expect(simulateScan(1700)).toBe(false);
-
-    // Advance remaining 30 seconds — window resets
-    vi.advanceTimersByTime(30000);
-    expect(scanCount).toBe(0);
-
-    // Can scan again
-    expect(simulateScan(1800)).toBe(true);
-    expect(scanCount).toBe(1);
+    // Large change (500 chars) — triggers scan and consumes 1 token
+    expect(simulateMutationAttempt(1525)).toBe(true);
+    expect(getTokenCount(Date.now())).toBe(13);
   });
 
   it('debounce delay prevents rapid-fire scans within 400ms', () => {
-    const DEBOUNCE_DELAY_MS = 400;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let scanCount = 0;
 
@@ -179,13 +151,24 @@ describe('MutationObserver Throttle Behavior', () => {
       vi.advanceTimersByTime(50);
     }
 
-    // Only the debounce timer should be pending, not 10 scans
+    // Debounce timer is still pending
     expect(scanCount).toBe(0);
 
-    // Advance past the debounce window
+    // Advance past the 400ms debounce window
     vi.advanceTimersByTime(400);
 
-    // Exactly 1 scan should have fired (the debounced one)
+    // Exactly 1 debounced scan fires
     expect(scanCount).toBe(1);
+  });
+
+  it('resetTokenBucket restores bucket immediately to maximum capacity', () => {
+    for (let i = 0; i < 15; i++) {
+      consumeScanToken();
+    }
+    expect(getTokenCount()).toBe(0);
+
+    resetTokenBucket();
+    expect(getTokenCount()).toBe(15);
+    expect(consumeScanToken()).toBe(true);
   });
 });
