@@ -179,7 +179,11 @@ export function handleHardBurnDOM(): void {
     highlights.forEach(el => el.removeAttribute('data-kty-trap'));
   }
 
-  // Close BroadcastChannel to release event handlers and isolate frame
+  // Close BroadcastChannel to release event handlers and isolate frame.
+  // Note: Nulling burnBroadcastChannel here is intentional to achieve true amnesia.
+  // If the page remains open and the scanner is subsequently re-injected or rescanned,
+  // the primary chrome.runtime.onMessage / chrome.tabs.sendMessage transport remains active
+  // and covers any subsequent burn commands for that context.
   if (burnBroadcastChannel) {
     try {
       burnBroadcastChannel.close();

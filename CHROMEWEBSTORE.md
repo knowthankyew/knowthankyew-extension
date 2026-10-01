@@ -15,7 +15,7 @@
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
 - **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.6.0` (Release Complete & Packaged for Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v1.6.0.zip` (SHA256: `73e11a96912a050cafe089f7f7e9b21877ecfeea003d9bd49b52108f260704e8`)
+- **Manual Upload ZIP**: `knowthankyew-extension-v1.6.0.zip` (SHA256: `cd3aeb732bba8f4a31c9ca9e98da6f78ce372a9c48422606bd10ed6a0462003e`)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
