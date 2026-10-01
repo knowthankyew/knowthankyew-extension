@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
@@ -41,7 +41,7 @@ jobs:
 
       - name: Create Pull Request on Statutory Change
         if: steps.check_statutes.outputs.has_updates == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore(legal): statutory update notices detected by policy monitor'
           branch: bot/statutory-update-${{ github.run_id }}
