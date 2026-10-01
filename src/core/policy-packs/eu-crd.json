@@ -1,0 +1,90 @@
+{
+  "packId": "eu-crd",
+  "name": "EU Consumer Rights Directive (2011/83/EU)",
+  "version": "1.0.0",
+  "jurisdiction": "EU",
+  "description": "Statutory rules covering EU CRD 2011/83/EU prohibitions on pre-ticked subscription boxes and requirements for transparent cancellation mechanisms.",
+  "rules": [
+    {
+      "id": "EU-AR-001",
+      "title": "Pre-Ticked Consent Box & Default Subscription Enrollment",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "CRITICAL",
+      "statute": {
+        "code": "Directive 2011/83/EU, Article 22",
+        "title": "Prohibition of Pre-Ticked Default Options",
+        "jurisdiction": "EU",
+        "plainExplanation": "EU law strictly prohibits traders from inferring consumer consent through pre-ticked checkboxes or default selections for recurring payments."
+      },
+      "patterns": [
+        "(?:checkbox|box|option)\\s+is\\s+(?:pre-?selected|checked\\s+by\\s+default)",
+        "unless\\s+you\\s+(?:uncheck|deselect)[^.\\n]{0,60}(?:subscription|monthly|recurring|enrolled)",
+        "(?:automatically\\s+included|added\\s+by\\s+default)[^.\\n]{0,60}(?:opt-out|uncheck\\s+to\\s+remove)"
+      ],
+      "explanation": "The terms or checkout flow indicate that a recurring subscription option or add-on fee is selected or checked by default.",
+      "recommendation": "EU Directive 2011/83/EU bans pre-ticked boxes across all EU member states. Subscription consent must be an explicit affirmative opt-in.",
+      "tracking": {
+        "agency": "European Commission / National Consumer Authorities",
+        "jurisdiction": "EU",
+        "statuteCode": "Directive 2011/83/EU, Art. 22",
+        "apiKeywords": ["Consumer Rights Directive", "Directive 2011/83/EU", "Pre-ticked", "Default Option"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "EU-AR-002",
+      "title": "Statutory 14-Day EU Withdrawal Right Waiver",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Directive 2011/83/EU, Articles 9 & 25",
+        "title": "Unwaivable Right of Withdrawal",
+        "jurisdiction": "EU",
+        "plainExplanation": "EU consumers possess a statutory 14-day right of withdrawal from distance and digital subscription contracts that cannot be waived or contracted away."
+      },
+      "patterns": [
+        "(?:right\\s+of\\s+withdrawal|withdrawal\\s+right)\\s+does\\s+not\\s+apply",
+        "(?:no\\s+right|no\\s+statutory\\s+right)\\s+of\\s+withdrawal[^.\\n]{0,60}(?:digital|subscription|services)",
+        "(?:by\\s+proceeding|by\\s+subscribing)[^.\\n]{0,60}(?:you\\s+waive|waiving)\\s+(?:right|statutory\\s+right)\\s+of\\s+withdrawal"
+      ],
+      "explanation": "The clause purports to waive, forfeit, or exclude your statutory 14-day EU right of withdrawal upon starting a subscription.",
+      "recommendation": "Under Directive 2011/83/EU Article 25, contractual clauses derogating from consumer withdrawal rights are null and void across the European Union.",
+      "tracking": {
+        "agency": "European Commission / National Consumer Authorities",
+        "jurisdiction": "EU",
+        "statuteCode": "Directive 2011/83/EU, Art. 9, 25",
+        "apiKeywords": ["Right of Withdrawal", "Cooling-Off", "Directive 2011/83/EU"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "EU-SURV-001",
+      "title": "Bundled Subscription & Tracking/Profiling Consent",
+      "category": "SURVEILLANCE",
+      "classification": "SURVEILLANCE_NOTICE",
+      "severity": "WARNING",
+      "statute": {
+        "code": "EU GDPR Regulation (EU) 2016/679, Articles 7 & 22",
+        "title": "Unbundled Freely-Given Consent Mandate",
+        "jurisdiction": "EU",
+        "plainExplanation": "Consent to behavioral advertising or profiling cannot be bundled into acceptance of subscription terms as a condition of service."
+      },
+      "patterns": [
+        "by\\s+(?:subscribing|purchasing|signing\\s+up)[^.\\n]{0,60}(?:agree|consent)\\s+to\\s+(?:our\\s+cookie\\s+policy|cross-site\\s+tracking)",
+        "agreeing\\s+to\\s+these\\s+terms\\s+includes\\s+consent\\s+to\\s+(?:profiling|targeted\\s+advertising)",
+        "(?:we\\s+may\\s+use|use)\\s+your\\s+data\\s+for\\s+(?:personalisation|behavioral\\s+profiling)\\s+as\\s+part\\s+of\\s+this\\s+subscription"
+      ],
+      "explanation": "The subscription contract conditions service access on blanket acceptance of behavioral tracking, advertising cookies, or automated profiling.",
+      "recommendation": "GDPR Article 7 requires data processing consent to be freely given, specific, and unbundled from subscription contract performance.",
+      "tracking": {
+        "agency": "European Data Protection Board (EDPB)",
+        "jurisdiction": "EU",
+        "statuteCode": "Regulation (EU) 2016/679, Art. 7",
+        "apiKeywords": ["GDPR", "Consent Bundling", "Profiling", "Article 7"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    }
+  ]
+}

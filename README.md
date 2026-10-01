@@ -8,12 +8,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![Release: v1.3.0 Live](https://img.shields.io/badge/Release-v1.3.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
-[![v1.6.0: Hardened & Verified](https://img.shields.io/badge/v1.6.0-Hardened%20%26%20Verified-success.svg)](ROADMAP.md)
+[![Firefox AMO: v1.6.0 Approved](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Approved)-orange.svg)](https://addons.mozilla.org)
+[![v2.0.0: Release Complete](https://img.shields.io/badge/v2.0.0-Release%20Complete%20%26%20Packaged-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
 > **Release Status & Roadmap Notice**:  
-> The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**.  
-> **v1.6.0 Hardened & Verified** includes multi-tab session amnesia coordination (`BroadcastChannel` + `chrome.tabs`), token-bucket MutationObserver throttling, full senior code audit hardening, and 100+ verified passing tests. Packaged across all targets: Chrome Web Store (`knowthankyew-extension-v1.6.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`), and Developer Local ML Assist (`knowthankyew-extension-v1.6.0-local-assist.zip`).
+> The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.3.0**. **v1.6.0** is approved and live on Mozilla AMO.  
+> **v2.0.0 Release Complete & Packaged** delivers Closed Shadow DOM inline visual defense overlays next to deceptive consent checkboxes, international statutory packs (UK DMCC 2024, EU CRD 2011/83/EU, expanded State ARLs for CO, IL, OR), Safari build pipeline, and 125/125 verified passing tests. Packaged across all targets: Chrome Web Store (`knowthankyew-extension-v2.0.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v2.0.0-firefox.zip`), Apple Safari (`knowthankyew-extension-v2.0.0-safari.zip`), and Developer Local ML Assist (`knowthankyew-extension-v2.0.0-local-assist.zip`).
 
 ---
 
@@ -104,12 +105,30 @@ npm install
 # Run the test verification suite (unit + Puppeteer real-Chromium E2E + ReDoS audit)
 npm test
 
-# Build production bundle and package store zip
+# Build production bundle and package Chrome store zip
 npm run package
+
+# Build & package Mozilla Firefox / Gecko AMO zip
+npm run package:firefox
+
+# Build & package Apple Safari zip (dist-safari)
+npm run package:safari
+
+# Package all browser targets simultaneously
+npm run package:all
 
 # Run local demo checkout fixture
 npm run demo
 ```
+
+### Apple Safari Packaging & Xcode Integration
+To convert the Safari distribution into a native macOS/iOS Safari Web Extension:
+```bash
+npm run build:safari
+xcrun safari-web-extension-converter dist-safari --project-name "KnowThankYew"
+```
+- **App Sandbox Entitlements**: Zero network entitlements required. `com.apple.security.network.client` is **NOT** included in the consumer build because all analysis runs 100% locally under `connect-src 'none'`.
+- **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyTrackedDataTypes: []` (zero tracked data types), verified by physical bundle invariant testing.
 
 - **Architecture Details**: See [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 - **Store Publication Spec**: See [`CHROMEWEBSTORE.md`](./CHROMEWEBSTORE.md)

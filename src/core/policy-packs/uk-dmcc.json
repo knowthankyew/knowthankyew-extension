@@ -1,0 +1,89 @@
+{
+  "packId": "uk-dmcc",
+  "name": "UK Digital Markets, Competition and Consumers Act 2024",
+  "version": "1.0.0",
+  "jurisdiction": "UK",
+  "description": "Statutory rules covering the UK DMCC Act 2024 mandatory pre-renewal disclosure schedules and 14-day cooling-off rights for UK consumers.",
+  "rules": [
+    {
+      "id": "UK-AR-001",
+      "title": "Mandatory Pre-Renewal Reminder Schedule",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "CRITICAL",
+      "statute": {
+        "code": "UK DMCC Act 2024, Part 2, Chapter 1",
+        "title": "Subscription Contracts — Pre-Renewal Reminders",
+        "jurisdiction": "UK",
+        "plainExplanation": "The UK DMCC Act 2024 requires traders to provide timely, conspicuous reminder notices before a subscription automatically renews or converts from a trial."
+      },
+      "patterns": [
+        "(?:subscription|contract)\\s+(?:will|shall)\\s+(?:automatically\\s+renew|continue)[^.\\n]{0,80}(?:without\\s+notice|without\\s+prior\\s+notice|no\\s+reminder\\s+notice)",
+        "no\\s+(?:renewal\\s+reminder|advance\\s+notice)[^.\\n]{0,60}(?:sent|provided)\\s+(?:prior\\s+to|before)\\s+(?:renewal|billing)",
+        "(?:you\\s+agree|agrees)\\s+that\\s+no\\s+(?:reminder|notice)\\s+(?:will|shall)\\s+be\\s+given\\s+prior\\s+to\\s+auto(?:matic)?-?renewal"
+      ],
+      "explanation": "The terms state or imply that the subscription will auto-renew without mandatory pre-renewal reminder notices sent to you.",
+      "recommendation": "Verify that the trader has committed to sending advance renewal reminders before charges recur. Under UK law, failure to send reminders renders renewal unenforceable.",
+      "tracking": {
+        "agency": "Competition and Markets Authority (CMA)",
+        "jurisdiction": "UK",
+        "statuteCode": "UK DMCC Act 2024, Part 2, Chapter 1",
+        "apiKeywords": ["DMCC 2024", "Subscription Contracts", "UK Consumer Rights"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "UK-AR-002",
+      "title": "14-Day Statutory Cooling-Off Rights Obstruction",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "CRITICAL",
+      "statute": {
+        "code": "UK DMCC Act 2024, Part 2, Chapter 1 (Cancellation Rights)",
+        "title": "14-Day Subscription Cooling-Off Rights",
+        "jurisdiction": "UK",
+        "plainExplanation": "UK consumers possess an unwaivable statutory right to cancel a subscription contract within a 14-day cooling-off window at inception and upon material renewal."
+      },
+      "patterns": [
+        "waiv(?:e|es|ed)\\s+(?:cooling-off|cancellation)\\s+(?:rights?|period)",
+        "no\\s+(?:right\\s+to\\s+cancel|cooling-off\\s+period)[^.\\n]{0,60}(?:once|after)\\s+(?:order|subscription|access\\s+is\\s+granted)",
+        "cancellation\\s+(?:is\\s+not\\s+permitted|cannot\\s+be\\s+made)[^.\\n]{0,60}within\\s+(?:14\\s+days|the\\s+first\\s+14\\s+days)"
+      ],
+      "explanation": "The contract denies, restricts, or claims to waive your statutory 14-day cooling-off cancellation rights.",
+      "recommendation": "Do not waive cooling-off cancellation rights. UK law prohibits traders from excluding statutory 14-day withdrawal windows for consumer subscriptions.",
+      "tracking": {
+        "agency": "Competition and Markets Authority (CMA)",
+        "jurisdiction": "UK",
+        "statuteCode": "UK DMCC Act 2024, Part 2",
+        "apiKeywords": ["DMCC 2024", "Cooling-Off", "Cancellation Rights"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "UK-CONS-001",
+      "title": "Unilateral Variation of Material Subscription Terms",
+      "category": "UNILATERAL_CHANGE",
+      "classification": "ONE_SIDED_DISCRETION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "UK Consumer Rights Act 2015, Section 62",
+        "title": "Unfair Contract Terms — Unilateral Variations",
+        "jurisdiction": "UK",
+        "plainExplanation": "Terms granting traders unlimited unilateral discretion to alter subscription pricing, deliverables, or material specifications without consumer opt-out are presumptively unfair."
+      },
+      "patterns": [
+        "(?:we\\s+reserve|reserves)\\s+the\\s+right\\s+to\\s+(?:vary|alter|change)\\s+subscription\\s+fees[^.\\n]{0,60}(?:at\\s+any\\s+time|sole\\s+discretion)",
+        "material\\s+(?:changes?|variations?)[^.\\n]{0,60}(?:effective\\s+immediately|without\\s+prior\\s+notice)[^.\\n]{0,60}(?:uk|england|wales|scotland)"
+      ],
+      "explanation": "The contract reserves unrestricted powers to alter prices or core subscription terms unilaterally without reasonable advance notice.",
+      "recommendation": "Under the UK Consumer Rights Act 2015, unfair price variation clauses are legally unenforceable against consumer subscribers.",
+      "tracking": {
+        "agency": "Competition and Markets Authority (CMA)",
+        "jurisdiction": "UK",
+        "statuteCode": "UK CRA 2015, Section 62",
+        "apiKeywords": ["CRA 2015", "Unfair Terms", "Unilateral Variation"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    }
+  ]
+}

@@ -81,6 +81,84 @@ describe('Arbitration Opt-Out Provision (ARB-003)', () => {
   });
 });
 
+describe('UK DMCC Act 2024 Rule Pack', () => {
+  it('detects missing pre-renewal reminder disclosures (UK-AR-001)', () => {
+    const text = 'Your subscription will automatically renew each month without prior notice unless cancelled.';
+    const rule = ALL_RULES.find(r => r.id === 'UK-AR-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects 14-day cooling-off rights waivers (UK-AR-002)', () => {
+    const text = 'You acknowledge and waive cooling-off period once digital content is accessed.';
+    const rule = ALL_RULES.find(r => r.id === 'UK-AR-002')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects unilateral variation of material subscription terms (UK-CONS-001)', () => {
+    const text = 'We reserve the right to vary subscription fees at any time at our sole discretion.';
+    const rule = ALL_RULES.find(r => r.id === 'UK-CONS-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+});
+
+describe('EU Consumer Rights Directive (2011/83/EU) Rule Pack', () => {
+  it('detects pre-ticked consent boxes (EU-AR-001)', () => {
+    const text = 'The monthly subscription checkbox is pre-selected for your convenience at checkout.';
+    const rule = ALL_RULES.find(r => r.id === 'EU-AR-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects statutory withdrawal right waivers (EU-AR-002)', () => {
+    const text = 'By subscribing to this digital service you waive right of withdrawal immediately.';
+    const rule = ALL_RULES.find(r => r.id === 'EU-AR-002')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects bundled tracking and profiling consent (EU-SURV-001)', () => {
+    const text = 'Agreeing to these terms includes consent to profiling and targeted advertising.';
+    const rule = ALL_RULES.find(r => r.id === 'EU-SURV-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+});
+
+describe('Expanded State ARL Rule Pack (CO, IL, OR)', () => {
+  it('detects Colorado advance renewal notice disclaimers (US-CO-001)', () => {
+    const text = 'Colorado residents agree that no advance notice of subscription renewal shall be given.';
+    const rule = ALL_RULES.find(r => r.id === 'US-CO-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects Illinois asymmetric online cancellation obstructions (US-IL-001)', () => {
+    const text = 'Illinois residents must call our customer service hotline to cancel your subscription.';
+    const rule = ALL_RULES.find(r => r.id === 'US-IL-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+
+  it('detects Oregon advance renewal notice omissions (US-OR-001)', () => {
+    const text = 'Oregon residents acknowledge that no renewal notice will be issued prior to annual billing.';
+    const rule = ALL_RULES.find(r => r.id === 'US-OR-001')!;
+    expect(rule).toBeDefined();
+    const matched = rule.patterns.some(p => p.test(text));
+    expect(matched).toBe(true);
+  });
+});
+
 describe('Negative Tests: False Positive Prevention', () => {
   it('does NOT trigger on standard benign cancellation language', () => {
     const text = 'You may cancel your subscription at any time through your online account settings. No fees or penalties apply.';
@@ -103,6 +181,22 @@ describe('Negative Tests: False Positive Prevention', () => {
     for (const rule of ALL_RULES) {
       const matched = rule.patterns.some(p => p.test(text));
       expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match standard refund policy`).toBe(false);
+    }
+  });
+
+  it('does NOT trigger on standard UK statutory refund policy', () => {
+    const text = 'Under our UK store policy, you may return faulty goods within 30 days for a full refund or exchange in accordance with statutory consumer rights. Please retain your receipt.';
+    for (const rule of ALL_RULES) {
+      const matched = rule.patterns.some(p => p.test(text));
+      expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match standard UK refund policy`).toBe(false);
+    }
+  });
+
+  it('does NOT trigger on standard EU GDPR privacy disclosure', () => {
+    const text = 'In compliance with EU regulations, we process your personal data solely for fulfilling your purchase order and invoicing purposes. We do not engage in automated profiling without explicit consent.';
+    for (const rule of ALL_RULES) {
+      const matched = rule.patterns.some(p => p.test(text));
+      expect(matched, `Rule ${rule.id} (${rule.title}) should NOT match standard EU privacy disclosure`).toBe(false);
     }
   });
 });

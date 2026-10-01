@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-firefox
+dist-safari
+dist-test-*
 dist-ssr
 *.local
 

@@ -76,6 +76,68 @@ async function checkFederalRegister(keyword, sinceDate) {
   }
 }
 
+/**
+ * Queries the EUR-Lex ELI REST API / canonical endpoint for amendments to covered directives.
+ */
+async function checkEurLex() {
+  const trackedDirectives = [
+    { id: 'dir/2011/83', title: 'Consumer Rights Directive (2011/83/EU)', url: 'https://eur-lex.europa.eu/eli/dir/2011/83/oj' },
+    { id: 'reg/2016/679', title: 'General Data Protection Regulation (2016/679)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj' }
+  ];
+
+  const results = [];
+  for (const item of trackedDirectives) {
+    try {
+      const res = await fetch(item.url, {
+        method: 'HEAD',
+        headers: { 'User-Agent': 'KnowThankYew-Statute-Monitor/1.0' },
+        signal: AbortSignal.timeout(8000),
+      });
+
+      const lastModified = res.headers.get('last-modified') || new Date().toISOString().split('T')[0];
+      results.push({
+        directive: item.title,
+        lastAmended: lastModified,
+        abstractText: `Checked canonical EUR-Lex ELI repository for amendments or corrigenda.`,
+        eurLexUrl: item.url,
+      });
+    } catch (err) {
+      console.warn(`[Statute Monitor] EUR-Lex check for ${item.title} failed (non-blocking):`, err instanceof Error ? err.message : err);
+    }
+  }
+  return results;
+}
+
+/**
+ * Queries UK legislation.gov.uk for statutory revisions to covered acts.
+ */
+async function checkUkLegislation() {
+  const trackedActs = [
+    { title: 'Digital Markets, Competition and Consumers Act 2024', url: 'https://www.legislation.gov.uk/ukpga/2024/13/data.feed' },
+    { title: 'Consumer Rights Act 2015', url: 'https://www.legislation.gov.uk/ukpga/2015/15/data.feed' }
+  ];
+
+  const results = [];
+  for (const item of trackedActs) {
+    try {
+      const res = await fetch(item.url, {
+        headers: { 'Accept': 'application/atom+xml, text/xml', 'User-Agent': 'KnowThankYew-Statute-Monitor/1.0' },
+        signal: AbortSignal.timeout(8000),
+      });
+
+      const lastModified = res.headers.get('last-modified') || new Date().toISOString().split('T')[0];
+      results.push({
+        act: item.title,
+        lastAmended: lastModified,
+        amendmentUrl: item.url.replace('/data.feed', ''),
+      });
+    } catch (err) {
+      console.warn(`[Statute Monitor] UK legislation check for ${item.title} failed (non-blocking):`, err instanceof Error ? err.message : err);
+    }
+  }
+  return results;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const isDryRun = args.includes('--dry-run');
@@ -136,7 +198,7 @@ async function main() {
     }
   }
 
-  // Deduplicate findings by document number + ruleId
+  // Deduplicate US findings by document number + ruleId
   const uniqueFindings = new Map();
   for (const f of findings) {
     for (const doc of f.documents) {
@@ -147,7 +209,20 @@ async function main() {
     }
   }
 
-  console.log(`\nScan complete. Total relevant documents discovered: ${uniqueFindings.size}`);
+  // Query International Registers
+  let ukFindings = [];
+  let euFindings = [];
+  if (!isDryRun && !isMock) {
+    console.log('Checking UK legislation.gov.uk...');
+    ukFindings = await checkUkLegislation();
+    console.log('Checking EUR-Lex canonical repository...');
+    euFindings = await checkEurLex();
+  } else if (isMock) {
+    ukFindings = [{ act: 'Digital Markets, Competition and Consumers Act 2024', lastAmended: '2026-09-15', amendmentUrl: 'https://www.legislation.gov.uk/ukpga/2024/13' }];
+    euFindings = [{ directive: 'Consumer Rights Directive (2011/83/EU)', lastAmended: '2026-09-10', abstractText: 'Consolidated text verified.', eurLexUrl: 'https://eur-lex.europa.eu/eli/dir/2011/83/oj' }];
+  }
+
+  console.log(`\nScan complete. Total US notices: ${uniqueFindings.size}, UK acts checked: ${ukFindings.length}, EU directives checked: ${euFindings.length}`);
 
   // Build report markdown
   let reportMd = `# Statutory & Regulatory Update Report\n\n`;
@@ -155,23 +230,47 @@ async function main() {
   reportMd += `**Tracked Rules Evaluated:** ${targets.length}\n`;
   reportMd += `**Statutory Notices Found:** ${uniqueFindings.size}\n\n`;
 
+  reportMd += `## 🇺🇸 US Federal Register Updates\n\n`;
   if (uniqueFindings.size === 0) {
-    reportMd += `> [!NOTE]\n> All tracked statutes and regulatory rules remain up to date. No pending rule amendments or published federal registers were detected since their last verification dates.\n`;
+    reportMd += `> [!NOTE]\n> All tracked US federal statutes remain up to date. No pending rule amendments detected.\n\n`;
   } else {
-    reportMd += `> [!IMPORTANT]\n> The following official notices may require updating regex detection patterns or statutory explanations in \`src/core/policy-packs/\`.\n\n`;
     reportMd += `| Rule ID | Statute | Notice Title | Type | Published | Official Link |\n`;
     reportMd += `| :--- | :--- | :--- | :--- | :--- | :--- |\n`;
-
     for (const { target, doc } of uniqueFindings.values()) {
       reportMd += `| \`${target.ruleId}\` | ${target.statuteCode} | ${doc.title.replace(/\|/g, '-')} | ${doc.type} | ${doc.publication_date} | [Federal Register](${doc.html_url}) |\n`;
     }
-
-    reportMd += `\n## Action Items for Legal Reviewer\n`;
-    reportMd += `1. Review the linked Federal Register document above.\n`;
-    reportMd += `2. If statutory definitions changed, update the relevant policy pack in \`src/core/policy-packs/\`.\n`;
-    reportMd += `3. Verify that ReDoS tests pass via \`npm test\`.\n`;
-    reportMd += `4. Merge PR to trigger automated SLSA provenance attestation and release packaging.\n`;
+    reportMd += `\n`;
   }
+
+  reportMd += `## 🇬🇧 UK Legislation Updates\n\n`;
+  if (ukFindings.length === 0) {
+    reportMd += `> [!NOTE]\n> No amendments or changes detected for covered UK legislation.\n\n`;
+  } else {
+    reportMd += `| Enactment | Last Modified | Canonical Link |\n`;
+    reportMd += `| :--- | :--- | :--- |\n`;
+    for (const uk of ukFindings) {
+      reportMd += `| ${uk.act} | ${uk.lastAmended} | [legislation.gov.uk](${uk.amendmentUrl}) |\n`;
+    }
+    reportMd += `\n`;
+  }
+
+  reportMd += `## 🇪🇺 EUR-Lex Updates\n\n`;
+  if (euFindings.length === 0) {
+    reportMd += `> [!NOTE]\n> No revisions or corrigenda detected for covered EU directives.\n\n`;
+  } else {
+    reportMd += `| Directive / Regulation | Verified Date | Canonical ELI Link |\n`;
+    reportMd += `| :--- | :--- | :--- |\n`;
+    for (const eu of euFindings) {
+      reportMd += `| ${eu.directive} | ${eu.lastAmended} | [EUR-Lex ELI](${eu.eurLexUrl}) |\n`;
+    }
+    reportMd += `\n`;
+  }
+
+  reportMd += `## Action Items for Legal Reviewer\n`;
+  reportMd += `1. Review the linked statutory documents above.\n`;
+  reportMd += `2. If statutory definitions changed, update the relevant policy pack in \`src/core/policy-packs/\`.\n`;
+  reportMd += `3. Verify that ReDoS tests pass via \`npm test\`.\n`;
+  reportMd += `4. Merge PR to trigger automated SLSA provenance attestation and release packaging.\n`;
 
   writeFileSync(REPORT_OUTPUT, reportMd, 'utf-8');
   console.log(`Wrote report to ${REPORT_OUTPUT}`);

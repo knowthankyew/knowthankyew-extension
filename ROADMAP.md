@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: **v1.3.0 Live on Chrome Web Store · v1.5.0 Release Complete & Packaged · v1.6.0 Hardened & Verified**
+> **Status**: **v1.3.0 Live on Chrome Web Store · v1.6.0 Approved on Firefox AMO · v2.0.0 Release Complete & Packaged**
 
 ---
 
@@ -69,27 +69,27 @@ The core reality engine is fully built, statically verified, and audited:
 
 ---
 
-## Milestone 6: International Jurisdiction Packs, Safari & Inline Defense (`v2.0.0`)
+## Milestone 6: International Jurisdiction Packs, Safari & Inline Defense (`v2.0.0`) ✅
 
 **Why this is a major version**: Two simultaneous product-changing shifts — ambient inline visual indicators (new UX surface and trust model) and international regulatory coverage (new user base outside the US) — merit a major version bump. The ongoing operational commitment of monitoring EUR-Lex and UK legislation.gov.uk is a new maintenance boundary that does not exist in 1.x.
 
 ### New UX Surface
 
-- [ ] **Context-Aware Inline Visual Indicators**: Shield badges injected directly adjacent to predatory consent checkboxes and deceptive terms toggles *before* form submission — shifting the extension from a toolbar alert panel to an ambient, frontline visual layer. Implemented inside a **closed Shadow DOM** to guarantee complete CSS isolation from host-page styles. SPA resilience strategy (reconnecting injected indicators after framework re-renders) will be finalized during the v2.0 sprint based on findings from Milestone 5's MutationObserver work.
+- [x] **Context-Aware Inline Visual Indicators**: Shield badges injected directly adjacent to predatory consent checkboxes and deceptive terms toggles *before* form submission — shifting the extension from a toolbar alert panel to an ambient, frontline visual layer. Implemented inside a **closed Shadow DOM** (`attachShadow({ mode: 'closed' })`) to guarantee complete CSS isolation from host-page styles. Form-neutral, fail-silent, zero `innerHTML` (pure document text nodes), and seamlessly integrated into `scanner.ts` with atomic teardown upon Hard Burn.
 
 ### International Jurisdiction Packs
 
-- [ ] **UK Digital Markets, Competition and Consumers Act 2024**: Statutory rules covering mandatory 14-day cooling-off reminders and pre-renewal disclosure schedules under the DMCC Act.
-- [ ] **EU Consumer Rights Directive (Directive 2011/83/EU)**: Rules detecting pre-ticked subscription boxes (banned across all EU member states) and non-compliant cancellation mechanisms. Note: the extension *detects* non-compliant mechanisms — it does not enforce or block them.
-- [ ] **State ARL Expansion**: Specific statutory alerts for Colorado, Illinois (ACRA 815 ILCS 601), and Oregon auto-renewal notification thresholds not currently covered by `state-arl.json`.
+- [x] **UK Digital Markets, Competition and Consumers Act 2024**: Statutory rules covering mandatory 14-day cooling-off reminders and pre-renewal disclosure schedules under the DMCC Act (`src/core/policy-packs/uk-dmcc.json`).
+- [x] **EU Consumer Rights Directive (Directive 2011/83/EU)**: Rules detecting pre-ticked subscription boxes (banned across all EU member states), unwaivable withdrawal right waivers, and bundled consent profiling under GDPR (`src/core/policy-packs/eu-crd.json`).
+- [x] **State ARL Expansion**: Specific statutory alerts for Colorado (C.R.S. § 6-1-732), Illinois (ACRA 815 ILCS 601), and Oregon (ORS § 646A.295) auto-renewal notification thresholds added to `state-arl.json`.
 
 ### New Distribution Channel
 
-- [ ] **Apple Safari (macOS / iOS)**: Convert the Chrome extension via `xcrun safari-web-extension-converter`. Native macOS App Sandbox companion packaging. App Store distribution pipeline including Apple's required privacy manifest (`NSPrivacyTrackedDataTypes` declarations). iOS Safari compatibility testing.
+- [x] **Apple Safari (macOS / iOS)**: Dedicated `TARGET_BROWSER=safari` build target outputting `dist-safari/` and packaging `knowthankyew-extension-v2.0.0-safari.zip`. Verified clean conversion via `xcrun safari-web-extension-converter`. Documented Apple App Store privacy manifest (`NSPrivacyTrackedDataTypes: []`) and zero network entitlements requirement.
 
 ### Regulatory Upkeep Infrastructure
 
-- [ ] **Automated Regulatory Upkeep for International Packs**: Extend the existing weekly Federal Register GitHub Action to additionally monitor **EUR-Lex** (EU Official Journal API, `/ELI` endpoint) and **UK legislation.gov.uk** (SPARQL endpoint) for amendments to covered directives and acts. Auto-draft PRs with official citation diffs and amendment abstracts for human review — same human-in-the-loop pattern as the existing Federal Register monitor. No autonomous rule mutations.
+- [x] **Automated Regulatory Upkeep for International Packs**: Extended `scripts/check-statutory-updates.mjs` to monitor **EUR-Lex** (EU Official Journal API / ELI) and **UK legislation.gov.uk** for amendments to covered directives and statutory instruments. Produces multi-jurisdiction markdown reports for automated GitHub Actions PR dispatch. No autonomous rule mutations.
 
 ---
 

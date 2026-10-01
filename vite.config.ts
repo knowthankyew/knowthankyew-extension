@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 export default defineConfig(({ mode }) => {
   const isLocalMl = process.env.VITE_LOCAL_ML_ENABLED === 'true';
   const targetBrowser = process.env.TARGET_BROWSER || 'chrome';
-  let outDir = targetBrowser === 'firefox' ? 'dist-firefox' : 'dist';
+  let outDir = targetBrowser === 'firefox' ? 'dist-firefox' : targetBrowser === 'safari' ? 'dist-safari' : 'dist';
 
   return {
     plugins: [
@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => {
       {
         name: 'air-gap-zero-egress',
         configResolved(config) {
-          outDir = config.build.outDir || (targetBrowser === 'firefox' ? 'dist-firefox' : 'dist');
+          outDir = config.build.outDir || (targetBrowser === 'firefox' ? 'dist-firefox' : targetBrowser === 'safari' ? 'dist-safari' : 'dist');
         },
         transform(code, id) {
           if (id.includes('@knowthankyew/privacy-telemetry')) {
@@ -81,13 +81,23 @@ export default defineConfig(({ mode }) => {
                 type: 'module',
               };
             }
+            if (targetBrowser === 'safari') {
+              manifest.version_name = manifest.version;
+              delete manifest.browser_specific_settings;
+              if (!isLocalMl) {
+                delete manifest.host_permissions;
+                manifest.content_security_policy = {
+                  extension_pages: "default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self';",
+                };
+              }
+            }
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
           }
         },
       },
     ],
   build: {
-    outDir: targetBrowser === 'firefox' ? 'dist-firefox' : 'dist',
+    outDir: targetBrowser === 'firefox' ? 'dist-firefox' : targetBrowser === 'safari' ? 'dist-safari' : 'dist',
     emptyOutDir: true,
     modulePreload: {
       polyfill: false,

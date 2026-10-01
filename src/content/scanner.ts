@@ -2,6 +2,7 @@ import { extractPageLegalText } from './dom-extractor';
 import { discoverLegalLinks } from './link-detector';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
+import { injectIndicator, removeAllIndicators } from './inline-indicators';
 
 let cachedScanResult: PageScanResult | null = null;
 let lastExtractedTextLength = 0;
@@ -62,6 +63,12 @@ export function executeScan(): PageScanResult {
   cachedScanResult = result;
   lastExtractedTextLength = text.length;
 
+  try {
+    injectIndicatorsForScanResult(result);
+  } catch {
+    // Non-fatal if host DOM rejects indicator attachment
+  }
+
   if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
     chrome.runtime.sendMessage({
       type: 'KTY_SCAN_COMPLETED',
@@ -72,6 +79,82 @@ export function executeScan(): PageScanResult {
   }
 
   return result;
+}
+
+/**
+ * Resolves the associated textual label for a form checkbox input.
+ */
+export function findLabelForInput(input: HTMLInputElement): string {
+  if (input.id && typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    const label = document.querySelector(`label[for="${CSS.escape(input.id)}"]`);
+    if (label) return label.textContent || '';
+  } else if (input.id) {
+    const label = document.querySelector(`label[for="${input.id}"]`);
+    if (label) return label.textContent || '';
+  }
+  const parentLabel = input.closest('label');
+  if (parentLabel) return parentLabel.textContent || '';
+  if (input.getAttribute('aria-label')) return input.getAttribute('aria-label')!;
+  const next = input.nextElementSibling;
+  if (next) return next.textContent || '';
+  return '';
+}
+
+/**
+ * Scans the active document for consent checkboxes whose labels match predatory
+ * auto-renewal, mandatory arbitration, or unilateral rights-waiver patterns.
+ * Capped at 3 indicators to prevent visual clutter.
+ */
+export function findPredatoryCheckboxAnchors(): Element[] {
+  if (typeof document === 'undefined') return [];
+
+  const results: Element[] = [];
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  const suspiciousPatterns = [
+    /auto(?:matic(?:ally)?)?[\s-]?renew/i,
+    /recurring/i,
+    /arbitrat/i,
+    /waive/i,
+    /automatically.{0,30}charge/i,
+    /binding/i,
+    /class.action/i,
+  ];
+
+  checkboxes.forEach((cb) => {
+    const label = findLabelForInput(cb as HTMLInputElement);
+    if (label && suspiciousPatterns.some((p) => p.test(label))) {
+      results.push(cb);
+    }
+  });
+
+  return results.slice(0, 3);
+}
+
+/**
+ * Injects non-intrusive Closed Shadow DOM visual indicators adjacent to identified
+ * predatory consent anchors on the page.
+ */
+export function injectIndicatorsForScanResult(result: PageScanResult): void {
+  removeAllIndicators();
+
+  const actionableMatches = result.matches.filter(
+    (m) => m.severity === 'CRITICAL' || m.severity === 'WARNING'
+  );
+
+  if (actionableMatches.length === 0) return;
+
+  const anchors = findPredatoryCheckboxAnchors();
+  if (anchors.length === 0) return;
+
+  anchors.forEach((anchor, idx) => {
+    const match = actionableMatches[idx % actionableMatches.length];
+    injectIndicator({
+      anchorElement: anchor,
+      severity: match.severity,
+      label: match.severity === 'CRITICAL' ? '⚠ Trap' : '⚠ Risk',
+      tooltipText: `${match.title}: ${match.explanation.slice(0, 120)}`,
+    });
+  });
 }
 
 export function getCachedScanResult(): PageScanResult | null {
@@ -178,6 +261,9 @@ export function handleHardBurnDOM(): void {
     const highlights = document.querySelectorAll('[data-kty-trap]');
     highlights.forEach(el => el.removeAttribute('data-kty-trap'));
   }
+
+  // Remove any active Closed Shadow DOM inline indicator badges
+  removeAllIndicators();
 
   // Close BroadcastChannel to release event handlers and isolate frame.
   // Note: Nulling burnBroadcastChannel here is intentional to achieve true amnesia.

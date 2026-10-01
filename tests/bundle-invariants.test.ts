@@ -113,4 +113,28 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       rmSync(testDistFfx, { recursive: true, force: true });
     }
   }, 30000);
+
+  it('verifies Safari build target generates valid MV3 manifest and zero-egress JS', () => {
+    const rootDir = resolve(__dirname, '..');
+    const testDistSafari = resolve(__dirname, '../dist-test-safari');
+    try {
+      execSync('TARGET_BROWSER=safari npx vite build --outDir dist-test-safari', { cwd: rootDir, stdio: 'pipe' });
+      const manifest = JSON.parse(readFileSync(resolve(testDistSafari, 'manifest.json'), 'utf-8'));
+      expect(manifest.browser_specific_settings).toBeUndefined();
+      expect(manifest.background?.service_worker).toBe('background/service-worker.js');
+      expect(manifest.content_security_policy.extension_pages).toContain("connect-src 'none'");
+
+      const jsFiles = getJsFilesRecursively(testDistSafari);
+      expect(jsFiles.length).toBeGreaterThan(0);
+      const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
+      for (const filePath of jsFiles) {
+        const content = readFileSync(filePath, 'utf-8');
+        for (const pattern of forbiddenPatterns) {
+          expect(pattern.test(content)).toBe(false);
+        }
+      }
+    } finally {
+      rmSync(testDistSafari, { recursive: true, force: true });
+    }
+  }, 30000);
 });

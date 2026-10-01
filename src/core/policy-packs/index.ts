@@ -1,13 +1,19 @@
 import { PolicyPack, DeclarativeRule, DetectionRule } from '../types';
 import usFederalJson from './us-federal.json';
 import stateArlJson from './state-arl.json';
+import ukDmccJson from './uk-dmcc.json';
+import euCrdJson from './eu-crd.json';
 
 export const usFederalPack = usFederalJson as unknown as PolicyPack;
 export const stateArlPack = stateArlJson as unknown as PolicyPack;
+export const ukDmccPack = ukDmccJson as unknown as PolicyPack;
+export const euCrdPack = euCrdJson as unknown as PolicyPack;
 
 export const ALL_POLICY_PACKS: PolicyPack[] = [
   usFederalPack,
   stateArlPack,
+  ukDmccPack,
+  euCrdPack,
 ];
 
 /**

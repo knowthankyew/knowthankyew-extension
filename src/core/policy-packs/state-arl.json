@@ -81,6 +81,81 @@
         "apiKeywords": ["BIPA", "Biometric Privacy", "Geolocation"],
         "lastVerifiedDate": "2026-09-01"
       }
+    },
+    {
+      "id": "US-CO-001",
+      "title": "Colorado Advance Renewal Notice Disclosure",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Colo. Rev. Stat. § 6-1-732",
+        "title": "Colorado Automatic Renewal Notice Mandate",
+        "jurisdiction": "Colorado",
+        "plainExplanation": "Colorado law mandates advance notice before continuous service renewals or trial conversions, including clear cancellation details."
+      },
+      "patterns": [
+        "(?:automatic(?:ally)?\\s+renew(?:al|s)?|continuous\\s+service)[^.\\n]{0,60}(?:colorado|c\\.r\\.s\\.)[^.\\n]{0,60}(?:no\\s+notice|without\\s+advance\\s+notice)",
+        "colorado\\s+(?:residents|consumers|subscribers)[^.\\n]{0,60}(?:waive|no)\\s+(?:advance\\s+notice|renewal\\s+notice)"
+      ],
+      "explanation": "The terms fail to provide the Colorado-mandated advance notification before continuous subscription renewal or free trial conversion.",
+      "recommendation": "Colorado law guarantees advance notice before automatic renewal. Verify that clear cancellation instructions are provided before renewal fees post.",
+      "tracking": {
+        "jurisdiction": "Colorado",
+        "statuteCode": "Colo. Rev. Stat. § 6-1-732",
+        "apiKeywords": ["Colorado ARL", "Automatic Renewal", "Advance Notice"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "US-IL-001",
+      "title": "Illinois Symmetrical Online Cancellation Mandate",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "815 ILCS 601 (Illinois ACRA)",
+        "title": "Illinois Automatic Contract Renewal Act",
+        "jurisdiction": "Illinois",
+        "plainExplanation": "Illinois ACRA requires clear disclosure of auto-renewal terms and mandates symmetrical online cancellation for online subscriptions."
+      },
+      "patterns": [
+        "(?:automatic(?:ally)?\\s+renew(?:al|s)?)[^.\\n]{0,80}(?:illinois|815\\s+ilcs)[^.\\n]{0,60}(?:mail|written\\s+notice\\s+only|call\\s+to\\s+cancel)",
+        "(?:illinois\\s+residents|illinois\\s+subscribers)[^.\\n]{0,60}(?:must\\s+call|written\\s+cancellation\\s+required)"
+      ],
+      "explanation": "The terms impose asymmetric obstacles on Illinois consumers by requiring phone calls or postal mail to cancel an online subscription.",
+      "recommendation": "Under 815 ILCS 601, consumers who enroll online have a statutory right to cancel online without obstructive call-in hurdles.",
+      "tracking": {
+        "jurisdiction": "Illinois",
+        "statuteCode": "815 ILCS 601",
+        "apiKeywords": ["Illinois ACRA", "Automatic Renewal", "Online Cancellation"],
+        "lastVerifiedDate": "2026-09-01"
+      }
+    },
+    {
+      "id": "US-OR-001",
+      "title": "Oregon Advance Renewal Disclosure & Cancellation Mechanism",
+      "category": "AUTO_RENEWAL",
+      "classification": "STATUTORY_VIOLATION",
+      "severity": "WARNING",
+      "statute": {
+        "code": "Or. Rev. Stat. § 646A.295",
+        "title": "Oregon Automatic Renewal Law",
+        "jurisdiction": "Oregon",
+        "plainExplanation": "Oregon law requires businesses to clearly disclose auto-renewal terms, provide advance renewal notice, and offer simple cancellation methods."
+      },
+      "patterns": [
+        "(?:automatic(?:ally)?\\s+renew(?:al|s)?)[^.\\n]{0,80}(?:oregon|ors\\s+646a)[^.\\n]{0,60}(?:no\\s+notification|without\\s+notice)",
+        "oregon\\s+(?:residents|consumers|subscribers)[^.\\n]{0,60}(?:notice\\s+will\\s+not\\s+be\\s+provided|no\\s+renewal\\s+notice)"
+      ],
+      "explanation": "The agreement disclaims advance renewal notification or fails to provide the simple cancellation mechanism required for Oregon consumers.",
+      "recommendation": "Oregon ORS § 646A.295 prohibits automatic charges without prior disclosure and requires cancellation to be as easy as enrollment.",
+      "tracking": {
+        "jurisdiction": "Oregon",
+        "statuteCode": "Or. Rev. Stat. § 646A.295",
+        "apiKeywords": ["Oregon ARL", "ORS 646A.295", "Advance Notice", "Automatic Renewal"],
+        "lastVerifiedDate": "2026-09-01"
+      }
     }
   ]
 }

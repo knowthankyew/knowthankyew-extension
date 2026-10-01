@@ -153,7 +153,7 @@ export const OptionsApp: React.FC = () => {
                 fontFamily: 'ui-monospace, monospace',
               }}
             >
-              v1.6.0
+              v2.0.0
             </span>
           </div>
 

@@ -14,8 +14,8 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `1.6.0` (Release Complete & Packaged for Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v1.6.0.zip` (SHA256: `df4260377f1144dc32870bd6ff1be617c3fd68c10bba44823fea5f77ca38ca1c`)
+- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `2.0.0` (Release Complete & Packaged for Upload)
+- **Manual Upload ZIP**: `knowthankyew-extension-v2.0.0.zip` (SHA256: `31aff7032bcbc47df84ae0ad69cc4b9d500b895a96a36b922e4904dbf2b38d8e`)
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
@@ -29,6 +29,7 @@ When you reach a checkout page, terms of service modal, or subscription signup, 
 - **Forced Arbitration & Class Action Bans**: Identifies mandatory binding arbitration clauses and class action waivers where companies force you to surrender your constitutional rights to a public trial.
 - **Unilateral Contract Alterations**: Alerts you when a company claims the power to change prices or terms retroactively without your affirmative consent.
 - **Third-Party Data Brokerage**: Discloses clauses where your personal data and browsing history may be sold or shared with commercial advertisers.
+- **Closed Shadow DOM Inline Defense**: Injects non-intrusive visual badges directly adjacent to deceptive consent checkboxes (such as pre-ticked subscription enrollments) inside an isolated closed Shadow DOM before form submission.
 
 ### Complete Privacy & Total Amnesia
 
@@ -36,7 +37,7 @@ Unlike commercial extensions that upload your browsing history to cloud analytic
 
 1. **100% On-Device Processing**: Contract evaluation runs entirely inside your browser tab sandbox. No document text, form inputs, or browsing history ever leave your device.
 2. **Zero Network Egress (Browser Enforced for Extension Pages)**: Manifest CSP strictly enforces `connect-src 'none'` for all extension pages (popup and background worker), physically prohibiting `fetch`, XHR, WebSocket, or beacon dispatch at the browser engine level. (Note: Chromium's MV3 CSP applies to `extension_pages`, not content scripts; content script zero-egress is maintained via the absence of host permissions and verified by physical bundle auditing in CI).
-3. **The Hard Burn Switch**: Click "Hard Burn" at any moment to instantly wipe local extension storage, flush memory buffers, and dereference in-memory state.
+3. **The Hard Burn Switch**: Click "Hard Burn" at any moment to instantly wipe local extension storage, flush memory buffers, dereference in-memory state, and tear down all injected inline indicators.
 
 ### Architectural Scope & Honest Limitations
 
@@ -44,6 +45,7 @@ In accordance with our brutalist transparency principles:
 - **Visible DOM Text Only**: The engine analyzes visible DOM text extracted from the current active tab when you click the extension. It cannot follow external hyperlink chains (e.g., external "Terms & Conditions" URLs) or inspect opaque cross-origin iframes without explicit navigation.
 - **No False Reassurance ("No Findings" ≠ "Safe")**: If zero clauses are flagged, the extension shows "No Findings" and clears badge indicators. It never shows a green "OK" or "Safe" stamp, because no regex scanner can guarantee that an uninspected external contract is free of predatory terms.
 - **User-Initiated Tab Inspection**: Under the least-privilege `activeTab` permission model, the extension has zero access to any tab until you explicitly open the popup. Once invoked, a local MutationObserver monitors that specific tab for dynamic checkout modals and accordion expansions until closed or cleared via Hard Burn. It never tracks other tabs, background navigation, or browsing history.
+- **Local Closed Shadow DOM Overlays**: When predatory consent checkboxes are detected on scanned checkout forms, the extension injects lightweight warning indicators into an isolated closed Shadow DOM (`mode: 'closed'`). These overlays run 100% locally, contain zero network capabilities, do not alter host form inputs or layout, and are destroyed immediately upon Hard Burn.
 
 ---
 
@@ -151,6 +153,7 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
+| **2.0.0** | October 1, 2026 | Milestone 6 release packaged for multi-browser distribution (`knowthankyew-extension-v2.0.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Implemented ambient frontline visual layer via Closed Shadow DOM inline indicators next to deceptive consent checkboxes; added international policy packs (UK DMCC Act 2024, EU CRD Directive 2011/83/EU, expanded State ARLs for CO, IL, OR); automated EUR-Lex and UK legislation regulatory upkeep monitoring; added Apple Safari packaging pipeline; and expanded test suite to 125/125 passing tests. |
 | **1.6.0** | October 1, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.6.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`). Implemented Multi-Tab Session Amnesia dual-broadcast transport (`BroadcastChannel` + `chrome.tabs.sendMessage`), token-bucket MutationObserver throttling (15 capacity / 1 refill per 4s) to eliminate SPA scan starvation, senior code audit hardening, and 100+ verified passing tests. |
 | **1.5.0** | September 29, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.5.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`). Integrated declarative JSON policy packs, zero-setup Chrome Built-in Prompt API adapter (Gemini Nano / `ai.languageModel`), 50k character DOM extraction ceiling, OTLP enterprise badge preservation, senior code audit hardening, and 98/98 verified passing tests. |
 | **1.4.0 (Release Candidate)** | September 24, 2026 | Prepared for Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`). Resolved baseline issues, aligned statutory policy packs with current ROSCA / FTC Act § 5 / State ARL law, 50k char DOM extraction ceiling, OTLP enterprise badge preservation, and 85/85 tests passing. |
