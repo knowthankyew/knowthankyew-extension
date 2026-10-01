@@ -115,4 +115,73 @@ The `xcrun safari-web-extension-converter` output is an Xcode project wrapping t
 
 ---
 
-*Architecture and roadmap maintained by the `knowthankyew` project. Implementation coded by Gemini. Reviewed by Kiro (Claude).*
+## Milestone 7: Consumer Intelligence Arc — Plain Language, Structured Handoff & Remedy (`v2.x`)
+
+> **Strategic framing**: v2.0.0 established the ambient shield (inline indicators + international packs). The next arc transforms the extension from a *detector* into a *consumer advocate*: plain-language explanations first, then a structured handoff to the portfolio's specialist destination tools, and finally remedy artifact generation.
+
+### Phase 1 — BS Translator ✅ (`v2.0.0`)
+
+Gemini Nano explains each finding in 1–2 plain conversational sentences, on-device, with zero cloud egress.
+
+- [x] Nano on-device summaries per `TrapCard` via `ChromePromptAPIAdapter` (opt-in, fail-silent fallback to heuristic explanation)
+- [x] Rule IDs never surface to the user
+- [x] Severity tiers simplified to plain language: **"Watch out"** / **"This is a problem"** / **"FYI"**
+- [x] `useEffect` async/await + `AbortController` for clean inference lifecycle (burn-safe)
+- [x] Calendar reminder link for `AUTO_RENEWAL` traps (25-day pre-renewal reminder, zero new permissions)
+
+### Phase 2 — Structured Handoff Protocol (`v2.1.0`)
+
+Define the intent/findings/summary JSON schema and wire the extension popup to open portfolio destination tools with pre-loaded context. No new backend. No new infrastructure.
+
+- [ ] **Define `KTY_HANDOFF_PAYLOAD` schema**: structured JSON envelope containing `{ domain, scanTimestamp, findings: EvaluationMatch[], primaryLegalLink: DiscoveredLegalLink | null, summary: PageScanResult['summary'] }`
+- [ ] **`postMessage` bridge**: Extension popup serializes the payload into a `sessionStorage`-safe blob and opens the destination tool URL with a `?kty_handoff=1` flag; destination reads via `window.addEventListener('message', ...)` or `sessionStorage` key with HMAC integrity check
+- [ ] **Zero persistent storage for handoff**: Payload lives in `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
+- [ ] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `DATA_SHARING` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
+- [ ] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
+
+### Phase 3 — Destination Tools Receive Context (`v2.2.0`)
+
+`bill-of-rights-bot`, `careCheck`, and `lease-audit` detect the handoff payload and skip their intake flow, jumping directly to findings display.
+
+- [ ] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `sessionStorage` on mount; returns typed payload or `null`
+- [ ] **Intake bypass in `bill-of-rights-bot`**: When hook returns a payload, render findings panel directly with `findings[]` pre-populated; intake dropzone is replaced by the domain banner + "Back to scan" affordance
+- [ ] **Intake bypass in `careCheck`**: Same pattern — payload maps to itemized line items where applicable; graceful fallback if category mismatch
+- [ ] **Intake bypass in `lease-audit`**: Arbitration and unilateral-change findings map to lease clause categories; tenant tool renders matched clauses inline
+- [ ] **Privacy invariant**: `KTY_HANDOFF_PAYLOAD` must pass through `SAFE_ALLOWLIST_KEYS` sanitization before being written to `sessionStorage` — no raw clause text beyond the already-sanitized `matchedSnippet` (already redacted by `sanitizeSnippet()` in engine)
+- [ ] **Hard Burn propagation**: `KTY_HARD_BURN_DOM` broadcast must also clear `sessionStorage['kty_handoff']` in destination tool tabs
+
+### Phase 4 — Remedy Artifacts (`v2.3.0+`)
+
+Cancellation and dispute letter template generation with ML fill-in and statutory grounding. **Only after Phases 1–3 are stable and the accuracy bar is established.**
+
+- [ ] **Cancellation letter templates**: Jurisdiction-aware templates grounded in applicable ROSCA / state ARL statutes, filled in by Nano (on-device) with merchant name, subscription type, and detected renewal terms
+- [ ] **Dispute letter templates**: Medical bill, wage, and warranty dispute templates with statutory citation injection (one template per destination tool domain)
+- [ ] **ML fill-in accuracy gate**: Templates are only offered when Nano `confidence === 'high'` AND the heuristic engine corroborates the category — contradictions fall back to blank template with manual fill-in prompt
+- [ ] **Zero server-side generation**: All template rendering runs client-side in the destination tool. No document text leaves the browser at any point in the pipeline
+- [ ] **Download / copy affordance**: Generated letters are offered as a `.txt` download or clipboard copy — never transmitted to any KTY server
+
+---
+
+## Architecture Notes for v2.0.0
+
+### Inline Indicators: Trust Model Shift
+
+The inline visual indicators feature represents a meaningful trust model change from v1.x. Content scripts currently *read* from the host page DOM passively. Inline indicators *write* to the host page DOM. Key design constraints for the v2.0 sprint:
+
+- **Shadow DOM (closed mode required)**: Host-page CSS must not leak into indicators. `attachShadow({ mode: 'closed' })` is the baseline. Open mode is explicitly not acceptable.
+- **MutationObserver resilience**: SPA frameworks (React, Next.js, Vue) re-render subtrees and will overwrite injected indicators. The existing `scanner.ts` MutationObserver infrastructure from v1.x should be extended to detect when indicator anchor elements are re-rendered and re-inject accordingly.
+- **Layout safety**: Injected elements must not shift host-page layout. `position: absolute` overlay approach preferred over layout-participating inserts.
+- **Selector targeting strategy**: Heuristics for locating predatory checkboxes (common `name` attribute patterns, adjacent text matching existing policy pack patterns) must be designed to fail silently — missing an indicator is acceptable; breaking a checkout form is not.
+
+### Safari: Build Pipeline Delta
+
+The `xcrun safari-web-extension-converter` output is an Xcode project wrapping the existing MV3 extension. Key deltas from the existing Chrome/Firefox pipeline:
+
+- `BroadcastChannel` support: Verify Safari 16+ support for the `kty_hard_burn` channel added in v1.6.0.
+- `browser_specific_settings` in manifest: Extend the existing Firefox `closeBundle()` hook in `vite.config.ts` to also emit a Safari-compatible manifest variant.
+- App Sandbox entitlements: The Xcode wrapper requires explicit entitlements for `com.apple.security.network.client` if Local Assist loopback is ever enabled in a Safari build. Consumer builds with `connect-src 'none'` require no network entitlements — document this explicitly.
+- `NSPrivacyTrackedDataTypes`: Apple's required privacy manifest must declare zero tracked data types for the consumer build. This is provably accurate and should be documented with a reference to the `bundle-invariants.test.ts` zero-egress verification.
+
+---
+
+*Architecture and roadmap maintained by the `knowthankyew` project. Implementation coded by Gemini. Reviewed by Claude (Antigravity).*
