@@ -303,7 +303,7 @@ if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
 }
 
 // Secondary transport: BroadcastChannel coordinator for multi-context amnesia
-if (typeof BroadcastChannel !== 'undefined') {
+if (!burnBroadcastChannel && typeof BroadcastChannel !== 'undefined') {
   try {
     burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
     burnBroadcastChannel.onmessage = (event) => {

@@ -23,7 +23,6 @@ export interface IndicatorConfig {
   tooltipText: string;
 }
 
-const shadowRoots = new WeakMap<Element, ShadowRoot>();
 const activeHostElements = new Set<Element>();
 
 /**
@@ -50,7 +49,6 @@ export function injectIndicator(config: IndicatorConfig): Element | null {
     }
 
     const shadowRoot = host.attachShadow({ mode: 'closed' });
-    shadowRoots.set(host, shadowRoot);
 
     // Color definitions
     let bgColor = '#ef4444'; // CRITICAL: Red

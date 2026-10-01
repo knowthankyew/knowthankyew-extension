@@ -2,7 +2,7 @@
 
 > **Extension Name**: KnowThankYew Reality Engine  
 > **Gecko ID**: `reality-engine@knowthankyew.org`  
-> **Version**: `1.6.0`
+> **Version**: `2.0.0`
 
 ---
 
@@ -32,10 +32,10 @@
    ```bash
    npm test
    ```
-   Verifies all 103 invariant, ReDoS, and DOM parsing tests pass with 0 errors.
+   Verifies all 125 invariant, ReDoS, and DOM parsing tests pass with 0 errors.
 
 4. **Package the Release Archive**:
    ```bash
    npm run package:firefox
    ```
-   Packages `dist-firefox/` into `knowthankyew-extension-v1.6.0-firefox.zip`.
+   Packages `dist-firefox/` into `knowthankyew-extension-v2.0.0-firefox.zip`.

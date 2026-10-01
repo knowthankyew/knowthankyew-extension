@@ -83,25 +83,49 @@ Consequently, reopening the popup or navigating away can discard context-local s
 
 ---
 
-## 3. Directory Structure
+## 3. The 12 Core Invariants
+
+Every release and pull request must satisfy these 12 core invariants, verified by automated unit, ReDoS, and physical bundle invariant test suites:
+
+| # | Invariant | Enforcement Mechanism |
+|:--|:----------|:----------------------|
+| 1 | **Zero Document Egress (Consumer Build)** | Manifest CSP `connect-src 'none'`, Vite air-gap plugin, and fail-closed CI bundle scan over all distribution JS (`scanner.js` explicit). |
+| 2 | **No PII in Telemetry Spans** | Strict compile-time allowlist (`EXTENSION_ALLOWLIST_KEYS`); arbitrary properties are stripped before entering memory buffer. |
+| 3 | **`memory_only` Telemetry Mode** | Telemetry runs strictly in volatile circular memory; zero persistence to disk, databases, or cloud endpoints. |
+| 4 | **Hard Burn Covers All Contexts** | Dual-broadcast Nuclear Amnesia (`chrome.tabs` + `BroadcastChannel`) wipes memory buffers, `chrome.storage.local`, badges, loopback worker cache (`POST /burn`), and purges DOM observers and inline indicators. |
+| 5 | **Least-Privilege Permissions** | Only `activeTab`, `storage`, and `scripting` requested. Zero broad host permissions (`<all_urls>` strictly prohibited). |
+| 6 | **ReDoS-Free Regex Patterns** | 100% of regular expression patterns across all statutory policy packs statically verified via `safe-regex` in CI. |
+| 7 | **Zero `innerHTML` Execution** | All UI components and inline indicators use React sanitized rendering or native `document.createTextNode()` / DOM text nodes. |
+| 8 | **Dynamic UI Claims Grounding** | Privacy meters and policy claims are derived dynamically from verified runtime configuration via `getPrivacyClaims()`. |
+| 9 | **Compile-Time ML Dead-Code Elimination** | Consumer builds completely excise loopback networking code (`http://127.0.0.1:8420`) at compile time. |
+| 10 | **Minimal Production Dependencies** | Exactly 3 production dependencies (`react`, `react-dom`, `@knowthankyew/privacy-telemetry`) to prevent supply-chain attack surface. |
+| 11 | **Shadow DOM Closed Mode** | All inline visual indicators injected into the host page DOM must use `attachShadow({ mode: 'closed' })`. Host page styles cannot pierce or distort badges, and host scripts cannot inspect or access internal badge nodes. |
+| 12 | **Indicator Content No Raw Text** | Injected indicator labels and accessible tooltips are constructed strictly from deterministic rule metadata (`rule.title`, `rule.explanation`), never from raw page-extracted text, form values, or PII. |
+
+---
+
+## 4. Directory Structure
 
 ```
 knowthankyew-extension/
 ├── .github/workflows/       # CI, Release, and Weekly Statutory Monitor workflows
 ├── manifest.json            # Manifest V3 configuration (activeTab, storage, scripting)
 ├── package.json             # React 19 + TypeScript + @knowthankyew/privacy-telemetry
-├── vite.config.ts           # Multi-input bundling with compile-time air-gap shims
+├── vite.config.ts           # Multi-browser bundling (Chrome, Firefox, Safari) with air-gap shims
 ├── public/                  # Manifest and generated PNG icons (16, 48, 128)
 ├── scripts/                 # Asset generators & check-statutory-updates.mjs
 ├── src/
 │   ├── background/          # Ephemeral MV3 service worker
-│   ├── content/             # Isolated DOM extractor & 2-stage link discovery
+│   ├── content/             # Isolated DOM extractor, link discovery & inline indicators
 │   ├── core/
-│   │   ├── policy-packs/    # Declarative JSON statutory packs (us-federal, state-arl)
+│   │   ├── policy-packs/    # Declarative JSON statutory packs (us-federal, state-arl, uk-dmcc, eu-crd)
 │   │   ├── rules/           # Typed statutory rule definitions
 │   │   └── engine.ts        # Dynamic policy compiler & reality engine scanner
 │   ├── ml/                  # Local ML loopback client (127.0.0.1:8420) & /burn contract
 │   ├── telemetry/           # Privacy telemetry singleton & Hard Burn controller
 │   └── popup/               # React 19 popup UI & PrivacyAuditModal
-└── tests/                   # Vitest suite (policy packs, ML client, ReDoS, Chromium E2E)
+├── tests/                   # Vitest suite (18 files, 125 tests: policy packs, ML, ReDoS, indicators, Chromium E2E)
+├── CHROMEWEBSTORE.md        # Chrome Web Store submission specification
+├── BUILD.md                 # Mozilla AMO source verification guide
+└── SAFARI-SUBMISSION.md     # Safari Web Extension packaging & Xcode conversion guide
 ```
