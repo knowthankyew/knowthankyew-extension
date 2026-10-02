@@ -113,6 +113,17 @@ The `xcrun safari-web-extension-converter` output is an Xcode project wrapping t
 - App Sandbox entitlements: The Xcode wrapper requires explicit entitlements for `com.apple.security.network.client` if Local Assist loopback is ever enabled in a Safari build. Consumer builds with `connect-src 'none'` require no network entitlements — document this explicitly.
 - `NSPrivacyTrackedDataTypes`: Apple's required privacy manifest must declare zero tracked data types for the consumer build. This is provably accurate and should be documented with a reference to the `bundle-invariants.test.ts` zero-egress verification.
 
+### Clean-State Proof of Work: Resolving the "Silent Failure vs. Clean Bill of Health" Dilemma
+
+A core vulnerability in consumer trust for client-side privacy extensions is the ambiguity of a green or "all good" verdict. When a scan yields zero violations (`riskScore === 0`), the user currently cannot distinguish between:
+1. **A Thorough Clean Bill of Health**: The engine extracted thousands of characters across multiple legal containers, segmented dozens of discrete clauses, and evaluated them against all compiled policy packs with zero violations.
+2. **A Silent Extraction Failure / Empty Scope**: The content script encountered text trapped inside a cross-origin `<iframe>`, an unexpanded dynamic accordion, a PDF/canvas viewer, or a DOM structure unreached by `dom-extractor.ts`, evaluating negligible text and falsely proclaiming "Clean".
+
+To address this, the v2.0 architecture requires an auditable **Proof of Work receipt** for every evaluation:
+- **Quantifiable Telemetry**: Expose extracted character counts, word estimates, evaluated segment counts, and inspected DOM selectors directly in the UI.
+- **Fail-Loud Low-Watermark Guard**: Introduce a minimum extraction threshold (`< 250` chars of substantive text). If below threshold, suppress the "Clean / Low Risk" green state and display an amber **"Sparse / Indeterminate Scope"** warning with actionable navigation diagnostics.
+- **Verifiable Ingest Preview**: Provide a collapsible, strictly sanitized on-page text sample verifying exactly what DOM content was passed to the regex engine.
+
 ---
 
 ## Milestone 7: Consumer Intelligence Arc — Plain Language, Structured Handoff & Remedy (`v2.x`)
@@ -128,6 +139,29 @@ Gemini Nano explains each finding in 1–2 plain conversational sentences, on-de
 - [x] Severity tiers simplified to plain language: **"Watch out"** / **"This is a problem"** / **"FYI"**
 - [x] `useEffect` async/await + `AbortController` for clean inference lifecycle (burn-safe)
 - [x] Calendar reminder link for `AUTO_RENEWAL` traps (25-day pre-renewal reminder, zero new permissions)
+
+### Phase 1.5 — Clean-State "Proof of Work" & Evaluation Transparency (`v2.0.1`)
+
+Give users verifiable evidence of what the engine actually inspected when a page passes clean, eliminating the ambiguity between a spotless contract and a failed DOM extraction.
+
+- [ ] **Clean-State "Audit Receipt" Drawer**: When `riskScore === 0` ("Clean / Low Risk"), replace the passive empty-state placeholder with an interactive, inspectable **Evaluation Breakdown / Proof of Work** card.
+- [ ] **Extraction Scope Telemetry**: Surface quantitative metrics so the user can verify the engine actively evaluated their document:
+  - Total characters and estimated word count evaluated (e.g. `14,820 chars · ~2,100 words`).
+  - Evaluated clause segments: count of discrete bounded clauses parsed by `segmentText()`.
+  - DOM container attribution: list of candidate selectors scanned (e.g. `<main>`, `article.legal`, `form.checkout`, `body`).
+  - Local scan latency: microsecond/millisecond execution time (`~35ms local execution`).
+- [ ] **Statutory & Category Pass Checklist**: Explicitly render the verified battery of checks so "all good" is provable rather than a black box:
+  - `✓ Automatic Renewal & Negative Option (ROSCA 15 U.S.C. § 8403 / State ARLs)`
+  - `✓ Mandatory Binding Arbitration & Jury Trial Waivers (FAA 9 U.S.C. § 2)`
+  - `✓ Unilateral Terms Modification & Illusory Discretion`
+  - `✓ Surveillance & Cross-Context Data Brokerage Disclosures`
+  - `✓ EU CRD / UK DMCC 2024 Pre-ticked Consent & Cooling-off Disclosures`
+- [ ] **Sanitized Text Preview Accordion**: An expandable "Inspect Evaluated Text" drawer displaying a scrollable, redacted snippet preview of what the engine ingested, enabling the user to confirm their specific agreement was processed.
+- [ ] **Sparse Text & Frame Warning Guard**: Distinguish between a genuinely clean contract and an unscanned page. If `scannedLength < 250` characters or no semantic clauses are detected:
+  - Suppress the green "Clean / Low Risk" banner and surface an amber **"Sparse Content / Indeterminate Scan"** advisory.
+  - Alert the user that contract text may reside in a cross-origin `<iframe>`, closed shadow DOM, canvas/PDF viewer, or collapsed accordion.
+  - Elevate discovered external contract links with a prominent 1-click "Open & Scan Contract" action.
+- [ ] **Zero-Egress & Amnesiac Conformance**: Proof of work telemetry and text previews remain strictly in ephemeral content script / popup memory, never leave the browser, and are purged completely on Nuclear Hard Burn (`KTY_HARD_BURN_DOM`).
 
 ### Phase 2 — Structured Handoff Protocol (`v2.1.0`)
 
