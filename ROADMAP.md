@@ -162,26 +162,5 @@ Cancellation and dispute letter template generation with ML fill-in and statutor
 
 ---
 
-## Architecture Notes for v2.0.0
-
-### Inline Indicators: Trust Model Shift
-
-The inline visual indicators feature represents a meaningful trust model change from v1.x. Content scripts currently *read* from the host page DOM passively. Inline indicators *write* to the host page DOM. Key design constraints for the v2.0 sprint:
-
-- **Shadow DOM (closed mode required)**: Host-page CSS must not leak into indicators. `attachShadow({ mode: 'closed' })` is the baseline. Open mode is explicitly not acceptable.
-- **MutationObserver resilience**: SPA frameworks (React, Next.js, Vue) re-render subtrees and will overwrite injected indicators. The existing `scanner.ts` MutationObserver infrastructure from v1.x should be extended to detect when indicator anchor elements are re-rendered and re-inject accordingly.
-- **Layout safety**: Injected elements must not shift host-page layout. `position: absolute` overlay approach preferred over layout-participating inserts.
-- **Selector targeting strategy**: Heuristics for locating predatory checkboxes (common `name` attribute patterns, adjacent text matching existing policy pack patterns) must be designed to fail silently — missing an indicator is acceptable; breaking a checkout form is not.
-
-### Safari: Build Pipeline Delta
-
-The `xcrun safari-web-extension-converter` output is an Xcode project wrapping the existing MV3 extension. Key deltas from the existing Chrome/Firefox pipeline:
-
-- `BroadcastChannel` support: Verify Safari 16+ support for the `kty_hard_burn` channel added in v1.6.0.
-- `browser_specific_settings` in manifest: Extend the existing Firefox `closeBundle()` hook in `vite.config.ts` to also emit a Safari-compatible manifest variant.
-- App Sandbox entitlements: The Xcode wrapper requires explicit entitlements for `com.apple.security.network.client` if Local Assist loopback is ever enabled in a Safari build. Consumer builds with `connect-src 'none'` require no network entitlements — document this explicitly.
-- `NSPrivacyTrackedDataTypes`: Apple's required privacy manifest must declare zero tracked data types for the consumer build. This is provably accurate and should be documented with a reference to the `bundle-invariants.test.ts` zero-egress verification.
-
----
-
 *Architecture and roadmap maintained by the `knowthankyew` project. Implementation coded by Gemini. Reviewed by Claude (Antigravity).*
+
