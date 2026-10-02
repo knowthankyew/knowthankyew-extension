@@ -67,6 +67,40 @@ export const OptionsApp: React.FC = () => {
 
   useEffect(() => {
     refreshDiagnostics();
+
+    let channel: BroadcastChannel | null = null;
+    let timerId: ReturnType<typeof setTimeout> | null = null;
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        channel = new BroadcastChannel('kty_hard_burn');
+        channel.onmessage = (event) => {
+          if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+            setBurned(true);
+            refreshDiagnostics();
+            if (timerId) clearTimeout(timerId);
+            timerId = setTimeout(() => {
+              setBurned(false);
+            }, 4000);
+          }
+        };
+      } catch {
+        // Non-fatal if BroadcastChannel is restricted or unsupported
+      }
+    }
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+      if (channel) {
+        try {
+          channel.close();
+        } catch {
+          // Ignore close errors
+        }
+      }
+    };
   }, [refreshDiagnostics]);
 
   const handleBurnAll = async () => {
