@@ -37,7 +37,7 @@ describe('Local Document Scanning Engine', () => {
     expect(result.riskScore).toBeGreaterThanOrEqual(70);
   });
 
-  it('returns clean zero-risk assessment for benign terms', () => {
+  it('returns clean zero-risk assessment for benign terms with full proof-of-work telemetry', () => {
     const document = `
       This is a one-time purchase software license.
       No recurring fees or subscriptions apply.
@@ -45,10 +45,44 @@ describe('Local Document Scanning Engine', () => {
       Disputes are subject to the jurisdiction of the state courts located in your county.
     `;
 
-    const result = scanDocumentText(document, 'honest-vendor.org');
+    const result = scanDocumentText(document, 'honest-vendor.org', ['main', 'article.legal']);
     expect(result.matches.length).toBe(0);
     expect(result.summary.critical).toBe(0);
     expect(result.summary.warning).toBe(0);
     expect(result.riskScore).toBe(0);
+
+    // Phase 1.5 Extraction Scope Telemetry assertions
+    expect(result.scannedLength).toBe(document.length);
+    expect(result.wordCount).toBe(Math.round(document.length / 5));
+    expect(result.segmentCount).toBeGreaterThanOrEqual(1);
+    expect(result.durationMs).toBeGreaterThanOrEqual(1);
+    expect(result.evaluatedRulesCount).toBeGreaterThan(0);
+    expect(result.inspectedContainers).toEqual(['main', 'article.legal']);
+    expect(result.sanitizedTextPreview).toBeDefined();
+    expect(result.extractedTextSnippet).toBe(result.sanitizedTextPreview);
+    expect(result.sanitizedTextPreview?.length).toBeLessThanOrEqual(2003);
+  });
+
+  it('bounds sanitizedTextPreview to 2,000 characters and redacts PII', () => {
+    const hugeDocument = 'Confidential agreement for user@example.com with payment 4111-2222-3333-4444. ' + 'Long clause content. '.repeat(200);
+    const result = scanDocumentText(hugeDocument, 'test-doc.com');
+
+    expect(result.sanitizedTextPreview).toContain('[EMAIL REDACTED]');
+    expect(result.sanitizedTextPreview).toContain('[CARD REDACTED]');
+    expect(result.sanitizedTextPreview).not.toContain('user@example.com');
+    expect(result.sanitizedTextPreview).not.toContain('4111-2222-3333-4444');
+    expect(result.sanitizedTextPreview?.endsWith('...')).toBe(true);
+    expect(result.sanitizedTextPreview?.length).toBeLessThanOrEqual(2003);
+  });
+
+  it('correctly discriminates sparse sub-threshold text (< 250 chars) from thorough documents', () => {
+    const sparseText = 'Short disclaimer: All sales are final. No refunds.';
+    const sparseResult = scanDocumentText(sparseText, 'sparse-checkout.com');
+    expect(sparseResult.scannedLength).toBeLessThan(250);
+    expect(sparseResult.riskScore).toBe(0);
+
+    const fullText = 'Terms of Service. '.repeat(30);
+    const fullResult = scanDocumentText(fullText, 'full-terms.com');
+    expect(fullResult.scannedLength).toBeGreaterThanOrEqual(250);
   });
 });

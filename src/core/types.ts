@@ -55,6 +55,14 @@ export interface PageScanResult {
   timestamp: string;
   urlDomain: string;
   scannedLength: number;
+  wordCount?: number;
+  segmentCount?: number;
+  inspectedContainers?: string[];
+  durationMs?: number;
+  evaluatedRulesCount?: number;
+  sanitizedTextPreview?: string;
+  /** @deprecated Alias for sanitizedTextPreview; prefer sanitizedTextPreview directly */
+  extractedTextSnippet?: string;
   matches: EvaluationMatch[];
   riskScore: number;
   summary: {

@@ -140,28 +140,28 @@ Gemini Nano explains each finding in 1–2 plain conversational sentences, on-de
 - [x] `useEffect` async/await + `AbortController` for clean inference lifecycle (burn-safe)
 - [x] Calendar reminder link for `AUTO_RENEWAL` traps (25-day pre-renewal reminder, zero new permissions)
 
-### Phase 1.5 — Clean-State "Proof of Work" & Evaluation Transparency (`v2.0.1`)
+### Phase 1.5 — Clean-State "Proof of Work" & Evaluation Transparency ✅ (`v2.0.1`)
 
 Give users verifiable evidence of what the engine actually inspected when a page passes clean, eliminating the ambiguity between a spotless contract and a failed DOM extraction.
 
-- [ ] **Clean-State "Audit Receipt" Drawer**: When `riskScore === 0` ("Clean / Low Risk"), replace the passive empty-state placeholder with an interactive, inspectable **Evaluation Breakdown / Proof of Work** card.
-- [ ] **Extraction Scope Telemetry**: Surface quantitative metrics so the user can verify the engine actively evaluated their document:
+- [x] **Clean-State "Audit Receipt" Drawer**: When `riskScore === 0` ("Clean / Low Risk"), replace the passive empty-state placeholder with an interactive, inspectable **Evaluation Breakdown / Proof of Work** card.
+- [x] **Extraction Scope Telemetry**: Surface quantitative metrics so the user can verify the engine actively evaluated their document:
   - Total characters and estimated word count evaluated (e.g. `14,820 chars · ~2,100 words`).
   - Evaluated clause segments: count of discrete bounded clauses parsed by `segmentText()`.
   - DOM container attribution: list of candidate selectors scanned (e.g. `<main>`, `article.legal`, `form.checkout`, `body`).
   - Local scan latency: microsecond/millisecond execution time (`~35ms local execution`).
-- [ ] **Statutory & Category Pass Checklist**: Explicitly render the verified battery of checks so "all good" is provable rather than a black box:
+- [x] **Statutory & Category Pass Checklist**: Explicitly render the verified battery of checks so "all good" is provable rather than a black box:
   - `✓ Automatic Renewal & Negative Option (ROSCA 15 U.S.C. § 8403 / State ARLs)`
   - `✓ Mandatory Binding Arbitration & Jury Trial Waivers (FAA 9 U.S.C. § 2)`
   - `✓ Unilateral Terms Modification & Illusory Discretion`
   - `✓ Surveillance & Cross-Context Data Brokerage Disclosures`
   - `✓ EU CRD / UK DMCC 2024 Pre-ticked Consent & Cooling-off Disclosures`
-- [ ] **Sanitized Text Preview Accordion**: An expandable "Inspect Evaluated Text" drawer displaying a scrollable, redacted snippet preview of what the engine ingested, enabling the user to confirm their specific agreement was processed.
-- [ ] **Sparse Text & Frame Warning Guard**: Distinguish between a genuinely clean contract and an unscanned page. If `scannedLength < 250` characters or no semantic clauses are detected:
+- [x] **Sanitized Text Preview Accordion**: An expandable "Inspect Evaluated Text" drawer displaying a scrollable, redacted snippet preview of what the engine ingested, enabling the user to confirm their specific agreement was processed.
+- [x] **Sparse Text & Frame Warning Guard**: Distinguish between a genuinely clean contract and an unscanned page. If `scannedLength < 250` characters or no semantic clauses are detected:
   - Suppress the green "Clean / Low Risk" banner and surface an amber **"Sparse Content / Indeterminate Scan"** advisory.
   - Alert the user that contract text may reside in a cross-origin `<iframe>`, closed shadow DOM, canvas/PDF viewer, or collapsed accordion.
   - Elevate discovered external contract links with a prominent 1-click "Open & Scan Contract" action.
-- [ ] **Zero-Egress & Amnesiac Conformance**: Proof of work telemetry and text previews remain strictly in ephemeral content script / popup memory, never leave the browser, and are purged completely on Nuclear Hard Burn (`KTY_HARD_BURN_DOM`).
+- [x] **Zero-Egress & Amnesiac Conformance**: Proof of work telemetry and text previews remain strictly in ephemeral content script / popup memory, never leave the browser, and are purged completely on Nuclear Hard Burn (`KTY_HARD_BURN_DOM`).
 
 ### Phase 2 — Structured Handoff Protocol (`v2.1.0`)
 

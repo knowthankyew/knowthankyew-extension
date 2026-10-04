@@ -3,6 +3,8 @@ import { PageScanResult } from '../core/types';
 import { TrapCard } from './components/TrapCard';
 import { BurnButton } from './components/BurnButton';
 import { DiscoveredLinksCard } from './components/DiscoveredLinksCard';
+import { AuditReceiptCard } from './components/AuditReceiptCard';
+import { SparseScanWarning } from './components/SparseScanWarning';
 import { telemetry, recordScanMetrics } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
@@ -159,6 +161,13 @@ export const App: React.FC = () => {
           timestamp: new Date().toISOString(),
           urlDomain: 'example.com',
           scannedLength: 3420,
+          wordCount: 684,
+          segmentCount: 12,
+          inspectedContainers: ['main', 'form.checkout'],
+          durationMs: 38,
+          evaluatedRulesCount: 42,
+          sanitizedTextPreview: 'Your subscription will automatically renew each month unless you cancel at least 48 hours prior to billing. You and Company agree that any dispute arising out of this agreement shall be resolved exclusively by binding arbitration.',
+          extractedTextSnippet: 'Your subscription will automatically renew each month unless you cancel at least 48 hours prior to billing. You and Company agree that any dispute arising out of this agreement shall be resolved exclusively by binding arbitration.',
           riskScore: 85,
           summary: { critical: 2, warning: 1, info: 0 },
           limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation.',
@@ -443,141 +452,156 @@ export const App: React.FC = () => {
           </div>
         ) : scanResult ? (
           <>
-            {/* Risk Banner */}
-            <div
-              style={{
-                backgroundColor: scanResult.riskScore > 50 ? 'rgba(239, 68, 68, 0.15)' : '#131b2e',
-                border: `1px solid ${scanResult.riskScore > 50 ? '#ef4444' : '#334155'}`,
-                borderRadius: '6px',
-                padding: '12px',
-                marginBottom: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase' }}>
-                  Risk Assessment
-                </div>
-                <div
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 800,
-                    color: scanResult.riskScore > 50 ? '#f87171' : '#34d399',
-                  }}
-                >
-                  {scanResult.riskScore > 70
-                    ? 'Predatory Terms Detected'
-                    : scanResult.riskScore > 30
-                    ? 'Moderate Risk'
-                    : 'Clean / Low Risk'}
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span
-                  style={{
-                    fontSize: '20px',
-                    fontWeight: 900,
-                    color: scanResult.riskScore > 50 ? '#ef4444' : '#10b981',
-                    fontFamily: 'ui-monospace, monospace',
-                  }}
-                >
-                  {scanResult.riskScore}
-                </span>
-                <span style={{ fontSize: '11px', color: '#64748b' }}>/100</span>
-              </div>
-            </div>
+            {(() => {
+              const isSparse = scanResult.scannedLength < 250;
+              const isClean = scanResult.matches.length === 0;
+              const isIndeterminate = isClean && isSparse;
 
-            {/* Finding Stats */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '8px',
-                marginBottom: '14px',
-                fontSize: '11px',
-                fontWeight: 600,
-              }}
-            >
-              <div
-                style={{
-                  flex: 1,
-                  padding: '6px 8px',
-                  backgroundColor: '#131b2e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '4px',
-                  textAlign: 'center',
-                }}
-              >
-                <span style={{ color: '#ef4444', marginRight: '4px' }}>●</span>
-                {scanResult.summary.critical} Watch out
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  padding: '6px 8px',
-                  backgroundColor: '#131b2e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '4px',
-                  textAlign: 'center',
-                }}
-              >
-                <span style={{ color: '#f59e0b', marginRight: '4px' }}>●</span>
-                {scanResult.summary.warning} Problem
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  padding: '6px 8px',
-                  backgroundColor: '#131b2e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '4px',
-                  textAlign: 'center',
-                }}
-              >
-                <span style={{ color: '#38bdf8', marginRight: '4px' }}>●</span>
-                {scanResult.matches.length} Total
-              </div>
-            </div>
+              return (
+                <>
+                  {/* Risk Banner */}
+                  <div
+                    style={{
+                      backgroundColor: isIndeterminate
+                        ? 'rgba(245, 158, 11, 0.15)'
+                        : scanResult.riskScore > 50
+                        ? 'rgba(239, 68, 68, 0.15)'
+                        : '#131b2e',
+                      border: `1px solid ${
+                        isIndeterminate
+                          ? '#f59e0b'
+                          : scanResult.riskScore > 50
+                          ? '#ef4444'
+                          : '#334155'
+                      }`,
+                      borderRadius: '6px',
+                      padding: '12px',
+                      marginBottom: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase' }}>
+                        {isIndeterminate ? 'Scope Advisory' : 'Risk Assessment'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: '16px',
+                          fontWeight: 800,
+                          color: isIndeterminate
+                            ? '#fbbf24'
+                            : scanResult.riskScore > 50
+                            ? '#f87171'
+                            : '#34d399',
+                        }}
+                      >
+                        {isIndeterminate
+                          ? 'Sparse Content / Indeterminate Scan'
+                          : scanResult.riskScore > 70
+                          ? 'Predatory Terms Detected'
+                          : scanResult.riskScore > 30
+                          ? 'Moderate Risk'
+                          : 'Clean / Low Risk'}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span
+                        style={{
+                          fontSize: '20px',
+                          fontWeight: 900,
+                          color: isIndeterminate
+                            ? '#f59e0b'
+                            : scanResult.riskScore > 50
+                            ? '#ef4444'
+                            : '#10b981',
+                          fontFamily: 'ui-monospace, monospace',
+                        }}
+                      >
+                        {isIndeterminate ? '—' : scanResult.riskScore}
+                      </span>
+                      <span style={{ fontSize: '11px', color: isIndeterminate ? '#f59e0b' : '#64748b' }}>
+                        /100
+                      </span>
+                    </div>
+                  </div>
 
-            {/* Discovered Governing Agreements */}
-            {scanResult.discoveredLinks && scanResult.discoveredLinks.length > 0 && (
-              <DiscoveredLinksCard
-                links={scanResult.discoveredLinks}
-                onNavigate={handleNavigateToContract}
-              />
-            )}
+                  {/* Finding Stats */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '8px',
+                      marginBottom: '14px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        backgroundColor: '#131b2e',
+                        border: '1px solid #1e293b',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#ef4444', marginRight: '4px' }}>●</span>
+                      {scanResult.summary.critical} Watch out
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        backgroundColor: '#131b2e',
+                        border: '1px solid #1e293b',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#f59e0b', marginRight: '4px' }}>●</span>
+                      {scanResult.summary.warning} Problem
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        padding: '6px 8px',
+                        backgroundColor: '#131b2e',
+                        border: '1px solid #1e293b',
+                        borderRadius: '4px',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <span style={{ color: '#38bdf8', marginRight: '4px' }}>●</span>
+                      {scanResult.matches.length} Total
+                    </div>
+                  </div>
 
-            {/* Clause Findings */}
-            {scanResult.matches.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '24px 16px',
-                  color: '#94a3b8',
-                  fontSize: '12px',
-                  backgroundColor: '#131b2e',
-                  border: '1px solid #1e293b',
-                  borderRadius: '6px',
-                  lineHeight: 1.5,
-                }}
-              >
-                <div style={{ fontSize: '20px', marginBottom: '8px' }}>🔍</div>
-                <div style={{ color: '#f1f5f9', fontWeight: 600, marginBottom: '6px' }}>
-                  No Matched Traps Detected in Visible Text
-                </div>
-                <div style={{ fontSize: '11px', color: '#64748b' }}>
-                  {scanResult.limitationsNotice}
-                </div>
-                <div style={{ fontSize: '10.5px', color: '#38bdf8', marginTop: '6px' }}>
-                  Tip: If terms are hosted on a separate linked page, navigate to that tab and click Rescan.
-                </div>
-              </div>
-            ) : (
-              scanResult.matches.map((match) => (
-                <TrapCard key={match.ruleId} match={match} sourceDomain={activeHostname} />
-              ))
-            )}
+                  {/* Discovered Governing Agreements (non-sparse clean or with findings) */}
+                  {!isIndeterminate && scanResult.discoveredLinks && scanResult.discoveredLinks.length > 0 && (
+                    <DiscoveredLinksCard
+                      links={scanResult.discoveredLinks}
+                      onNavigate={handleNavigateToContract}
+                    />
+                  )}
+
+                  {/* Clause Findings / Proof of Work Receipt / Sparse Content Warning */}
+                  {isIndeterminate ? (
+                    <SparseScanWarning
+                      scanResult={scanResult}
+                      onNavigate={handleNavigateToContract}
+                    />
+                  ) : isClean ? (
+                    <AuditReceiptCard scanResult={scanResult} />
+                  ) : (
+                    scanResult.matches.map((match) => (
+                      <TrapCard key={match.ruleId} match={match} sourceDomain={activeHostname} />
+                    ))
+                  )}
+                </>
+              );
+            })()}
 
             {/* Browser Support & Local ML Upgrade Notice */}
             {(nanoState === 'unsupported-browser' || nanoState === 'unsupported-hardware') && (

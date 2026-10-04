@@ -9,7 +9,7 @@ export const ALL_RULES: DetectionRule[] = COMPILED_POLICY_RULES;
  */
 export function sanitizeSnippet(snippet: string): string {
   return snippet
-    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL REDACTED]')
+    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '[EMAIL REDACTED]')
     .replace(/\b(?:\d[ -]*?){13,16}\b/g, '[CARD REDACTED]')
     .replace(/\s+/g, ' ')
     .trim();
@@ -32,7 +32,12 @@ export function segmentText(rawText: string): string[] {
  * Scans provided text paragraphs against statutory rule packs.
  * Runs 100% locally with zero external network dispatch.
  */
-export function scanDocumentText(text: string, domain = 'current-page'): PageScanResult {
+export function scanDocumentText(
+  text: string,
+  domain = 'current-page',
+  inspectedContainers?: string[]
+): PageScanResult {
+  const startTime = performance.now();
   const segments = segmentText(text);
   const matches: EvaluationMatch[] = [];
   const matchedRuleIds = new Set<string>();
@@ -75,10 +80,24 @@ export function scanDocumentText(text: string, domain = 'current-page'): PageSca
   const rawScore = (summary.critical * 35) + (summary.warning * 15) + (summary.info * 5);
   const riskScore = Math.min(100, Math.max(0, rawScore));
 
+  const durationMs = Math.max(1, Math.round(performance.now() - startTime));
+  const wordCount = Math.round(text.length / 5);
+  const sanitizedFull = sanitizeSnippet(text);
+  const sanitizedTextPreview = sanitizedFull.length > 2000
+    ? sanitizedFull.slice(0, 2000) + '...'
+    : sanitizedFull;
+
   return {
     timestamp: new Date().toISOString(),
     urlDomain: domain,
     scannedLength: text.length,
+    wordCount,
+    segmentCount: segments.length,
+    inspectedContainers: inspectedContainers && inspectedContainers.length > 0 ? inspectedContainers : ['body'],
+    durationMs,
+    evaluatedRulesCount: ALL_RULES.length,
+    sanitizedTextPreview,
+    extractedTextSnippet: sanitizedTextPreview,
     matches,
     riskScore,
     summary,

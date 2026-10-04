@@ -11,6 +11,8 @@ node_modules
 dist
 dist-firefox
 dist-safari
+dist-local-assist
+dist-ml-e2e
 dist-test-*
 dist-ssr
 *.local

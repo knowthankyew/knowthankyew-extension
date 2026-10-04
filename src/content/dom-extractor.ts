@@ -6,10 +6,35 @@
  */
 export const MAX_EXTRACTED_CHAR_CEILING = 50_000;
 
-export function extractPageLegalText(
+export interface ExtractedLegalContent {
+  text: string;
+  inspectedContainers: string[];
+}
+
+function describeContainer(el: Element): string {
+  const tag = el.tagName ? el.tagName.toLowerCase() : 'element';
+  if (tag === 'body') return 'body';
+
+  const meaningfulClasses = Array.from(el.classList || []).filter(c =>
+    ['terms', 'legal', 'privacy', 'disclaimer', 'checkout', 'subscription', 'agreement', 'modal'].includes(c)
+  );
+
+  if (meaningfulClasses.length > 0) {
+    return `${tag}.${meaningfulClasses.join('.')}`;
+  }
+  if (el.id && ['terms', 'privacy', 'legal'].includes(el.id)) {
+    return `${tag}#${el.id}`;
+  }
+  if (el.getAttribute && (el.getAttribute('role') === 'dialog' || el.getAttribute('role') === 'main')) {
+    return `[role="${el.getAttribute('role')}"]`;
+  }
+  return tag;
+}
+
+export function extractPageLegalContent(
   root?: Element | Document,
   visited?: Set<Node>
-): string {
+): ExtractedLegalContent {
   const targetDoc = typeof document !== 'undefined' ? document : null;
   let targetRoot: Element | null = null;
   if (root) {
@@ -21,7 +46,7 @@ export function extractPageLegalText(
   } else {
     targetRoot = targetDoc?.body || null;
   }
-  if (!targetRoot) return '';
+  if (!targetRoot) return { text: '', inspectedContainers: [] };
 
   // Elements likely to contain contracts, fine print, checkout forms, and modals
   const selectors = [
@@ -82,6 +107,11 @@ export function extractPageLegalText(
     disjointNodes.push(node);
   }
 
+  const inspectedContainers = Array.from(new Set(disjointNodes.map(describeContainer)));
+  if (inspectedContainers.length === 0) {
+    inspectedContainers.push('body');
+  }
+
   const collectedStrings: string[] = [];
 
   for (const node of disjointNodes) {
@@ -108,10 +138,18 @@ export function extractPageLegalText(
 
   // Combine and deduplicate redundant spans with strict 50k safety ceiling
   const combined = collectedStrings.join('\n\n');
-  if (combined.length > MAX_EXTRACTED_CHAR_CEILING) {
-    return combined.slice(0, MAX_EXTRACTED_CHAR_CEILING);
-  }
-  return combined;
+  const text = combined.length > MAX_EXTRACTED_CHAR_CEILING
+    ? combined.slice(0, MAX_EXTRACTED_CHAR_CEILING)
+    : combined;
+
+  return { text, inspectedContainers };
+}
+
+export function extractPageLegalText(
+  root?: Element | Document,
+  visited?: Set<Node>
+): string {
+  return extractPageLegalContent(root, visited).text;
 }
 
 // Alias for spec compatibility

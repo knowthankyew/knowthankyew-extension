@@ -1,4 +1,4 @@
-import { extractPageLegalText } from './dom-extractor';
+import { extractPageLegalText, extractPageLegalContent } from './dom-extractor';
 import { discoverLegalLinks } from './link-detector';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
@@ -53,12 +53,12 @@ export function resetTokenBucket(): void {
  * Caches the result and broadcasts the summary to the background service worker.
  */
 export function executeScan(): PageScanResult {
-  const text = extractPageLegalText();
+  const { text, inspectedContainers } = extractPageLegalContent();
   const hostname = (typeof window !== 'undefined' && window.location?.hostname) || 'current-page';
   const currentHref = (typeof window !== 'undefined' && window.location?.href) || '';
   const discoveredLinks = discoverLegalLinks(typeof document !== 'undefined' ? document : undefined, currentHref);
 
-  const result: PageScanResult = scanDocumentText(text, hostname);
+  const result: PageScanResult = scanDocumentText(text, hostname, inspectedContainers);
   result.discoveredLinks = discoveredLinks;
   cachedScanResult = result;
   lastExtractedTextLength = text.length;

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync, rmSync, existsSync } from 'fs';
+import { readFileSync, readdirSync, statSync, rmSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -7,10 +7,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure fresh standard production build exists for testing
-    if (!existsSync(distDir) || !existsSync(resolve(distDir, 'manifest.json')) || !existsSync(resolve(distDir, 'background/service-worker.js'))) {
-      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
-    }
+    // Unconditionally ensure fresh, uncontaminated standard production build exists for testing
+    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
   });
 
   function getJsFilesRecursively(dir: string): string[] {
