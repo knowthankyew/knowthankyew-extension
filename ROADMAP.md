@@ -173,16 +173,16 @@ Define the intent/findings/summary JSON schema and wire the extension popup to o
 - [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `DATA_SHARING` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
 - [x] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
 
-### Phase 3 — Destination Tools Receive Context (`v2.2.0`)
+### Phase 3 — Destination Tools Receive Context ✅ (`v2.2.0`)
 
 `bill-of-rights-bot`, `careCheck`, and `lease-audit` detect the handoff payload and skip their intake flow, jumping directly to findings display.
 
-- [ ] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `sessionStorage` on mount; returns typed payload or `null`
-- [ ] **Intake bypass in `bill-of-rights-bot`**: When hook returns a payload, render findings panel directly with `findings[]` pre-populated; intake dropzone is replaced by the domain banner + "Back to scan" affordance
-- [ ] **Intake bypass in `careCheck`**: Same pattern — payload maps to itemized line items where applicable; graceful fallback if category mismatch
-- [ ] **Intake bypass in `lease-audit`**: Arbitration and unilateral-change findings map to lease clause categories; tenant tool renders matched clauses inline
-- [ ] **Privacy invariant**: `KTY_HANDOFF_PAYLOAD` must pass through `SAFE_ALLOWLIST_KEYS` sanitization before being written to `sessionStorage` — no raw clause text beyond the already-sanitized `matchedSnippet` (already redacted by `sanitizeSnippet()` in engine)
-- [ ] **Hard Burn propagation**: `KTY_HARD_BURN_DOM` broadcast must also clear `sessionStorage['kty_handoff']` in destination tool tabs
+- [x] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `sessionStorage` on mount; returns typed payload or `null`
+- [x] **Intake bypass in `bill-of-rights-bot`**: When hook returns a payload, render findings panel directly with `findings[]` pre-populated; intake dropzone is replaced by the domain banner + "Back to scan" affordance
+- [x] **Intake bypass in `careCheck`**: Same pattern — payload maps to itemized line items where applicable; graceful fallback if category mismatch
+- [x] **Intake bypass in `lease-audit`**: Arbitration and unilateral-change findings map to lease clause categories; tenant tool renders matched clauses inline
+- [x] **Privacy invariant**: `KTY_HANDOFF_PAYLOAD` must pass through `SAFE_ALLOWLIST_KEYS` sanitization before being written to `sessionStorage` — no raw clause text beyond the already-sanitized `matchedSnippet` (already redacted by `sanitizeSnippet()` in engine)
+- [x] **Hard Burn propagation**: `KTY_HARD_BURN_DOM` broadcast must also clear `sessionStorage['kty_handoff']` in destination tool tabs
 
 ### Phase 4 — Remedy Artifacts (`v2.3.0+`)
 
