@@ -99,7 +99,7 @@ jobs:
               - Official build submitted to the Chrome Web Store.
             - **Developer Local Assist Edition**: `knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip`
               - Includes loopback client (`http://127.0.0.1:8420`) for AppSec researchers running local LLMs (Ollama, llama.cpp, FTaaS).
-              - See `SECURITY.md` for the explicit trust delta and security boundary.
+              - See `docs/SECURITY.md` for the explicit trust delta and security boundary.
 
             ### Installation (Unpacked Developer Mode)
             1. Download your preferred package zip below

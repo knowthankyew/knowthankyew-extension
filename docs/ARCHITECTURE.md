@@ -124,8 +124,14 @@ knowthankyew-extension/
 │   ├── ml/                  # Local ML loopback client (127.0.0.1:8420) & /burn contract
 │   ├── telemetry/           # Privacy telemetry singleton & Hard Burn controller
 │   └── popup/               # React 19 popup UI & PrivacyAuditModal
-├── tests/                   # Vitest suite (18 files, 125 tests: policy packs, ML, ReDoS, indicators, Chromium E2E)
-├── CHROMEWEBSTORE.md        # Chrome Web Store submission specification
-├── BUILD.md                 # Mozilla AMO source verification guide
-└── SAFARI-SUBMISSION.md     # Safari Web Extension packaging & Xcode conversion guide
+├── tests/                   # Vitest suite (policy packs, ML, ReDoS, indicators, handoff, Chromium E2E)
+└── docs/                    # Technical documentation, store specs, and GitHub Pages
+    ├── ARCHITECTURE.md      # Architecture, state machines & security invariants
+    ├── BUILD.md             # Mozilla AMO source verification guide
+    ├── CHROMEWEBSTORE.md    # Chrome Web Store submission specification
+    ├── HOW-TO-USE.md        # Plain-English user guide & onboarding
+    ├── LOCAL-ML-SETUP.md    # Local ML inference sidecar setup guide
+    ├── SAFARI-SUBMISSION.md # Safari Web Extension packaging & Xcode conversion guide
+    ├── SECURITY.md          # Threat model & vulnerability disclosure
+    └── senior-review.md     # Production readiness audit & verification log
 ```

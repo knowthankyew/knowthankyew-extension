@@ -130,8 +130,11 @@ xcrun safari-web-extension-converter dist-safari --project-name "KnowThankYew"
 - **App Sandbox Entitlements**: Zero network entitlements required. `com.apple.security.network.client` is **NOT** included in the consumer build because all analysis runs 100% locally under `connect-src 'none'`.
 - **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyTrackedDataTypes: []` (zero tracked data types), verified by physical bundle invariant testing.
 
-- **Architecture Details**: See [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-- **Store Publication Spec**: See [`CHROMEWEBSTORE.md`](./CHROMEWEBSTORE.md)
+- **Architecture Details**: See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- **Store Publication Spec**: See [`docs/CHROMEWEBSTORE.md`](./docs/CHROMEWEBSTORE.md)
+- **User Guide**: See [`docs/HOW-TO-USE.md`](./docs/HOW-TO-USE.md)
+- **Safari Submission Guide**: See [`docs/SAFARI-SUBMISSION.md`](./docs/SAFARI-SUBMISSION.md)
+- **Security Policy**: See [`docs/SECURITY.md`](./docs/SECURITY.md)
 - **Product Roadmap**: See [`ROADMAP.md`](./ROADMAP.md)
 - **Legal Notice & Attributions**: See [`NOTICE.md`](./NOTICE.md)
 

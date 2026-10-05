@@ -744,7 +744,7 @@ export const App: React.FC = () => {
                     → How to enable on Chrome
                   </a>
                   <a
-                    href="https://github.com/knowthankyew/knowthankyew-extension/blob/main/LOCAL-ML-SETUP.md"
+                    href="https://github.com/knowthankyew/knowthankyew-extension/blob/main/docs/LOCAL-ML-SETUP.md"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 500 }}
