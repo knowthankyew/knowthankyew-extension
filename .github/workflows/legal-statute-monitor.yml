@@ -34,9 +34,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Verify TypeScript & Policy ReDoS Test Suite
+      - name: Build & Verify TypeScript & Test Suite
         run: |
           npx tsc --noEmit
+          npm run build
           npm test
 
       - name: Query Federal Register, EUR-Lex & UK Regulatory APIs
