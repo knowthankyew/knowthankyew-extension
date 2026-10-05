@@ -163,15 +163,15 @@ Give users verifiable evidence of what the engine actually inspected when a page
   - Elevate discovered external contract links with a prominent 1-click "Open & Scan Contract" action.
 - [x] **Zero-Egress & Amnesiac Conformance**: Proof of work telemetry and text previews remain strictly in ephemeral content script / popup memory, never leave the browser, and are purged completely on Nuclear Hard Burn (`KTY_HARD_BURN_DOM`).
 
-### Phase 2 — Structured Handoff Protocol (`v2.1.0`)
+### Phase 2 — Structured Handoff Protocol ✅ (`v2.1.0`)
 
 Define the intent/findings/summary JSON schema and wire the extension popup to open portfolio destination tools with pre-loaded context. No new backend. No new infrastructure.
 
-- [ ] **Define `KTY_HANDOFF_PAYLOAD` schema**: structured JSON envelope containing `{ domain, scanTimestamp, findings: EvaluationMatch[], primaryLegalLink: DiscoveredLegalLink | null, summary: PageScanResult['summary'] }`
-- [ ] **`postMessage` bridge**: Extension popup serializes the payload into a `sessionStorage`-safe blob and opens the destination tool URL with a `?kty_handoff=1` flag; destination reads via `window.addEventListener('message', ...)` or `sessionStorage` key with HMAC integrity check
-- [ ] **Zero persistent storage for handoff**: Payload lives in `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
-- [ ] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `DATA_SHARING` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
-- [ ] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
+- [x] **Define `KTY_HANDOFF_PAYLOAD` schema**: structured JSON envelope containing `{ domain, scanTimestamp, findings: EvaluationMatch[], primaryLegalLink: DiscoveredLegalLink | null, summary: PageScanResult['summary'] }`
+- [x] **`postMessage` bridge**: Extension popup serializes the payload into a `sessionStorage`-safe blob and opens the destination tool URL with a `?kty_handoff=1` flag; destination reads via `window.addEventListener('message', ...)` or `sessionStorage` key with HMAC integrity check
+- [x] **Zero persistent storage for handoff**: Payload lives in `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
+- [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `DATA_SHARING` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
+- [x] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
 
 ### Phase 3 — Destination Tools Receive Context (`v2.2.0`)
 

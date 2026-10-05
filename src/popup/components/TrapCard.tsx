@@ -7,9 +7,10 @@ import { ClauseSummary } from '../../ml/nano-types';
 interface TrapCardProps {
   match: EvaluationMatch;
   sourceDomain?: string;
+  onHandoff?: (match: EvaluationMatch) => void;
 }
 
-export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain }) => {
+export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain, onHandoff }) => {
   const [expanded, setExpanded] = useState(false);
   const [nanoSummary, setNanoSummary] = useState<ClauseSummary | null>(null);
 
@@ -167,8 +168,17 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain }) => {
         </div>
       )}
 
-      <div>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '8px',
+        }}
+      >
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           style={{
             background: 'none',
@@ -183,6 +193,30 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain }) => {
         >
           {expanded ? '▲ Hide Detected Clause Snippet' : '▼ Inspect Local Matched Text'}
         </button>
+
+        {onHandoff && (
+          <button
+            type="button"
+            onClick={() => onHandoff(match)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 8px',
+              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+              border: '1px solid #0284c7',
+              borderRadius: '4px',
+              color: '#38bdf8',
+              fontSize: '11px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+          >
+            Defend Rights →
+          </button>
+        )}
+      </div>
 
         {expanded && (
           <div
@@ -202,7 +236,6 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain }) => {
             "{match.matchedSnippet}"
           </div>
         )}
-      </div>
     </div>
   );
 };

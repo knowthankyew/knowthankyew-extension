@@ -70,6 +70,15 @@ export async function hardBurnAllData(): Promise<void> {
     await chrome.action.setBadgeText({ text: '' });
   }
 
+  // 4. Clear ephemeral handoff payload from sessionStorage.
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem('kty_handoff');
+    } catch {
+      // Non-fatal if sessionStorage is restricted
+    }
+  }
+
   // 4. Command every open tab to dereference DOM state and stop observation.
   // Dual-transport amnesia:
   // Primary transport: chrome.tabs.sendMessage across all queryable tabs.

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "KnowThankYew Reality Engine",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Zero-egress consumer advocate detecting hidden subscription traps, arbitration waivers, and dark patterns in real-time.",
   "options_ui": {
     "page": "options.html",

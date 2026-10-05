@@ -105,3 +105,5 @@ export interface PolicyPack {
   description: string;
   rules: DeclarativeRule[];
 }
+
+export * from './handoff-types';

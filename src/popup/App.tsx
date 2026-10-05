@@ -10,6 +10,9 @@ import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
 import { ChromePromptAPIAdapter } from '../ml/chrome-ai-adapter';
 import { NanoCapabilityState } from '../ml/nano-types';
+import { EvaluationMatch } from '../core/types';
+import { resolveDestinationTool, buildHandoffPayload } from '../core/handoff';
+import { dispatchHandoffToDestination } from './handoff-bridge';
 
 export const App: React.FC = () => {
   const [scanning, setScanning] = useState(false);
@@ -19,6 +22,7 @@ export const App: React.FC = () => {
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [isLocalMLActive, setIsLocalMLActive] = useState(false);
   const [nanoState, setNanoState] = useState<NanoCapabilityState | null>(null);
+  const [handoffStatus, setHandoffStatus] = useState<string | null>(null);
 
   /**
    * Injects the content script into a tab and retries the scan request.
@@ -272,8 +276,27 @@ export const App: React.FC = () => {
     window.open(targetUrl, '_blank');
   };
 
+  const handleBatchHandoff = async () => {
+    if (!scanResult || scanResult.matches.length === 0) return;
+    const targetTool = resolveDestinationTool(scanResult.matches, activeHostname);
+    const payload = buildHandoffPayload(scanResult);
+    await dispatchHandoffToDestination(payload);
+    setHandoffStatus(`Launched ${targetTool.name}`);
+    setTimeout(() => setHandoffStatus(null), 3000);
+  };
+
+  const handleSingleHandoff = async (match: EvaluationMatch) => {
+    if (!scanResult) return;
+    const targetTool = resolveDestinationTool([match], activeHostname);
+    const payload = buildHandoffPayload(scanResult, targetTool.id, match);
+    await dispatchHandoffToDestination(payload);
+    setHandoffStatus(`Launched ${targetTool.name} for ${match.title}`);
+    setTimeout(() => setHandoffStatus(null), 3000);
+  };
+
   const handleBurnCompleted = () => {
     setScanResult(null);
+    setHandoffStatus(null);
     setErrorMessage('All session data and local storage have been incinerated.');
   };
 
@@ -595,9 +618,95 @@ export const App: React.FC = () => {
                   ) : isClean ? (
                     <AuditReceiptCard scanResult={scanResult} />
                   ) : (
-                    scanResult.matches.map((match) => (
-                      <TrapCard key={match.ruleId} match={match} sourceDomain={activeHostname} />
-                    ))
+                    <>
+                      {/* Phase 2: Actionable Advocate Handoff Banner */}
+                      {(() => {
+                        const targetTool = resolveDestinationTool(scanResult.matches, activeHostname);
+                        return (
+                          <div
+                            style={{
+                              backgroundColor: '#0f172a',
+                              border: '1px solid #0284c7',
+                              borderRadius: '6px',
+                              padding: '10px 12px',
+                              marginBottom: '12px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 700, color: '#f1f5f9' }}>
+                                Take Action: Dispute or Cancel
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: '10px',
+                                  padding: '2px 6px',
+                                  backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                                  color: '#38bdf8',
+                                  borderRadius: '4px',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {targetTool.name}
+                              </span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: '11px', color: '#94a3b8', lineHeight: 1.35 }}>
+                              {targetTool.tagline}. Pre-loads sanitized findings into an advocate workflow with zero cloud storage.
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                              <button
+                                type="button"
+                                onClick={handleBatchHandoff}
+                                style={{
+                                  backgroundColor: '#0284c7',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  padding: '6px 12px',
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px',
+                                }}
+                              >
+                                Launch Rights Advocate →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {handoffStatus && (
+                        <div
+                          style={{
+                            padding: '6px 10px',
+                            marginBottom: '10px',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            border: '1px solid #0284c7',
+                            borderRadius: '4px',
+                            color: '#38bdf8',
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            textAlign: 'center',
+                          }}
+                        >
+                          ✓ {handoffStatus}
+                        </div>
+                      )}
+
+                      {scanResult.matches.map((match) => (
+                        <TrapCard
+                          key={match.ruleId}
+                          match={match}
+                          sourceDomain={activeHostname}
+                          onHandoff={handleSingleHandoff}
+                        />
+                      ))}
+                    </>
                   )}
                 </>
               );

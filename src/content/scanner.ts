@@ -274,6 +274,15 @@ export function handleHardBurnDOM(): void {
   // Remove any active Closed Shadow DOM inline indicator badges
   removeAllIndicators();
 
+  // Clear ephemeral handoff state in sessionStorage if present
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem('kty_handoff');
+    } catch {
+      // Non-fatal if sessionStorage is blocked
+    }
+  }
+
   // Close BroadcastChannel to release event handlers and isolate frame.
   // Note: Nulling burnBroadcastChannel here is intentional to achieve true amnesia.
   // If the page remains open and the scanner is subsequently re-injected or rescanned,
