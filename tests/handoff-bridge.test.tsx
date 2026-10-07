@@ -75,8 +75,8 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
   // -------------------------------------------------------------
   // Test 1: dispatchHandoffToDestination with Chrome Extension APIs
   // -------------------------------------------------------------
-  it('dispatches handoff via chrome.tabs.create and executes ephemeral sessionStorage script', async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'https://billofrightsbot.knowthankyew.org?kty_handoff=1' });
+  it('dispatches handoff via chrome.tabs.create and navigates to target repository', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'https://github.com/knowthankyew/bill-of-rights-bot' });
     const mockExecuteScript = vi.fn().mockResolvedValue([{ result: undefined }]);
 
     (globalThis as any).chrome = {
@@ -88,15 +88,10 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
     const result = await dispatchHandoffToDestination(payload);
 
     expect(result.success).toBe(true);
-    expect(result.url).toBe('https://billofrightsbot.knowthankyew.org?kty_handoff=1');
+    expect(result.url).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
     expect(mockCreate).toHaveBeenCalledWith({
-      url: 'https://billofrightsbot.knowthankyew.org?kty_handoff=1',
+      url: 'https://github.com/knowthankyew/bill-of-rights-bot',
       active: true,
-    });
-    expect(mockExecuteScript).toHaveBeenCalledWith({
-      target: { tabId: 101 },
-      func: expect.any(Function),
-      args: [KTY_HANDOFF_SESSION_KEY, JSON.stringify(payload)],
     });
   });
 
@@ -202,7 +197,7 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       launchButton!.click();
     });
 
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://billofrightsbot.knowthankyew.org?kty_handoff=1', '_blank');
+    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank');
     const stored = sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY);
     expect(stored).toBeTruthy();
     expect(JSON.parse(stored!).targetTool).toBe('bill-of-rights-bot');

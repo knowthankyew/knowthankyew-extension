@@ -24,7 +24,7 @@ export async function dispatchHandoffToDestination(
   if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
     try {
       const newTab = await chrome.tabs.create({ url: targetUrl, active: true });
-      if (newTab.id && chrome.scripting?.executeScript) {
+      if (!targetUrl.startsWith('https://github.com/') && newTab.id && chrome.scripting?.executeScript) {
         try {
           await chrome.scripting.executeScript({
             target: { tabId: newTab.id },

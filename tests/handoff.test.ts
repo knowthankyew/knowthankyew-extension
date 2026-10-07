@@ -27,7 +27,7 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
       expect(tool.id).toBe(id);
       expect(tool.name).toBeTruthy();
       expect(tool.tagline).toBeTruthy();
-      expect(tool.productionUrl).toMatch(/^https:\/\/[a-z0-9.-]+\.knowthankyew\.org$/);
+      expect(tool.productionUrl).toMatch(/^https:\/\/github\.com\/knowthankyew\/[a-z0-9-]+$/);
       expect(tool.localDevUrl).toMatch(/^http:\/\/localhost:\d+$/);
     }
   });
@@ -120,9 +120,9 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
   // -------------------------------------------------------------
   // Test 3: buildDestinationUrl
   // -------------------------------------------------------------
-  it('builds destination URL with ?kty_handoff=1 query flag in prod and dev mode', () => {
+  it('builds destination URL with repository link in prod and ?kty_handoff=1 query flag in dev mode', () => {
     const prodUrl = buildDestinationUrl('bill-of-rights-bot', false);
-    expect(prodUrl).toBe('https://billofrightsbot.knowthankyew.org?kty_handoff=1');
+    expect(prodUrl).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
 
     const devUrl = buildDestinationUrl('care-check', true);
     expect(devUrl).toBe('http://localhost:3001?kty_handoff=1');

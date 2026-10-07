@@ -82,9 +82,9 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 - **1-Click Advocate Launch**:
   - Surfaces a prominent **"Take Action: Dispute or Cancel"** banner in the popup when critical or warning terms are discovered.
   - Automatically routes users to specialist portfolio tools:
-    - `AUTO_RENEWAL` / `ROSCA` violations $\rightarrow$ **Bill of Rights Bot** (`billofrightsbot.knowthankyew.org`)
-    - `DATA_SHARING` violations $\rightarrow$ **CareCheck**
-    - `ARBITRATION` / `UNILATERAL_CHANGE` $\rightarrow$ **Lease-Audit** or **Bill of Rights Bot**
+    - `AUTO_RENEWAL` / `ROSCA` violations $\rightarrow$ **Bill of Rights Bot** ([github.com/knowthankyew/bill-of-rights-bot](https://github.com/knowthankyew/bill-of-rights-bot))
+    - `DATA_SHARING` violations $\rightarrow$ **CareCheck** ([github.com/knowthankyew/care-check](https://github.com/knowthankyew/care-check))
+    - `ARBITRATION` / `UNILATERAL_CHANGE` $\rightarrow$ **Lease-Audit** ([github.com/knowthankyew/lease-audit](https://github.com/knowthankyew/lease-audit)) or **Bill of Rights Bot**
 - **Ephemeral Session Security**:
   - Transferred via `sessionStorage` with HMAC verification and target URL flag (`?kty_handoff=1`). Zero cloud persistence, zero cookies, zero external telemetry.
   - Purged automatically on tab close or Nuclear Hard Burn.

@@ -22,7 +22,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'bill-of-rights-bot',
     name: 'Bill of Rights Bot',
     tagline: 'AI consumer rights advocate & dispute generator',
-    productionUrl: 'https://billofrightsbot.knowthankyew.org',
+    productionUrl: 'https://github.com/knowthankyew/bill-of-rights-bot',
     localDevUrl: 'http://localhost:3000',
     supportedCategories: ['AUTO_RENEWAL', 'ARBITRATION', 'UNILATERAL_CHANGE'],
   },
@@ -30,7 +30,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'care-check',
     name: 'CareCheck',
     tagline: 'Medical billing & patient surveillance compliance',
-    productionUrl: 'https://carecheck.knowthankyew.org',
+    productionUrl: 'https://github.com/knowthankyew/care-check',
     localDevUrl: 'http://localhost:3001',
     supportedCategories: ['SURVEILLANCE'],
   },
@@ -38,7 +38,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'lease-audit',
     name: 'Lease Audit',
     tagline: 'Tenant rights & residential lease agreement scanner',
-    productionUrl: 'https://leaseaudit.knowthankyew.org',
+    productionUrl: 'https://github.com/knowthankyew/lease-audit',
     localDevUrl: 'http://localhost:3002',
     supportedCategories: ['ARBITRATION', 'UNILATERAL_CHANGE'],
   },
@@ -46,7 +46,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'warranty-watch',
     name: 'Warranty Watch',
     tagline: 'Magnuson-Moss warranty and tie-in clause auditor',
-    productionUrl: 'https://warrantywatch.knowthankyew.org',
+    productionUrl: 'https://github.com/knowthankyew/warranty-watch',
     localDevUrl: 'http://localhost:3003',
     supportedCategories: ['WARRANTY_DISCLAIMER'],
   },
@@ -54,7 +54,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'paystub-check',
     name: 'Paystub Check',
     tagline: 'Wage theft & independent contractor misclassification auditor',
-    productionUrl: 'https://paystubcheck.knowthankyew.org',
+    productionUrl: 'https://github.com/knowthankyew/paystub-check',
     localDevUrl: 'http://localhost:3004',
     supportedCategories: [],
   },
@@ -108,11 +108,14 @@ export function resolveDestinationTool(
 }
 
 /**
- * Builds the URL with query flag to invoke the destination tool.
+ * Builds the URL to invoke the destination tool or navigate to its repository.
  */
 export function buildDestinationUrl(toolId: DestinationToolId, isDev = false): string {
   const tool = CANONICAL_DESTINATION_TOOLS[toolId] || CANONICAL_DESTINATION_TOOLS['bill-of-rights-bot'];
   const baseUrl = isDev ? tool.localDevUrl : tool.productionUrl;
+  if (!isDev && baseUrl.startsWith('https://github.com/')) {
+    return baseUrl;
+  }
   const separator = baseUrl.includes('?') ? '&' : '?';
   return `${baseUrl}${separator}kty_handoff=1`;
 }

@@ -49,7 +49,7 @@ We welcome vulnerability reports from security researchers and the community. If
 
 ### How to Report:
 1. **Do NOT open a public GitHub issue** for undisclosed security vulnerabilities.
-2. Email your findings directly to the maintainers at: **`security@knowthankyew.org`** (or open a private security advisory via [GitHub Security Advisories](https://github.com/knowthankyew/knowthankyew-extension/security/advisories/new)).
+2. Open a private security advisory via [GitHub Security Advisories](https://github.com/knowthankyew/knowthankyew-extension/security/advisories/new).
 3. Include:
    - Detailed reproduction steps or Proof of Concept (PoC).
    - Affected browser version and operating system.
