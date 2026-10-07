@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync, readdirSync, statSync, rmSync } from 'fs';
+import { readFileSync, readdirSync, statSync, rmSync, existsSync } from 'fs';
 import { resolve, join } from 'path';
 import { execSync } from 'child_process';
 
@@ -59,6 +59,25 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     expect(violations).toEqual([]);
   });
 
+  it('verifies content/scanner.js is an isolated classic script (IIFE) with 0 ES module import/export statements', () => {
+    const scannerPath = resolve(distDir, 'content/scanner.js');
+    expect(existsSync(scannerPath), 'dist/content/scanner.js must exist').toBe(true);
+
+    const content = readFileSync(scannerPath, 'utf-8');
+
+    // Content scripts injected into host tabs execute as classic scripts.
+    // If Vite/Rollup code-splits or treats the content script as an ES module,
+    // browsers throw: "Uncaught SyntaxError: Cannot use import statement outside a module"
+    const hasImport = /^\s*import\b/m.test(content);
+    expect(hasImport, 'dist/content/scanner.js must NOT contain any ES module import statements').toBe(false);
+
+    const hasExport = /^\s*export\b/m.test(content);
+    expect(hasExport, 'dist/content/scanner.js must NOT contain any ES module export statements').toBe(false);
+
+    // Must be compiled as an executable self-contained script
+    expect(content.length).toBeGreaterThan(20000);
+  });
+
   it('verifies manifest.json version matches package.json and enforces connect-src none', () => {
     const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8'));
     const manifest = JSON.parse(readFileSync(resolve(distDir, 'manifest.json'), 'utf-8'));
@@ -100,6 +119,12 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
 
       const jsFiles = getJsFilesRecursively(testDistFfx);
       expect(jsFiles.length).toBeGreaterThan(0);
+      const scannerFfx = resolve(testDistFfx, 'content/scanner.js');
+      expect(existsSync(scannerFfx)).toBe(true);
+      const scannerContent = readFileSync(scannerFfx, 'utf-8');
+      expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
+      expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
+
       const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
       for (const filePath of jsFiles) {
         const content = readFileSync(filePath, 'utf-8');
@@ -124,6 +149,12 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
 
       const jsFiles = getJsFilesRecursively(testDistSafari);
       expect(jsFiles.length).toBeGreaterThan(0);
+      const scannerSafari = resolve(testDistSafari, 'content/scanner.js');
+      expect(existsSync(scannerSafari)).toBe(true);
+      const scannerContent = readFileSync(scannerSafari, 'utf-8');
+      expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
+      expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
+
       const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
       for (const filePath of jsFiles) {
         const content = readFileSync(filePath, 'utf-8');
