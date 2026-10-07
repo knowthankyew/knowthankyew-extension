@@ -1,6 +1,30 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { hardBurnAllData, telemetry } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
+import { scanDocumentText } from '../core/engine';
+import { PageScanResult } from '../core/types';
+
+function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const latin1 = new TextDecoder('latin1').decode(bytes);
+  const textMatches: string[] = [];
+  const tjRegex = /\(([^)]+)\)\s*(?:Tj|'|")/g;
+  let match;
+  while ((match = tjRegex.exec(latin1)) !== null) {
+    textMatches.push(match[1]);
+  }
+  const arrayTjRegex = /\[([^\]]+)\]\s*TJ/g;
+  while ((match = arrayTjRegex.exec(latin1)) !== null) {
+    const inner = match[1];
+    const subMatches = inner.match(/\(([^)]+)\)/g);
+    if (subMatches) {
+      for (const sm of subMatches) {
+        textMatches.push(sm.slice(1, -1));
+      }
+    }
+  }
+  return textMatches.join(' ').replace(/\\([()\\])/g, '$1').replace(/\s+/g, ' ').trim();
+}
 
 export const OptionsApp: React.FC = () => {
   const [storageBytes, setStorageBytes] = useState<number>(0);
@@ -11,8 +35,16 @@ export const OptionsApp: React.FC = () => {
   const [burning, setBurning] = useState(false);
   const [burned, setBurned] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
-  const [activeTabSection, setActiveTabSection] = useState<'memory' | 'pillars' | 'permissions'>('memory');
+  const [activeTabSection, setActiveTabSection] = useState<'memory' | 'document' | 'pillars' | 'permissions'>('memory');
   const [mlStatus, setMlStatus] = useState<'connected' | 'disconnected' | 'disabled'>('disabled');
+
+  // Document & Contract Auditor State
+  const [docText, setDocText] = useState('');
+  const [docScanResult, setDocScanResult] = useState<PageScanResult | null>(null);
+  const [isAuditingDoc, setIsAuditingDoc] = useState(false);
+  const [docFileName, setDocFileName] = useState<string | null>(null);
+  const [docError, setDocError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const refreshDiagnostics = useCallback(async (force = false) => {
     // 1. Query chrome.storage.local usage
@@ -66,6 +98,12 @@ export const OptionsApp: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && (window.location.hash === '#document' || window.location.hash === '#audit')) {
+      setActiveTabSection('document');
+    }
+  }, []);
+
+  useEffect(() => {
     refreshDiagnostics();
 
     let channel: BroadcastChannel | null = null;
@@ -77,6 +115,10 @@ export const OptionsApp: React.FC = () => {
         channel.onmessage = (event) => {
           if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
             setBurned(true);
+            setDocText('');
+            setDocScanResult(null);
+            setDocFileName(null);
+            setDocError(null);
             refreshDiagnostics();
             if (timerId) clearTimeout(timerId);
             timerId = setTimeout(() => {
@@ -108,12 +150,82 @@ export const OptionsApp: React.FC = () => {
     try {
       await hardBurnAllData();
       setBurned(true);
+      setDocText('');
+      setDocScanResult(null);
+      setDocFileName(null);
+      setDocError(null);
       await refreshDiagnostics();
       setTimeout(() => setBurned(false), 4000);
     } catch (err) {
       console.error('Master burn failed:', err);
     } finally {
       setBurning(false);
+    }
+  };
+
+  const handleAuditDoc = (textToAudit?: string) => {
+    const text = (textToAudit ?? docText).trim();
+    if (!text) {
+      setDocError('Please paste contract text or select a file to audit.');
+      setDocScanResult(null);
+      return;
+    }
+    setDocError(null);
+    setIsAuditingDoc(true);
+    try {
+      const result = scanDocumentText(text, docFileName || 'document-input', ['document-auditor']);
+      setDocScanResult(result);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setDocError(`Audit failed: ${msg}`);
+    } finally {
+      setIsAuditingDoc(false);
+    }
+  };
+
+  const handlePasteClipboard = async () => {
+    setDocError(null);
+    try {
+      if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
+        throw new Error('Clipboard access is not available.');
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text || text.trim().length === 0) {
+        setDocError('Clipboard is empty. Copy text from your agreement first.');
+        return;
+      }
+      setDocText(text);
+      handleAuditDoc(text);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setDocError(`Clipboard read error: ${msg}. Please paste text into the box manually.`);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setDocError(null);
+    setDocFileName(file.name);
+    try {
+      if (file.name.toLowerCase().endsWith('.pdf')) {
+        const buffer = await file.arrayBuffer();
+        const extracted = extractTextFromPdfBuffer(buffer);
+        if (!extracted || extracted.trim().length === 0) {
+          setDocError(
+            'This PDF appears to use custom font encodings or scanned images without embedded text streams. Please select and copy (Cmd+A, Cmd+C) text directly from your PDF viewer and paste below.'
+          );
+          setDocText('');
+          return;
+        }
+        setDocText(extracted);
+        handleAuditDoc(extracted);
+      } else {
+        const text = await file.text();
+        setDocText(text);
+        handleAuditDoc(text);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setDocError(`Failed to read file: ${msg}`);
     }
   };
 
@@ -307,6 +419,24 @@ export const OptionsApp: React.FC = () => {
           }}
         >
           🔥 Memory & Cross-Domain Burn
+        </button>
+
+        <button
+          onClick={() => setActiveTabSection('document')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTabSection === 'document' ? '2px solid #38bdf8' : '2px solid transparent',
+            color: activeTabSection === 'document' ? '#38bdf8' : '#94a3b8',
+            padding: '10px 16px',
+            fontSize: '13px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          📄 Document & Contract Auditor
         </button>
 
         <button
@@ -626,7 +756,393 @@ export const OptionsApp: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 2: Architectural Pillars */}
+      {/* Tab 2: Document & Contract Auditor */}
+      {activeTabSection === 'document' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '28px' }}>
+          {/* Header Card */}
+          <div
+            style={{
+              backgroundColor: '#131b2e',
+              border: '1px solid #1e293b',
+              borderRadius: '8px',
+              padding: '24px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 style={{ margin: '0 0 6px 0', fontSize: '18px', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📄</span>
+                  <span>Air-Gapped Document & Contract Auditor</span>
+                </h2>
+                <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8', lineHeight: 1.5 }}>
+                  Audit offline PDF agreements, Terms of Service contracts, or fine-print disclosures directly on-device with zero network egress.
+                </p>
+              </div>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  fontSize: '11px',
+                  color: '#34d399',
+                  fontWeight: 600,
+                }}
+              >
+                <span>🔒</span>
+                <span>Zero Cloud Egress</span>
+              </div>
+            </div>
+
+            {/* Upload & Drop Zone */}
+            <div
+              style={{
+                marginTop: '20px',
+                padding: '20px',
+                border: '2px dashed #334155',
+                borderRadius: '8px',
+                backgroundColor: '#0c1322',
+                textAlign: 'center',
+                cursor: 'pointer',
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                  handleFileUpload(e.dataTransfer.files[0]);
+                }
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.txt,.md,.html"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    handleFileUpload(e.target.files[0]);
+                  }
+                }}
+              />
+              <div style={{ fontSize: '24px', marginBottom: '8px' }}>📥</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#f1f5f9' }}>
+                {docFileName ? `Selected: ${docFileName}` : 'Drop PDF or text contract file here, or click to browse'}
+              </div>
+              <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                Supports .pdf, .txt, .md, .html • Processed 100% in volatile browser memory
+              </div>
+            </div>
+
+            {/* Or Paste Textarea */}
+            <div style={{ marginTop: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#cbd5e1', textTransform: 'uppercase' }}>
+                  Or Paste Agreement Fine Print Below:
+                </label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={handlePasteClipboard}
+                    style={{
+                      background: 'none',
+                      border: '1px solid #334155',
+                      borderRadius: '4px',
+                      color: '#38bdf8',
+                      padding: '4px 8px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <span>📋</span>
+                    <span>Paste from Clipboard</span>
+                  </button>
+                  {docText && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDocText('');
+                        setDocScanResult(null);
+                        setDocFileName(null);
+                        setDocError(null);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: '1px solid #334155',
+                        borderRadius: '4px',
+                        color: '#94a3b8',
+                        padding: '4px 8px',
+                        fontSize: '11px',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <textarea
+                value={docText}
+                onChange={(e) => setDocText(e.target.value)}
+                placeholder="Paste contract clauses, arbitration agreements, subscription terms, or contractor fine print here..."
+                rows={7}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: '#0c1322',
+                  border: '1px solid #1e293b',
+                  borderRadius: '6px',
+                  color: '#e2e8f0',
+                  fontSize: '12px',
+                  fontFamily: 'ui-monospace, monospace',
+                  lineHeight: 1.5,
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+
+            {/* Error Banner */}
+            {docError && (
+              <div
+                style={{
+                  marginTop: '14px',
+                  padding: '12px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  borderRadius: '6px',
+                  color: '#fca5a5',
+                  fontSize: '12px',
+                  lineHeight: 1.4,
+                }}
+              >
+                {docError}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div style={{ marginTop: '16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => handleAuditDoc()}
+                disabled={isAuditingDoc || !docText.trim()}
+                style={{
+                  backgroundColor: '#0284c7',
+                  border: 'none',
+                  color: '#ffffff',
+                  padding: '10px 22px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  cursor: isAuditingDoc || !docText.trim() ? 'not-allowed' : 'pointer',
+                  opacity: isAuditingDoc || !docText.trim() ? 0.6 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <span>🔍</span>
+                <span>{isAuditingDoc ? 'Analyzing Document...' : 'Run Statutory Audit'}</span>
+              </button>
+
+              <span style={{ fontSize: '11px', color: '#64748b' }}>
+                Evaluates against ROSCA, FAA, State ARL, UK DMCC, and EU Consumer Rights rule packs
+              </span>
+            </div>
+          </div>
+
+          {/* Audit Results View */}
+          {docScanResult && (
+            <div
+              style={{
+                backgroundColor: '#131b2e',
+                border: '1px solid #1e293b',
+                borderRadius: '8px',
+                padding: '24px',
+              }}
+            >
+              {/* Summary Stats Header */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: '1px solid #1e293b',
+                  paddingBottom: '16px',
+                  marginBottom: '20px',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                }}
+              >
+                <div>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', color: '#f8fafc' }}>
+                    Audit Findings for {docFileName || 'Pasted Agreement'}
+                  </h3>
+                  <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    Scanned {docScanResult.wordCount} words ({docScanResult.segmentCount} segments) in {docScanResult.durationMs}ms
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      padding: '6px 12px',
+                      backgroundColor:
+                        docScanResult.riskScore > 50
+                          ? 'rgba(239, 68, 68, 0.2)'
+                          : docScanResult.riskScore > 20
+                          ? 'rgba(245, 158, 11, 0.2)'
+                          : 'rgba(16, 185, 129, 0.2)',
+                      border: `1px solid ${
+                        docScanResult.riskScore > 50
+                          ? '#ef4444'
+                          : docScanResult.riskScore > 20
+                          ? '#f59e0b'
+                          : '#10b981'
+                      }`,
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      color:
+                        docScanResult.riskScore > 50
+                          ? '#f87171'
+                          : docScanResult.riskScore > 20
+                          ? '#fbbf24'
+                          : '#34d399',
+                    }}
+                  >
+                    Risk Score: {docScanResult.riskScore}/100
+                  </div>
+
+                  <div
+                    style={{
+                      padding: '6px 12px',
+                      backgroundColor: '#0f172a',
+                      border: '1px solid #334155',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      color: '#cbd5e1',
+                    }}
+                  >
+                    <span style={{ color: '#ef4444', fontWeight: 700, marginRight: '4px' }}>●</span>
+                    {docScanResult.summary.critical} Critical &nbsp;|&nbsp;
+                    <span style={{ color: '#f59e0b', fontWeight: 700, margin: '0 4px' }}>●</span>
+                    {docScanResult.summary.warning} Warnings
+                  </div>
+                </div>
+              </div>
+
+              {/* Matched Clauses List */}
+              {docScanResult.matches.length === 0 ? (
+                <div
+                  style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    backgroundColor: '#0c1322',
+                    borderRadius: '6px',
+                    color: '#94a3b8',
+                    fontSize: '13px',
+                  }}
+                >
+                  <div style={{ fontSize: '24px', marginBottom: '6px' }}>🛡️</div>
+                  <div style={{ fontWeight: 700, color: '#34d399' }}>Zero Statutory Violations Detected</div>
+                  <div style={{ marginTop: '4px', fontSize: '12px', color: '#64748b' }}>
+                    No automatic renewal traps, forced arbitration clauses, or unilateral modification patterns were found in the inspected text.
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {docScanResult.matches.map((m, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        padding: '16px',
+                        backgroundColor: '#0c1322',
+                        border: `1px solid ${m.severity === 'CRITICAL' ? '#ef4444' : '#f59e0b'}`,
+                        borderRadius: '6px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                        <div>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              padding: '2px 6px',
+                              backgroundColor: m.severity === 'CRITICAL' ? '#7f1d1d' : '#78350f',
+                              color: m.severity === 'CRITICAL' ? '#fca5a5' : '#fde68a',
+                              borderRadius: '4px',
+                              marginRight: '8px',
+                            }}
+                          >
+                            {m.severity}
+                          </span>
+                          <span style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc' }}>
+                            {m.title}
+                          </span>
+                        </div>
+                        {m.statute && (
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              fontFamily: 'ui-monospace, monospace',
+                              color: '#38bdf8',
+                              backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                              padding: '2px 8px',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            {m.statute.code}
+                          </span>
+                        )}
+                      </div>
+
+                      <p style={{ margin: '0 0 10px 0', fontSize: '12.5px', color: '#cbd5e1', lineHeight: 1.5 }}>
+                        {m.explanation}
+                      </p>
+
+                      <div
+                        style={{
+                          padding: '10px 12px',
+                          backgroundColor: '#131b2e',
+                          borderLeft: '3px solid #38bdf8',
+                          borderRadius: '0 4px 4px 0',
+                          fontSize: '11.5px',
+                          color: '#94a3b8',
+                          fontStyle: 'italic',
+                          lineHeight: 1.45,
+                          marginBottom: '8px',
+                        }}
+                      >
+                        "{m.matchedSnippet}"
+                      </div>
+
+                      {m.recommendation && (
+                        <div style={{ fontSize: '11.5px', color: '#fcd34d' }}>
+                          💡 <strong>Action:</strong> {m.recommendation}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab 3: Architectural Pillars */}
       {activeTabSection === 'pillars' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
           <div style={{ backgroundColor: '#131b2e', border: '1px solid #1e293b', borderRadius: '8px', padding: '20px' }}>

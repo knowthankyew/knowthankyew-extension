@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PageScanResult } from '../core/types';
+import { scanDocumentText } from '../core/engine';
 import { TrapCard } from './components/TrapCard';
 import { BurnButton } from './components/BurnButton';
 import { DiscoveredLinksCard } from './components/DiscoveredLinksCard';
@@ -19,6 +20,9 @@ export const App: React.FC = () => {
   const [scanResult, setScanResult] = useState<PageScanResult | null>(null);
   const [activeHostname, setActiveHostname] = useState<string>('local-tab');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPdfDetected, setIsPdfDetected] = useState(false);
+  const [clipboardScanning, setClipboardScanning] = useState(false);
+  const [clipboardError, setClipboardError] = useState<string | null>(null);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [isLocalMLActive, setIsLocalMLActive] = useState(false);
   const [nanoState, setNanoState] = useState<NanoCapabilityState | null>(null);
@@ -103,6 +107,8 @@ export const App: React.FC = () => {
   const performScan = useCallback(async () => {
     setScanning(true);
     setErrorMessage(null);
+    setIsPdfDetected(false);
+    setClipboardError(null);
     const startTime = performance.now();
 
     try {
@@ -127,6 +133,13 @@ export const App: React.FC = () => {
         }
         setActiveHostname(hostname);
 
+        const rawUrl = (tab.url || '').toLowerCase();
+        const isPdf = Boolean(
+          rawUrl.split('?')[0].endsWith('.pdf') ||
+          rawUrl.includes('.pdf?') ||
+          rawUrl.startsWith('chrome-extension://mhjfbmdgcfjbbpaeojofohoefgiehjai')
+        );
+
         // Send scan request to content script, with automatic script injection fallback
         chrome.tabs.sendMessage(
           tab.id,
@@ -139,11 +152,18 @@ export const App: React.FC = () => {
                 setScanResult(retryResult.result);
                 recordScanMetrics(retryResult.result.summary, retryResult.duration);
                 setScanning(false);
+                setIsPdfDetected(false);
                 await attemptMLRerank(retryResult.result, hostname);
               } else {
-                setErrorMessage(
-                  'Cannot scan restricted browser system page or protected URL. Navigate to an active checkout, terms, or subscription agreement page.'
-                );
+                if (isPdf) {
+                  setIsPdfDetected(true);
+                  setErrorMessage(null);
+                } else {
+                  setIsPdfDetected(false);
+                  setErrorMessage(
+                    'Cannot scan restricted browser system page or protected URL. Navigate to an active checkout, terms, or subscription agreement page.'
+                  );
+                }
                 setScanning(false);
               }
               return;
@@ -154,6 +174,7 @@ export const App: React.FC = () => {
             setScanResult(result);
             recordScanMetrics(result.summary, duration);
             setScanning(false);
+            setIsPdfDetected(false);
 
             await attemptMLRerank(result, hostname);
           }
@@ -297,7 +318,49 @@ export const App: React.FC = () => {
   const handleBurnCompleted = () => {
     setScanResult(null);
     setHandoffStatus(null);
+    setIsPdfDetected(false);
+    setClipboardError(null);
     setErrorMessage('All session data and local storage have been incinerated.');
+  };
+
+  const handleScanClipboard = async () => {
+    setClipboardScanning(true);
+    setClipboardError(null);
+    try {
+      if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
+        throw new Error('Clipboard access is not supported in this browser context.');
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text || text.trim().length === 0) {
+        setClipboardError(
+          'Clipboard is empty. Copy text from the agreement (Cmd+A, Cmd+C) first, or open Document Auditor.'
+        );
+        return;
+      }
+      const result = scanDocumentText(text, activeHostname, ['clipboard-contract']);
+      setScanResult(result);
+      recordScanMetrics(result.summary, result.durationMs ?? 0);
+      setIsPdfDetected(false);
+      setErrorMessage(null);
+      await attemptMLRerank(result, activeHostname);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setClipboardError(
+        msg.includes('denied') || msg.includes('permission')
+          ? 'Clipboard read permission was not granted. Please open Document Auditor in the Dashboard to paste text directly.'
+          : `Unable to read clipboard (${msg}). Use the Dashboard Document Auditor.`
+      );
+    } finally {
+      setClipboardScanning(false);
+    }
+  };
+
+  const handleOpenDashboardAudit = () => {
+    if (typeof chrome !== 'undefined' && chrome.runtime?.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      window.open('options.html#document', '_blank');
+    }
   };
 
   return (
@@ -459,19 +522,184 @@ export const App: React.FC = () => {
               Evaluating against ROSCA, FAA & State ARL rule packs
             </div>
           </div>
+        ) : isPdfDetected ? (
+          <div
+            style={{
+              padding: '16px',
+              backgroundColor: '#131b2e',
+              border: '1px solid #38bdf8',
+              borderRadius: '8px',
+              color: '#f8fafc',
+              fontSize: '12px',
+              lineHeight: 1.5,
+              marginBottom: '14px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <span style={{ fontSize: '20px' }}>📄</span>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '13px', color: '#38bdf8' }}>
+                  PDF Agreement Detected
+                </div>
+                <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                  Chromium Native PDF Viewer
+                </div>
+              </div>
+            </div>
+
+            <p style={{ margin: '0 0 12px 0', color: '#cbd5e1', fontSize: '12px' }}>
+              Chromium isolates built-in PDF tabs from extension content scripts for security. You can audit this agreement immediately using copied text or the full-page Document Auditor:
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={handleScanClipboard}
+                disabled={clipboardScanning}
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  backgroundColor: '#0284c7',
+                  border: 'none',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  cursor: clipboardScanning ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontFamily: 'inherit',
+                  transition: 'background-color 0.15s ease',
+                }}
+              >
+                <span>📋</span>
+                <span>{clipboardScanning ? 'Reading Clipboard...' : 'Audit Copied Text (Clipboard)'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenDashboardAudit}
+                style={{
+                  width: '100%',
+                  padding: '9px 14px',
+                  backgroundColor: '#1e293b',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#f8fafc',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <span>🖥️</span>
+                <span>Open Document Auditor in Dashboard</span>
+              </button>
+            </div>
+
+            {clipboardError && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  padding: '10px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  borderRadius: '6px',
+                  color: '#fca5a5',
+                  fontSize: '11px',
+                  lineHeight: 1.4,
+                }}
+              >
+                {clipboardError}
+              </div>
+            )}
+
+            <div style={{ marginTop: '12px', fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>
+              💡 Tip: Click inside the PDF, press <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+A</kbd> then <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+C</kbd>, then click "Audit Copied Text".
+            </div>
+          </div>
         ) : errorMessage ? (
           <div
             style={{
-              padding: '12px',
+              padding: '14px',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '6px',
               color: '#fca5a5',
               fontSize: '12px',
               lineHeight: 1.4,
+              marginBottom: '14px',
             }}
           >
-            {errorMessage}
+            <div>{errorMessage}</div>
+            <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleScanClipboard}
+                disabled={clipboardScanning}
+                style={{
+                  flex: '1 1 140px',
+                  padding: '6px 10px',
+                  backgroundColor: '#1e293b',
+                  border: '1px solid #334155',
+                  borderRadius: '4px',
+                  color: '#f8fafc',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: clipboardScanning ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>📋</span>
+                <span>Audit Copied Text</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenDashboardAudit}
+                style={{
+                  flex: '1 1 140px',
+                  padding: '6px 10px',
+                  backgroundColor: '#1e293b',
+                  border: '1px solid #334155',
+                  borderRadius: '4px',
+                  color: '#f8fafc',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>🖥️</span>
+                <span>Document Auditor</span>
+              </button>
+            </div>
+            {clipboardError && (
+              <div
+                style={{
+                  marginTop: '10px',
+                  padding: '8px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                }}
+              >
+                {clipboardError}
+              </div>
+            )}
           </div>
         ) : scanResult ? (
           <>

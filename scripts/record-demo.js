@@ -1,11 +1,68 @@
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 import http from 'http';
+import { createRequire } from 'module';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
+
+function resolvePlaywright(repoRoot) {
+  const candidates = [
+    'playwright',
+    '@playwright/test',
+    'playwright-core',
+    path.resolve(repoRoot, '../node_modules/playwright'),
+    path.resolve(repoRoot, '../node_modules/@playwright/test'),
+    path.resolve(repoRoot, '../node_modules/playwright-core'),
+  ];
+  for (const c of candidates) {
+    try {
+      const mod = require(c);
+      if (mod.chromium) return mod.chromium;
+    } catch {}
+  }
+  throw new Error('Playwright not found in repo or portfolio root. Run npm install at repo or portfolio root.');
+}
+
+function resolveFfmpeg(repoRoot) {
+  if (process.env.FFMPEG_PATH && fs.existsSync(process.env.FFMPEG_PATH)) {
+    return process.env.FFMPEG_PATH;
+  }
+  try {
+    const sys = execSync('which ffmpeg', { encoding: 'utf8' }).trim();
+    if (sys && fs.existsSync(sys)) return sys;
+  } catch {}
+
+  const standardPaths = [
+    '/opt/homebrew/bin/ffmpeg',
+    '/usr/local/bin/ffmpeg',
+    path.resolve(repoRoot, '../node_modules/ffmpeg-static/ffmpeg'),
+    path.resolve(repoRoot, 'node_modules/ffmpeg-static/ffmpeg'),
+  ];
+  for (const p of standardPaths) {
+    if (fs.existsSync(p)) return p;
+  }
+
+  try {
+    const ffmpegStatic = require('ffmpeg-static');
+    if (ffmpegStatic && fs.existsSync(ffmpegStatic)) return ffmpegStatic;
+  } catch {}
+
+  const cacheDir = path.join(os.homedir(), 'Library/Caches/ms-playwright');
+  if (fs.existsSync(cacheDir)) {
+    for (const entry of fs.readdirSync(cacheDir)) {
+      if (entry.startsWith('ffmpeg-')) {
+        const bin = path.join(cacheDir, entry, 'ffmpeg-mac');
+        if (fs.existsSync(bin)) return bin;
+      }
+    }
+  }
+  return null;
+}
 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -40,8 +97,7 @@ async function sleep(ms) {
   const activeUrl = `http://127.0.0.1:${port}/demo.html`;
   console.log(`🎬 Launching Playwright browser for knowthankyew-extension demo against ${activeUrl}...`);
 
-  // Import Chromium from local bill-of-rights-bot peer
-  const { chromium } = await import('/Users/cl0rkster/Dev/bill-of-rights-bot/node_modules/playwright/index.mjs');
+  const chromium = resolvePlaywright(repoRoot);
 
   const browser = await chromium.launch({
     headless: true,
@@ -93,20 +149,8 @@ async function sleep(ms) {
 
   const latestVideo = path.join(tempVideoDir, videoFiles[videoFiles.length - 1]);
 
-  const candidateFfmpeg = [
-    '/Users/cl0rkster/Dev/ml/src/FtaaSService.Worker/.venv/lib/python3.12/site-packages/imageio_ffmpeg/binaries/ffmpeg-macos-x86_64-v7.1',
-    '/opt/homebrew/bin/ffmpeg',
-    '/usr/local/bin/ffmpeg',
-    'ffmpeg',
-  ];
+  const ffmpegPath = resolveFfmpeg(repoRoot);
 
-  let ffmpegPath = null;
-  for (const p of candidateFfmpeg) {
-    if (fs.existsSync(p)) {
-      ffmpegPath = p;
-      break;
-    }
-  }
 
   if (ffmpegPath) {
     try {
