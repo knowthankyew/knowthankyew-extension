@@ -155,6 +155,14 @@ export const App: React.FC = () => {
                 recordScanMetrics(retryResult.result.summary, retryResult.duration);
                 setScanning(false);
                 setIsPdfDetected(false);
+                if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+                  chrome.runtime.sendMessage({
+                    type: 'KTY_SCAN_COMPLETED',
+                    tabId: tab.id,
+                    summary: retryResult.result.summary,
+                    riskScore: retryResult.result.riskScore,
+                  }).catch(() => {});
+                }
                 await attemptMLRerank(retryResult.result, hostname);
               } else {
                 if (isPdf) {
@@ -177,6 +185,14 @@ export const App: React.FC = () => {
             recordScanMetrics(result.summary, duration);
             setScanning(false);
             setIsPdfDetected(false);
+            if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+              chrome.runtime.sendMessage({
+                type: 'KTY_SCAN_COMPLETED',
+                tabId: tab.id,
+                summary: result.summary,
+                riskScore: result.riskScore,
+              }).catch(() => {});
+            }
 
             await attemptMLRerank(result, hostname);
           }
