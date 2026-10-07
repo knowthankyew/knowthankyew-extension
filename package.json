@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@knowthankyew/privacy-telemetry": "^1.0.0",
+    "fflate": "^0.8.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

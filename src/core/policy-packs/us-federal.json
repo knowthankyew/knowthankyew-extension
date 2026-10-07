@@ -77,10 +77,13 @@
       },
       "patterns": [
         "any\\s+dispute[^.\\n]{0,80}resolved\\s+by\\s+binding\\s+arbitration",
-        "(?:you\\s+and\\s+(?:the\\s+company|we)\\s+agree|disputes?\\s+resolved\\s+exclusively)\\s+by\\s+binding\\s+arbitration",
+        "(?:you\\s+and\\s+(?:the\\s+company|we|contractor|client)\\s+agree|disputes?\\s+resolved\\s+exclusively)\\s+by\\s+binding\\s+arbitration",
         "waive\\s+(?:any\\s+right\\s+to\\s+a|the\\s+right\\s+to\\s+a)\\s+jury\\s+trial",
         "administered\\s+by\\s+the\\s+american\\s+arbitration\\s+association",
-        "administered\\s+by\\s+jams\\s+(?:pursuant\\s+to|under)"
+        "administered\\s+by\\s+jams\\s+(?:pursuant\\s+to|under)",
+        "governed\\s+by\\s+the\\s+federal\\s+arbitration\\s+act",
+        "waiv(?:e|ing|es|ed)\\s+the\\s+right\\s+to\\s+trial\\s+by\\s+jury",
+        "waive\\s+their\\s+right\\s+to\\s+trial\\s+by\\s+jury"
       ],
       "explanation": "Lawful under federal law, but you surrender your constitutional right to a jury trial and access to a public court of law if the company harms you.",
       "recommendation": "Check whether the agreement includes a 30-day opt-out window to reject arbitration while maintaining your account.",
@@ -107,7 +110,10 @@
         "waive\\s+(?:any\\s+right\\s+to\\s+bring|the\\s+right\\s+to\\s+pursue|any\\s+right\\s+to\\s+participate\\s+in)\\s+(?:any\\s+class|a\\s+class\\s+action|representative\\s+action)",
         "no\\s+arbitration\\s+or\\s+(?:proceeding|claim)\\s+shall\\s+be\\s+joined\\s+with\\s+any\\s+other",
         "you\\s+may\\s+only\\s+resolve\\s+disputes\\s+(?:with\\s+us\\s+on|on)\\s+an\\s+individual\\s+basis",
-        "may\\s+not\\s+bring\\s+a\\s+claim\\s+as\\s+a\\s+plaintiff\\s+or\\s+class\\s+member\\s+in\\s+any\\s+purported\\s+class"
+        "may\\s+not\\s+bring\\s+a\\s+claim\\s+as\\s+a\\s+plaintiff\\s+or\\s+class\\s+member\\s+in\\s+any\\s+purported\\s+class",
+        "class\\s+and\\s+collective\\s+action\\s+waiver",
+        "agree\\s+to\\s+bring\\s+any\\s+claim\\s+on\\s+an\\s+individual\\s+basis",
+        "not\\s+as\\s+a\\s+plaintiff\\s+or\\s+class\\s+member"
       ],
       "explanation": "Forces every consumer into isolated individual dispute proceedings, preventing class-wide relief for systematic issues.",
       "recommendation": "Understand that you cannot join a class settlement if the company engages in unauthorized billing.",

@@ -4,27 +4,7 @@ import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
 
-function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  const latin1 = new TextDecoder('latin1').decode(bytes);
-  const textMatches: string[] = [];
-  const tjRegex = /\(([^)]+)\)\s*(?:Tj|'|")/g;
-  let match;
-  while ((match = tjRegex.exec(latin1)) !== null) {
-    textMatches.push(match[1]);
-  }
-  const arrayTjRegex = /\[([^\]]+)\]\s*TJ/g;
-  while ((match = arrayTjRegex.exec(latin1)) !== null) {
-    const inner = match[1];
-    const subMatches = inner.match(/\(([^)]+)\)/g);
-    if (subMatches) {
-      for (const sm of subMatches) {
-        textMatches.push(sm.slice(1, -1));
-      }
-    }
-  }
-  return textMatches.join(' ').replace(/\\([()\\])/g, '$1').replace(/\s+/g, ' ').trim();
-}
+import { extractTextFromPdfBuffer } from './pdf-extractor';
 
 export const OptionsApp: React.FC = () => {
   const [storageBytes, setStorageBytes] = useState<number>(0);
@@ -163,7 +143,7 @@ export const OptionsApp: React.FC = () => {
     }
   };
 
-  const handleAuditDoc = (textToAudit?: string) => {
+  const handleAuditDoc = (textToAudit?: string, fileName?: string) => {
     const text = (textToAudit ?? docText).trim();
     if (!text) {
       setDocError('Please paste contract text or select a file to audit.');
@@ -173,7 +153,8 @@ export const OptionsApp: React.FC = () => {
     setDocError(null);
     setIsAuditingDoc(true);
     try {
-      const result = scanDocumentText(text, docFileName || 'document-input', ['document-auditor']);
+      const activeName = fileName || docFileName || 'document-input';
+      const result = scanDocumentText(text, activeName, ['document-auditor']);
       setDocScanResult(result);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -195,7 +176,7 @@ export const OptionsApp: React.FC = () => {
         return;
       }
       setDocText(text);
-      handleAuditDoc(text);
+      handleAuditDoc(text, 'clipboard-paste');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setDocError(`Clipboard read error: ${msg}. Please paste text into the box manually.`);
@@ -217,11 +198,11 @@ export const OptionsApp: React.FC = () => {
           return;
         }
         setDocText(extracted);
-        handleAuditDoc(extracted);
+        handleAuditDoc(extracted, file.name);
       } else {
         const text = await file.text();
         setDocText(text);
-        handleAuditDoc(text);
+        handleAuditDoc(text, file.name);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
