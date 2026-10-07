@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { PageScanResult } from '../core/types';
 import { scanDocumentText } from '../core/engine';
 import { TrapCard } from './components/TrapCard';
@@ -23,6 +23,8 @@ export const App: React.FC = () => {
   const [isPdfDetected, setIsPdfDetected] = useState(false);
   const [clipboardScanning, setClipboardScanning] = useState(false);
   const [clipboardError, setClipboardError] = useState<string | null>(null);
+  const [pastedText, setPastedText] = useState('');
+  const pasteInputRef = useRef<HTMLTextAreaElement>(null);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [isLocalMLActive, setIsLocalMLActive] = useState(false);
   const [nanoState, setNanoState] = useState<NanoCapabilityState | null>(null);
@@ -315,12 +317,43 @@ export const App: React.FC = () => {
     setTimeout(() => setHandoffStatus(null), 3000);
   };
 
+  useEffect(() => {
+    if (isPdfDetected && pasteInputRef.current) {
+      pasteInputRef.current.focus();
+    }
+  }, [isPdfDetected]);
+
   const handleBurnCompleted = () => {
     setScanResult(null);
     setHandoffStatus(null);
     setIsPdfDetected(false);
     setClipboardError(null);
+    setPastedText('');
     setErrorMessage('All session data and local storage have been incinerated.');
+  };
+
+  const handleAuditText = async (textToAudit?: string) => {
+    const text = (textToAudit !== undefined ? textToAudit : pastedText).trim();
+    if (!text) {
+      setClipboardError('Please paste agreement text into the box below (Cmd+V) to audit.');
+      pasteInputRef.current?.focus();
+      return;
+    }
+    setClipboardScanning(true);
+    setClipboardError(null);
+    try {
+      const result = scanDocumentText(text, activeHostname, ['pasted-contract']);
+      setScanResult(result);
+      recordScanMetrics(result.summary, result.durationMs ?? 0);
+      setIsPdfDetected(false);
+      setErrorMessage(null);
+      await attemptMLRerank(result, activeHostname);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setClipboardError(`Audit error: ${msg}`);
+    } finally {
+      setClipboardScanning(false);
+    }
   };
 
   const handleScanClipboard = async () => {
@@ -333,23 +366,20 @@ export const App: React.FC = () => {
       const text = await navigator.clipboard.readText();
       if (!text || text.trim().length === 0) {
         setClipboardError(
-          'Clipboard is empty. Copy text from the agreement (Cmd+A, Cmd+C) first, or open Document Auditor.'
+          'Clipboard is empty. Copy text from the agreement (Cmd+A, Cmd+C) first, or paste directly into the box below.'
         );
+        pasteInputRef.current?.focus();
         return;
       }
-      const result = scanDocumentText(text, activeHostname, ['clipboard-contract']);
-      setScanResult(result);
-      recordScanMetrics(result.summary, result.durationMs ?? 0);
-      setIsPdfDetected(false);
-      setErrorMessage(null);
-      await attemptMLRerank(result, activeHostname);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      setPastedText(text);
+      await handleAuditText(text);
+    } catch {
+      // Chromium restricts background clipboard access in extension popups unless 'clipboardRead' is in manifest.
+      // Auto-focus the scratchpad so the user can hit Cmd+V directly with zero permissions required.
       setClipboardError(
-        msg.includes('denied') || msg.includes('permission')
-          ? 'Clipboard read permission was not granted. Please open Document Auditor in the Dashboard to paste text directly.'
-          : `Unable to read clipboard (${msg}). Use the Dashboard Document Auditor.`
+        'Chrome blocks extensions from reading your clipboard directly without invasive permissions. Simply press Cmd+V in the box below to audit!'
       );
+      pasteInputRef.current?.focus();
     } finally {
       setClipboardScanning(false);
     }
@@ -547,43 +577,108 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            <p style={{ margin: '0 0 12px 0', color: '#cbd5e1', fontSize: '12px' }}>
-              Chromium isolates built-in PDF tabs from extension content scripts for security. You can audit this agreement immediately using copied text or the full-page Document Auditor:
+            <p style={{ margin: '0 0 10px 0', color: '#cbd5e1', fontSize: '12px' }}>
+              Chromium isolates native PDF tabs from extension scripts for security. Copy text from the PDF (<kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+A</kbd>, <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+C</kbd>) and paste below for an instant on-device audit:
             </p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ marginBottom: '10px' }}>
+              <textarea
+                ref={pasteInputRef}
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text');
+                  if (pasted && pasted.trim().length > 0) {
+                    setPastedText(pasted);
+                    setTimeout(() => {
+                      handleAuditText(pasted);
+                    }, 50);
+                  }
+                }}
+                placeholder="Click here and press Cmd+V to paste & audit instantly..."
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  backgroundColor: '#0a0f1d',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#f8fafc',
+                  fontSize: '11px',
+                  fontFamily: 'ui-monospace, monospace',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  lineHeight: 1.4,
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleAuditText()}
+                disabled={clipboardScanning || pastedText.trim().length === 0}
+                style={{
+                  flex: '1 1 160px',
+                  padding: '9px 12px',
+                  backgroundColor: pastedText.trim().length > 0 ? '#0284c7' : '#1e293b',
+                  border: pastedText.trim().length > 0 ? 'none' : '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  cursor: pastedText.trim().length === 0 ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontFamily: 'inherit',
+                  transition: 'background-color 0.15s ease',
+                  opacity: pastedText.trim().length === 0 ? 0.6 : 1,
+                }}
+              >
+                <span>🔍</span>
+                <span>
+                  {clipboardScanning
+                    ? 'Auditing...'
+                    : pastedText.trim().length > 0
+                    ? `Audit Pasted Text (${pastedText.trim().length} chars)`
+                    : 'Audit Pasted Text'}
+                </span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleScanClipboard}
                 disabled={clipboardScanning}
+                title="Try reading from system clipboard"
                 style={{
-                  width: '100%',
-                  padding: '10px 14px',
-                  backgroundColor: '#0284c7',
-                  border: 'none',
+                  padding: '9px 12px',
+                  backgroundColor: '#1e293b',
+                  border: '1px solid #334155',
                   borderRadius: '6px',
-                  color: '#ffffff',
-                  fontWeight: 700,
+                  color: '#cbd5e1',
+                  fontWeight: 600,
                   fontSize: '12px',
                   cursor: clipboardScanning ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
+                  gap: '6px',
                   fontFamily: 'inherit',
-                  transition: 'background-color 0.15s ease',
                 }}
               >
                 <span>📋</span>
-                <span>{clipboardScanning ? 'Reading Clipboard...' : 'Audit Copied Text (Clipboard)'}</span>
+                <span>Clipboard</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleOpenDashboardAudit}
                 style={{
-                  width: '100%',
-                  padding: '9px 14px',
+                  flex: '1 1 160px',
+                  padding: '9px 12px',
                   backgroundColor: '#1e293b',
                   border: '1px solid #334155',
                   borderRadius: '6px',
@@ -594,20 +689,20 @@ export const App: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px',
+                  gap: '6px',
                   fontFamily: 'inherit',
                 }}
               >
                 <span>🖥️</span>
-                <span>Open Document Auditor in Dashboard</span>
+                <span>Full Auditor ↗</span>
               </button>
             </div>
 
             {clipboardError && (
               <div
                 style={{
-                  marginTop: '12px',
-                  padding: '10px',
+                  marginTop: '10px',
+                  padding: '8px 10px',
                   backgroundColor: 'rgba(239, 68, 68, 0.15)',
                   border: '1px solid rgba(239, 68, 68, 0.4)',
                   borderRadius: '6px',
@@ -620,8 +715,8 @@ export const App: React.FC = () => {
               </div>
             )}
 
-            <div style={{ marginTop: '12px', fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>
-              💡 Tip: Click inside the PDF, press <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+A</kbd> then <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+C</kbd>, then click "Audit Copied Text".
+            <div style={{ marginTop: '10px', fontSize: '11px', color: '#64748b', fontStyle: 'italic' }}>
+              💡 Tip: Click inside the PDF, press <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+A</kbd> then <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+C</kbd>, then focus the box above and press <kbd style={{ padding: '1px 4px', backgroundColor: '#1e293b', borderRadius: '3px', color: '#e2e8f0' }}>Cmd+V</kbd>. Auditing runs immediately with zero permissions required.
             </div>
           </div>
         ) : errorMessage ? (
@@ -638,18 +733,75 @@ export const App: React.FC = () => {
             }}
           >
             <div>{errorMessage}</div>
-            <div style={{ marginTop: '12px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+
+            <div style={{ marginTop: '10px' }}>
+              <textarea
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text');
+                  if (pasted && pasted.trim().length > 0) {
+                    setPastedText(pasted);
+                    setTimeout(() => {
+                      handleAuditText(pasted);
+                    }, 50);
+                  }
+                }}
+                placeholder="Or paste agreement text here (Cmd+V) to audit..."
+                rows={3}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  backgroundColor: '#0a0f1d',
+                  border: '1px solid #334155',
+                  borderRadius: '6px',
+                  color: '#f8fafc',
+                  fontSize: '11px',
+                  fontFamily: 'ui-monospace, monospace',
+                  resize: 'vertical',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  lineHeight: 1.4,
+                }}
+              />
+            </div>
+
+            <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleAuditText()}
+                disabled={clipboardScanning || pastedText.trim().length === 0}
+                style={{
+                  flex: '1 1 120px',
+                  padding: '6px 10px',
+                  backgroundColor: pastedText.trim().length > 0 ? '#0284c7' : '#1e293b',
+                  border: pastedText.trim().length > 0 ? 'none' : '1px solid #334155',
+                  borderRadius: '4px',
+                  color: '#f8fafc',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: pastedText.trim().length === 0 ? 'not-allowed' : 'pointer',
+                  fontFamily: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  opacity: pastedText.trim().length === 0 ? 0.6 : 1,
+                }}
+              >
+                <span>🔍</span>
+                <span>Audit Pasted Text</span>
+              </button>
               <button
                 type="button"
                 onClick={handleScanClipboard}
                 disabled={clipboardScanning}
                 style={{
-                  flex: '1 1 140px',
                   padding: '6px 10px',
                   backgroundColor: '#1e293b',
                   border: '1px solid #334155',
                   borderRadius: '4px',
-                  color: '#f8fafc',
+                  color: '#cbd5e1',
                   fontSize: '11px',
                   fontWeight: 600,
                   cursor: clipboardScanning ? 'not-allowed' : 'pointer',
@@ -657,17 +809,17 @@ export const App: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '4px',
                 }}
               >
                 <span>📋</span>
-                <span>Audit Copied Text</span>
+                <span>Clipboard</span>
               </button>
               <button
                 type="button"
                 onClick={handleOpenDashboardAudit}
                 style={{
-                  flex: '1 1 140px',
+                  flex: '1 1 120px',
                   padding: '6px 10px',
                   backgroundColor: '#1e293b',
                   border: '1px solid #334155',

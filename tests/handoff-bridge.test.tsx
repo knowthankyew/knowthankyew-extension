@@ -207,4 +207,62 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
     expect(stored).toBeTruthy();
     expect(JSON.parse(stored!).targetTool).toBe('bill-of-rights-bot');
   });
+
+  // -------------------------------------------------------------
+  // Test 7: App.tsx renders Quick-Paste scratchpad for PDF tabs
+  // -------------------------------------------------------------
+  it('renders Quick-Paste Scratchpad on PDF tabs and audits pasted contract clauses without permissions', async () => {
+    (globalThis as any).chrome = {
+      tabs: {
+        query: vi.fn().mockResolvedValue([{ id: 42, url: 'https://example.com/legal/agreement.pdf' }]),
+        sendMessage: vi.fn((_tabId: number, _msg: any, callback: (res: any) => void) => {
+          (chrome as any).runtime.lastError = { message: 'Cannot access chrome-native PDF viewer' };
+          callback(null);
+        }),
+      },
+      runtime: {
+        lastError: { message: 'Cannot access chrome-native PDF viewer' },
+        openOptionsPage: vi.fn(),
+      },
+      scripting: {
+        executeScript: vi.fn().mockRejectedValue(new Error('Cannot script PDF viewer tab')),
+      },
+    };
+
+    root = createRoot(container!);
+    await act(async () => {
+      root!.render(<App />);
+    });
+
+    // Verify PDF agreement card and scratchpad are rendered
+    expect(container!.textContent).toContain('PDF Agreement Detected');
+    expect(container!.textContent).toContain('Chromium Native PDF Viewer');
+
+    const textarea = container!.querySelector('textarea');
+    expect(textarea).not.toBeNull();
+    expect(textarea!.getAttribute('placeholder')).toContain('Cmd+V');
+
+    // Simulate pasting an agreement with automatic renewal
+    const predatoryClause =
+      'Your subscription will automatically renew each month indefinitely unless cancelled at least 48 hours prior to renewal.';
+
+    await act(async () => {
+      // Fire paste event
+      const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
+      (pasteEvent as any).clipboardData = {
+        getData: (format: string) => (format === 'text' ? predatoryClause : ''),
+      };
+      textarea!.dispatchEvent(pasteEvent);
+    });
+
+    // Allow debounce / setTimeout
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 100));
+    });
+
+    // Verification: PDF card transitioned to scan results
+    expect(container!.textContent).toContain('Moderate Risk');
+    expect(container!.textContent).toContain('Negative Option Automatic Renewal');
+    expect(container!.textContent).toContain('Take Action: Dispute or Cancel');
+  });
 });
