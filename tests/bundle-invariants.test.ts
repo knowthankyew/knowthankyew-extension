@@ -7,8 +7,14 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure fresh standard production build exists for testing
-    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    // Ensure standard production build exists for testing without wiping during parallel test runs
+    if (
+      !existsSync(resolve(distDir, 'background/service-worker.js')) ||
+      !existsSync(resolve(distDir, 'content/scanner.js')) ||
+      !existsSync(resolve(distDir, 'manifest.json'))
+    ) {
+      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    }
   });
 
   function getJsFilesRecursively(dir: string): string[] {
