@@ -1,0 +1,79 @@
+# CodeRabbit Configuration for KnowThankYew Reality Engine
+# Targeted Audit Scope: v1.6.0 Baseline -> v2.1.0 QA Release Candidate
+
+version: "2"
+language: "en-US"
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  sequence_diagrams: true
+  auto_review:
+    enabled: true
+    drafts: true
+
+  # Filter out binary assets, demo media, and compiled artifacts
+  path_filters:
+    - "!**/*.gif"
+    - "!**/*.mp4"
+    - "!**/*.zip"
+    - "!dist/**"
+    - "!dist-*/**"
+    - "!package-lock.json"
+    - "!mlflow.db"
+    - "!demo.*"
+
+  # Core QA & Architectural Review Directives for v2.1 Release
+  instructions: |
+    You are performing a comprehensive QA and security audit for the v2.1.0 release candidate of the KnowThankYew browser extension, comparing against the v1.6.0 baseline.
+    The extension operates under strict zero-egress, client-side amnesiac constraints across Chromium (MV3), Firefox, and Safari.
+
+    Evaluate code against these non-negotiable architectural invariants:
+
+    1. ZERO-EGRESS & CSP INTEGRITY (CRITICAL):
+       - Prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches).
+       - Ensure all telemetry routing through `src/telemetry/` conforms to `@knowthankyew/privacy-telemetry` without outbound transmissions.
+
+    2. CLOSED SHADOW DOM DEFENSE (`src/content/`):
+       - Ensure inline indicator badges are strictly encapsulated with `attachShadow({ mode: 'closed' })`.
+       - Prohibit `innerHTML` or raw HTML interpolation; all nodes must be constructed via pure DOM primitives (`createElement`, `textContent`).
+       - Ensure overlays never mutate or intercept user form inputs, never cause reflow/layout shifts, and fail silently if target selectors are missing.
+       - Confirm badges and observers are destroyed atomically on Nuclear Hard Burn / page unload.
+
+    3. CHROME EXTENSION MV3 LIFECYCLES (`src/background/service-worker.ts`):
+       - Audit for service worker sleep/termination race conditions. Background state must not assume continuous in-memory persistence.
+       - Verify toolbar action badges are strictly scoped to specific `tabId`s and cleared on tab navigation.
+       - Verify all asynchronous message listeners (`chrome.runtime.onMessage`) return `true` properly where callbacks are awaited.
+
+    4. IN-BROWSER PDF & TEXT PARSING ROBUSTNESS (`src/options/pdf-extractor.ts`):
+       - Audit `fflate` FlateDecode streams and CMap font extraction for out-of-memory risks, buffer overflows, or infinite loops on malformed PDFs.
+       - Ensure large documents do not hang or lock the main thread.
+
+    5. STRUCTURED HANDOFF PROTOCOL (`src/core/handoff.ts`, `src/popup/handoff-bridge.ts`):
+       - Verify data sanitization for handoff payloads exported to portfolio tools (bill-of-rights-bot, careCheck, lease-audit).
+       - Ensure sensitive page snippets are stripped or amnesiacally purged following handoff generation.
+
+    6. STATUTORY POLICY COMPLIANCE (`src/core/policy-packs/`):
+       - Validate rule structures for UK DMCC 2024, EU CRD, US Federal, and State ARL to ensure regex expressions are ReDoS-free and rule weights are properly bounded.
+
+  path_instructions:
+    - path: "src/content/**"
+      instructions: "Audit DOM isolation, style encapsulation, selector mutation safety, and zero host-script interference."
+    - path: "src/options/pdf-extractor.ts"
+      instructions: "Audit binary parsing safety, memory bounds, CMap decode edge cases, and graceful failure on encrypted or malformed PDF streams."
+    - path: "src/background/service-worker.ts"
+      instructions: "Audit MV3 service worker dormancy, badge lifecycle state management, and tab message routing."
+    - path: "src/core/handoff.ts"
+      instructions: "Audit handoff schema validation, serialization amnesia, and input sanitization."
+
+knowledge_base:
+  opt_out: false
+  learnings:
+    scope: "auto"
+  linked_repositories:
+    - repository: "knowthankyew/privacy-telemetry"
+      instructions: "Contains canonical privacy telemetry schemas, local differential privacy policies, and zero-egress invariants for the KnowThankYew suite. Verify extension telemetry strictly conforms."
+    - repository: "knowthankyew/portfolio-admin"
+      instructions: "Contains portfolio integration standards, handoff schemas, and administrative compliance specifications."
