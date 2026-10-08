@@ -98,7 +98,7 @@ Every release and pull request must satisfy these 12 core invariants, verified b
 | 7 | **Zero `innerHTML` Execution** | All UI components and inline indicators use React sanitized rendering or native `document.createTextNode()` / DOM text nodes. |
 | 8 | **Dynamic UI Claims Grounding** | Privacy meters and policy claims are derived dynamically from verified runtime configuration via `getPrivacyClaims()`. |
 | 9 | **Compile-Time ML Dead-Code Elimination** | Consumer builds completely excise loopback networking code (`http://127.0.0.1:8420`) at compile time. |
-| 10 | **Minimal Production Dependencies** | Exactly 3 production dependencies (`react`, `react-dom`, `@knowthankyew/privacy-telemetry`) to prevent supply-chain attack surface. |
+| 10 | **Minimal Production Dependencies** | Exactly 4 production dependencies (`react`, `react-dom`, `@knowthankyew/privacy-telemetry`, `fflate`) to prevent supply-chain attack surface. |
 | 11 | **Shadow DOM Closed Mode** | All inline visual indicators injected into the host page DOM must use `attachShadow({ mode: 'closed' })`. Host page styles cannot pierce or distort badges, and host scripts cannot inspect or access internal badge nodes. |
 | 12 | **Indicator Content No Raw Text** | Injected indicator labels and accessible tooltips are constructed strictly from deterministic rule metadata (`rule.title`, `rule.explanation`), never from raw page-extracted text, form values, or PII. |
 

@@ -7,23 +7,23 @@
   "rules": [
     {
       "id": "EU-AR-001",
-      "title": "Pre-Ticked Consent Box & Default Subscription Enrollment",
+      "title": "Pre-Ticked Consent Box & Default Additional Payments / Add-Ons",
       "category": "AUTO_RENEWAL",
       "classification": "STATUTORY_VIOLATION",
       "severity": "CRITICAL",
       "statute": {
         "code": "Directive 2011/83/EU, Article 22",
-        "title": "Prohibition of Pre-Ticked Default Options",
+        "title": "Prohibition of Default Options for Additional Payments",
         "jurisdiction": "EU",
-        "plainExplanation": "EU law strictly prohibits traders from inferring consumer consent through pre-ticked checkboxes or default selections for recurring payments."
+        "plainExplanation": "EU law strictly prohibits traders from inferring consumer consent through pre-ticked checkboxes or default options for additional payments or add-on subscriptions beyond the main purchase."
       },
       "patterns": [
         "(?:checkbox|box|option)\\s+is\\s+(?:pre-?selected|checked\\s+by\\s+default)",
         "unless\\s+you\\s+(?:uncheck|deselect)[^.\\n]{0,60}(?:subscription|monthly|recurring|enrolled)",
         "(?:automatically\\s+included|added\\s+by\\s+default)[^.\\n]{0,60}(?:opt-out|uncheck\\s+to\\s+remove)"
       ],
-      "explanation": "The terms or checkout flow indicate that a recurring subscription option or add-on fee is selected or checked by default.",
-      "recommendation": "EU Directive 2011/83/EU bans pre-ticked boxes across all EU member states. Subscription consent must be an explicit affirmative opt-in.",
+      "explanation": "The terms or checkout flow indicate that an additional recurring charge, add-on subscription, or optional payment is pre-selected or checked by default beyond the primary transaction.",
+      "recommendation": "EU Directive 2011/83/EU Article 22 prohibits default options (such as pre-ticked boxes) for additional payments. Consent for extra charges must be express and opt-in; otherwise consumers are entitled to full reimbursement.",
       "tracking": {
         "agency": "European Commission / National Consumer Authorities",
         "jurisdiction": "EU",
@@ -45,12 +45,12 @@
         "plainExplanation": "EU consumers possess a statutory 14-day right of withdrawal from distance and digital subscription contracts that cannot be waived or contracted away."
       },
       "patterns": [
-        "(?:right\\s+of\\s+withdrawal|withdrawal\\s+right)\\s+does\\s+not\\s+apply",
-        "(?:no\\s+right|no\\s+statutory\\s+right)\\s+of\\s+withdrawal[^.\\n]{0,60}(?:digital|subscription|services)",
-        "(?:by\\s+proceeding|by\\s+subscribing)[^.\\n]{0,60}(?:you\\s+waive|waiving)\\s+(?:right|statutory\\s+right)\\s+of\\s+withdrawal"
+        "(?:waiv(?:e|es|ing)|forfeit(?:s|ing)?)\\s+(?:right\\s+of\\s+withdrawal|your\\s+right\\s+of\\s+withdrawal|withdrawal\\s+right|your\\s+withdrawal\\s+right|cooling-off\\s+period)",
+        "(?:by\\s+proceeding|by\\s+subscribing|by\\s+purchasing)[^.\\n]{0,60}(?:you\\s+waive|waiving|lose)\\s+(?:right|your\\s+right|statutory\\s+right|your\\s+statutory\\s+right)\\s+of\\s+withdrawal",
+        "no\\s+statutory\\s+right\\s+of\\s+withdrawal[^.\\n]{0,60}(?:under\\s+any\\s+circumstances|is\\s+recognized)"
       ],
-      "explanation": "The clause purports to waive, forfeit, or exclude your statutory 14-day EU right of withdrawal upon starting a subscription.",
-      "recommendation": "Under Directive 2011/83/EU Article 25, contractual clauses derogating from consumer withdrawal rights are null and void across the European Union.",
+      "explanation": "The clause purports to enforce a blanket waiver or forfeiture of statutory EU withdrawal rights. Note that Directive 2011/83/EU Art. 16 permits narrow exceptions for digital content if express consent and acknowledgment of loss of withdrawal are provided.",
+      "recommendation": "Under Directive 2011/83/EU Article 25, contractual clauses derogating from consumer withdrawal rights outside narrow Art. 16 digital exemptions are null and void across the European Union.",
       "tracking": {
         "agency": "European Commission / National Consumer Authorities",
         "jurisdiction": "EU",

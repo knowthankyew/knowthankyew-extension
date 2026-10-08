@@ -7,8 +7,13 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Unconditionally ensure fresh, uncontaminated standard production build exists for testing
-    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    // Ensure standard production build exists for testing
+    if (
+      !existsSync(resolve(distDir, 'background/service-worker.js')) ||
+      !existsSync(resolve(distDir, 'content/scanner.js'))
+    ) {
+      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
+    }
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -125,7 +130,16 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
       expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
 
-      const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
+      const forbiddenPatterns = [
+        /\bfetch\s*\(/,
+        /\bWebSocket\b/,
+        /\bsendBeacon\b/,
+        /\bXMLHttpRequest\b/,
+        /\bEventSource\b/,
+        /\bimportScripts\s*\(/,
+        /\/v1\/traces/,
+        /__KTY_TEST_HOOK_/,
+      ];
       for (const filePath of jsFiles) {
         const content = readFileSync(filePath, 'utf-8');
         for (const pattern of forbiddenPatterns) {
@@ -155,7 +169,16 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
       expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
 
-      const forbiddenPatterns = [/\bfetch\s*\(/, /\bWebSocket\b/, /\bsendBeacon\b/];
+      const forbiddenPatterns = [
+        /\bfetch\s*\(/,
+        /\bWebSocket\b/,
+        /\bsendBeacon\b/,
+        /\bXMLHttpRequest\b/,
+        /\bEventSource\b/,
+        /\bimportScripts\s*\(/,
+        /\/v1\/traces/,
+        /__KTY_TEST_HOOK_/,
+      ];
       for (const filePath of jsFiles) {
         const content = readFileSync(filePath, 'utf-8');
         for (const pattern of forbiddenPatterns) {

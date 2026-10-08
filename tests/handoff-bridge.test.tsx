@@ -98,21 +98,62 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
   // -------------------------------------------------------------
   // Test 2: dispatchHandoffToDestination fallback for web/dev
   // -------------------------------------------------------------
-  it('falls back to sessionStorage and window.open when chrome.tabs is unavailable', async () => {
+  it('falls back to window.open when chrome.tabs is unavailable', async () => {
     delete (globalThis as any).chrome;
     const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    const payload = buildHandoffPayload(sampleScan);
+    const result = await dispatchHandoffToDestination(payload);
+
+    expect(result.success).toBe(true);
+    expect(result.url).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
+    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank', 'noopener,noreferrer');
+
+    // Ephemeral sessionStorage was cleared to prevent residual leakage
+    expect(sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY)).toBeNull();
+  });
+
+  it('injects payload via chrome.scripting.executeScript in dev mode', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'http://localhost:3000?kty_handoff=1' });
+    const mockExecuteScript = vi.fn().mockResolvedValue([{ result: undefined }]);
+
+    (globalThis as any).chrome = {
+      tabs: { create: mockCreate },
+      scripting: { executeScript: mockExecuteScript },
+    };
 
     const payload = buildHandoffPayload(sampleScan);
     const result = await dispatchHandoffToDestination(payload, true);
 
     expect(result.success).toBe(true);
     expect(result.url).toBe('http://localhost:3000?kty_handoff=1');
-    expect(windowOpenSpy).toHaveBeenCalledWith('http://localhost:3000?kty_handoff=1', '_blank');
+    expect(mockExecuteScript).toHaveBeenCalledTimes(1);
+    expect(mockExecuteScript).toHaveBeenCalledWith(expect.objectContaining({
+      target: { tabId: 101 },
+      args: [KTY_HANDOFF_SESSION_KEY, JSON.stringify(payload)],
+    }));
+  });
 
-    // Ephemeral sessionStorage was written
-    const stored = sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY);
-    expect(stored).toBeTruthy();
-    expect(JSON.parse(stored!).targetTool).toBe('bill-of-rights-bot');
+  it('returns success: false when chrome.scripting.executeScript rejects', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'http://localhost:3000?kty_handoff=1' });
+    const mockExecuteScript = vi.fn().mockRejectedValue(new Error('Script injection blocked'));
+
+    (globalThis as any).chrome = {
+      tabs: { create: mockCreate },
+      scripting: { executeScript: mockExecuteScript },
+    };
+
+    const payload = buildHandoffPayload(sampleScan);
+    const result = await dispatchHandoffToDestination(payload, true);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid payloads before dispatch and fails closed', async () => {
+    const invalidPayload = { invalid: true } as any;
+    const result = await dispatchHandoffToDestination(invalidPayload);
+    expect(result.success).toBe(false);
+    expect(result.url).toBe('');
   });
 
   // -------------------------------------------------------------
@@ -197,10 +238,9 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       launchButton!.click();
     });
 
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank');
-    const stored = sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY);
-    expect(stored).toBeTruthy();
-    expect(JSON.parse(stored!).targetTool).toBe('bill-of-rights-bot');
+    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank', 'noopener,noreferrer');
+    // Ephemeral payload is cleared post-dispatch to prevent residual storage leakage
+    expect(sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY)).toBeNull();
   });
 
   // -------------------------------------------------------------

@@ -9,12 +9,12 @@
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![Release: v1.6.0 Live](https://img.shields.io/badge/Release-v1.6.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
 [![Firefox AMO: v1.6.0 Live](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Live)-orange.svg)](https://addons.mozilla.org)
-[![v2.0.0: Release Complete](https://img.shields.io/badge/v2.0.0-Release%20Complete%20%26%20Packaged-success.svg)](ROADMAP.md)
+[![v2.1.0: Release Complete](https://img.shields.io/badge/v2.1.0-Release%20Complete%20%26%20Packaged-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
 > **Release Status & Roadmap Notice**:  
 > The approved production release currently active on the [Chrome Web Store](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl) is **v1.6.0**. **v1.6.0** is also live on Mozilla AMO.  
-> **v2.0.0 Release Complete & Packaged** delivers Closed Shadow DOM inline visual defense overlays next to deceptive consent checkboxes, international statutory packs (UK DMCC 2024, EU CRD 2011/83/EU, expanded State ARLs for CO, IL, OR), Safari build pipeline, and 125/125 verified passing tests. Packaged across all targets: Chrome Web Store (`knowthankyew-extension-v2.0.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v2.0.0-firefox.zip`), Apple Safari (`knowthankyew-extension-v2.0.0-safari.zip`), and Developer Local ML Assist (`knowthankyew-extension-v2.0.0-local-assist.zip`).
+> **v2.1.0 Release Complete & Packaged** delivers Closed Shadow DOM inline visual defense overlays next to deceptive consent checkboxes, international statutory packs (UK DMCC 2024, EU CRD 2011/83/EU, expanded State ARLs for CO, IL, OR), Cross-Tool Remediation Handoff Bridge, BS Translator plain-language tiers, Proof of Work transparency drawer, PDF agreement detection & quick-paste scratchpad, Safari build pipeline, and verified passing test suites. Packaged across all targets: Chrome Web Store (`knowthankyew-extension-v2.1.0.zip`), Mozilla Firefox / Gecko AMO (`knowthankyew-extension-v2.1.0-firefox.zip`), Apple Safari (`knowthankyew-extension-v2.1.0-safari.zip`), and Developer Local ML Assist (`knowthankyew-extension-v2.1.0-local-assist.zip`).
 
 ---
 
@@ -45,7 +45,7 @@ Click **"Add to Chrome"** (or Brave / Edge / Opera), then pin the shield icon to
 
 If you prefer installing directly from source without using the store:
 
-1. **Download the Package**: 👉 **[knowthankyew-extension-v1.3.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.3.0/knowthankyew-extension-v1.3.0.zip)** *(Official CWS v1.3.0 baseline)*.
+1. **Download the Package**: 👉 **[knowthankyew-extension-v1.6.0.zip](https://github.com/knowthankyew/knowthankyew-extension/releases/download/v1.6.0/knowthankyew-extension-v1.6.0.zip)** *(Official CWS / AMO v1.6.0 baseline)*.
 2. **Unzip** the archive into a folder on your computer.
 3. Open `chrome://extensions` (or `brave://extensions`) in your browser.
 4. Turn on **Developer mode** (top-right toggle).
@@ -125,10 +125,10 @@ npm run demo
 To convert the Safari distribution into a native macOS/iOS Safari Web Extension:
 ```bash
 npm run build:safari
-xcrun safari-web-extension-converter dist-safari --project-name "KnowThankYew"
+xcrun safari-web-extension-converter dist-safari --app-name "KnowThankYew"
 ```
 - **App Sandbox Entitlements**: Zero network entitlements required. `com.apple.security.network.client` is **NOT** included in the consumer build because all analysis runs 100% locally under `connect-src 'none'`.
-- **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyTrackedDataTypes: []` (zero tracked data types), verified by physical bundle invariant testing.
+- **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyCollectedDataTypes: []` and `NSPrivacyTracking: false` (zero collected data types), verified by physical bundle invariant testing.
 
 - **Architecture Details**: See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
 - **Store Publication Spec**: See [`docs/CHROMEWEBSTORE.md`](./docs/CHROMEWEBSTORE.md)

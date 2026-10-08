@@ -1,7 +1,7 @@
 # Safari Web Extension Packaging & Submission Guide
 
 > **Extension Name**: KnowThankYew Reality Engine  
-> **Target Version**: `2.0.0`  
+> **Target Version**: `2.1.0`  
 > **Bundle Identifier**: `org.knowthankyew.reality-engine`  
 > **Distribution Target**: Apple App Store (macOS Safari & iOS Safari)
 
@@ -22,7 +22,7 @@ Safari uses the standard Manifest V3 specification with an Xcode native containe
 ### Prerequisites
 - macOS 14 (Sonoma) or macOS 15 (Sequoia)
 - Xcode 15 or 16 (`xcode-select --install`)
-- Node.js v20+
+- Node.js v20.19+ or v22.12+ (required for Vite 8)
 
 ### Step 1: Compile the Clean Safari Distribution
 ```bash

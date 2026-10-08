@@ -20,16 +20,8 @@ export async function updateBadgeForScan(
       await chrome.action.setBadgeText({ text: '', tabId: targetTabId });
     }
   } else {
-    // Fallback if message has no associated tab (e.g. test harness)
-    if (critical > 0) {
-      await chrome.action.setBadgeText({ text: String(critical) });
-      await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
-    } else if (warning > 0) {
-      await chrome.action.setBadgeText({ text: String(warning) });
-      await chrome.action.setBadgeBackgroundColor({ color: '#f59e0b' });
-    } else {
-      await chrome.action.setBadgeText({ text: '' });
-    }
+    // No tab context: never write a global badge (strictly tab-scoped isolation invariant)
+    return;
   }
 }
 
@@ -66,8 +58,12 @@ export function handleRuntimeMessage(
   if (message?.type === 'KTY_SCAN_COMPLETED') {
     const targetTabId = sender?.tab?.id ?? message?.tabId;
     (async () => {
-      await updateBadgeForScan(message.summary, targetTabId);
-      sendResponse({ status: 'badge_updated' });
+      try {
+        await updateBadgeForScan(message.summary, targetTabId);
+        sendResponse({ status: 'badge_updated' });
+      } catch (err) {
+        sendResponse({ status: 'error', error: String(err) });
+      }
     })();
     return true; // Keep channel open
   }

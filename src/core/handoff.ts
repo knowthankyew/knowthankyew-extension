@@ -237,13 +237,22 @@ export function validateHandoffPayload(payload: unknown): payload is KtyHandoffP
     if (typeof f.recommendation !== 'string') return false;
   }
 
-  if (typeof p.targetTool !== 'string' || !(p.targetTool in CANONICAL_DESTINATION_TOOLS)) {
+  if (
+    typeof p.targetTool !== 'string' ||
+    !Object.prototype.hasOwnProperty.call(CANONICAL_DESTINATION_TOOLS, p.targetTool)
+  ) {
     return false;
   }
 
   if (p.primaryLegalLink !== null) {
     if (!p.primaryLegalLink || typeof p.primaryLegalLink !== 'object') return false;
     if (typeof p.primaryLegalLink.url !== 'string') return false;
+    try {
+      const proto = new URL(p.primaryLegalLink.url).protocol;
+      if (proto !== 'https:' && proto !== 'http:') return false;
+    } catch {
+      return false;
+    }
     if (typeof p.primaryLegalLink.title !== 'string') return false;
   }
 

@@ -134,7 +134,7 @@
     },
     {
       "id": "US-OR-001",
-      "title": "Oregon Advance Renewal Disclosure & Cancellation Mechanism",
+      "title": "Oregon Automatic Renewal Terms & Acknowledgment Disclosure",
       "category": "AUTO_RENEWAL",
       "classification": "STATUTORY_VIOLATION",
       "severity": "WARNING",
@@ -142,18 +142,18 @@
         "code": "Or. Rev. Stat. § 646A.295",
         "title": "Oregon Automatic Renewal Law",
         "jurisdiction": "Oregon",
-        "plainExplanation": "Oregon law requires businesses to clearly disclose auto-renewal terms, provide advance renewal notice, and offer simple cancellation methods."
+        "plainExplanation": "Oregon law requires businesses to clearly and conspicuously disclose auto-renewal offer terms, obtain affirmative consent, and provide an acknowledgment detailing straightforward cancellation procedures."
       },
       "patterns": [
-        "(?:automatic(?:ally)?\\s+renew(?:al|s)?)[^.\\n]{0,80}(?:oregon|ors\\s+646a)[^.\\n]{0,60}(?:no\\s+notification|without\\s+notice)",
-        "oregon\\s+(?:residents|consumers|subscribers)[^.\\n]{0,60}(?:notice\\s+will\\s+not\\s+be\\s+provided|no\\s+renewal\\s+notice)"
+        "(?:automatic(?:ally)?\\s+renew(?:al|s)?)[^.\\n]{0,80}(?:oregon|ors\\s+646a)[^.\\n]{0,60}(?:no\\s+acknowledg?ment|waiv(?:e|es|ing)\\s+cancellation\\s+procedure)",
+        "oregon\\s+(?:residents|consumers|subscribers)[^.\\n]{0,60}(?:no\\s+cancellation\\s+details|no\\s+written\\s+acknowledg?ment)"
       ],
-      "explanation": "The agreement disclaims advance renewal notification or fails to provide the simple cancellation mechanism required for Oregon consumers.",
-      "recommendation": "Oregon ORS § 646A.295 prohibits automatic charges without prior disclosure and requires cancellation to be as easy as enrollment.",
+      "explanation": "The agreement disclaims mandatory offer term disclosures, written acknowledgment, or the straightforward cancellation mechanism required for Oregon consumers under ORS § 646A.295.",
+      "recommendation": "Oregon ORS § 646A.295 requires clear pre-sale disclosure of terms, written acknowledgment with clear cancellation steps, and easy cancellation mechanisms.",
       "tracking": {
         "jurisdiction": "Oregon",
         "statuteCode": "Or. Rev. Stat. § 646A.295",
-        "apiKeywords": ["Oregon ARL", "ORS 646A.295", "Advance Notice", "Automatic Renewal"],
+        "apiKeywords": ["Oregon ARL", "ORS 646A.295", "Cancellation Procedure", "Automatic Renewal"],
         "lastVerifiedDate": "2026-09-01"
       }
     }

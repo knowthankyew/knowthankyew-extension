@@ -1,13 +1,24 @@
 import { extractPageLegalText, extractPageLegalContent } from './dom-extractor';
 import { discoverLegalLinks } from './link-detector';
 import { scanDocumentText } from '../core/engine';
-import { PageScanResult } from '../core/types';
+import { PageScanResult, TrapCategory } from '../core/types';
 import { injectIndicator, removeAllIndicators } from './inline-indicators';
 
 let cachedScanResult: PageScanResult | null = null;
 let lastExtractedTextLength = 0;
 let mutationObserver: MutationObserver | null = null;
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let burnBroadcastChannel: BroadcastChannel | null = null;
+let hardBurned = false;
+
+export function isHardBurned(): boolean {
+  return hardBurned;
+}
+
+export function resetHardBurnForTesting(): void {
+  hardBurned = false;
+}
+
 export const BUCKET_CAPACITY = 15;
 export const TOKEN_REFILL_INTERVAL_MS = 4000; // 1 token every 4s = 15 tokens/min steady state
 export const DEBOUNCE_DELAY_MS = 400;
@@ -53,6 +64,7 @@ export function resetTokenBucket(): void {
  * Caches the result and broadcasts the summary to the background service worker.
  */
 export function executeScan(): PageScanResult {
+  ensureBurnBroadcastChannel();
   const { text, inspectedContainers } = extractPageLegalContent();
   const hostname = (typeof window !== 'undefined' && window.location?.hostname) || 'current-page';
   const currentHref = (typeof window !== 'undefined' && window.location?.href) || '';
@@ -130,6 +142,18 @@ export function findPredatoryCheckboxAnchors(): Element[] {
   return results.slice(0, 3);
 }
 
+export function getCheckboxCategory(input: HTMLInputElement): TrapCategory | null {
+  const label = findLabelForInput(input);
+  if (!label) return null;
+  if (/arbitrat|waive|class\.action|binding/i.test(label)) {
+    return 'ARBITRATION';
+  }
+  if (/auto(?:matic(?:ally)?)?[\s-]?renew|recurring|automatically.{0,30}charge/i.test(label)) {
+    return 'AUTO_RENEWAL';
+  }
+  return null;
+}
+
 /**
  * Injects non-intrusive Closed Shadow DOM visual indicators adjacent to identified
  * predatory consent anchors on the page.
@@ -146,8 +170,13 @@ export function injectIndicatorsForScanResult(result: PageScanResult): void {
   const anchors = findPredatoryCheckboxAnchors();
   if (anchors.length === 0) return;
 
-  anchors.forEach((anchor, idx) => {
-    const match = actionableMatches[idx % actionableMatches.length];
+  anchors.forEach((anchor) => {
+    const category = getCheckboxCategory(anchor as HTMLInputElement);
+    const match =
+      (category ? actionableMatches.find((m) => m.category === category) : null) ||
+      actionableMatches[0];
+    if (!match) return;
+
     injectIndicator({
       anchorElement: anchor,
       severity: match.severity,
@@ -173,7 +202,11 @@ export function startDynamicObserver(): void {
     let hasMeaningfulChange = false;
     for (const mutation of mutations) {
       if (mutation.type === 'childList') {
-        if (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0) {
+        const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
+        const hasExternalNodes = nodes.some(
+          (n) => !(n instanceof Element && n.hasAttribute('data-kty-indicator-host'))
+        );
+        if (hasExternalNodes) {
           hasMeaningfulChange = true;
           break;
         }
@@ -253,13 +286,27 @@ if (!isAlreadyInitialized) {
   }
 }
 
-let burnBroadcastChannel: BroadcastChannel | null = null;
+export function ensureBurnBroadcastChannel(): void {
+  if (!burnBroadcastChannel && typeof BroadcastChannel !== 'undefined') {
+    try {
+      burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
+      burnBroadcastChannel.onmessage = (event) => {
+        if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+          handleHardBurnDOM();
+        }
+      };
+    } catch {
+      // Non-fatal if BroadcastChannel is restricted in current context
+    }
+  }
+}
 
 /**
  * Idempotent DOM teardown and sanitization handler.
  * Executed on receiving KTY_HARD_BURN_DOM via chrome.runtime.onMessage OR BroadcastChannel.
  */
 export function handleHardBurnDOM(): void {
+  hardBurned = true;
   // Disconnect observer and cease all monitoring
   stopDynamicObserver();
   cachedScanResult = null;
@@ -284,10 +331,6 @@ export function handleHardBurnDOM(): void {
   }
 
   // Close BroadcastChannel to release event handlers and isolate frame.
-  // Note: Nulling burnBroadcastChannel here is intentional to achieve true amnesia.
-  // If the page remains open and the scanner is subsequently re-injected or rescanned,
-  // the primary chrome.runtime.onMessage / chrome.tabs.sendMessage transport remains active
-  // and covers any subsequent burn commands for that context.
   if (burnBroadcastChannel) {
     try {
       burnBroadcastChannel.close();
@@ -306,6 +349,10 @@ if (typeof window !== 'undefined' && !(window as any)[KTY_LISTENERS_KEY]) {
   if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage) {
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message?.type === 'KTY_REQUEST_PAGE_SCAN') {
+        if (hardBurned) {
+          sendResponse({ success: false, error: 'Scanner disabled after hard burn' });
+          return true;
+        }
         try {
           const result = executeScan();
           sendResponse({ success: true, data: result });
@@ -325,16 +372,5 @@ if (typeof window !== 'undefined' && !(window as any)[KTY_LISTENERS_KEY]) {
   }
 
   // Secondary transport: BroadcastChannel coordinator for multi-context amnesia
-  if (!burnBroadcastChannel && typeof BroadcastChannel !== 'undefined') {
-    try {
-      burnBroadcastChannel = new BroadcastChannel('kty_hard_burn');
-      burnBroadcastChannel.onmessage = (event) => {
-        if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
-          handleHardBurnDOM();
-        }
-      };
-    } catch {
-      // Non-fatal if BroadcastChannel is restricted in current context
-    }
-  }
+  ensureBurnBroadcastChannel();
 }

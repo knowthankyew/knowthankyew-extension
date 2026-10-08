@@ -4,7 +4,8 @@ export type LegalClassification =
   | 'STATUTORY_VIOLATION'   // Explicit violation of statute (ROSCA non-disclosure, dark cancellation)
   | 'RIGHTS_WAIVER'         // Enforceable under FAA/UCC, but strips consumer access to courts
   | 'ONE_SIDED_DISCRETION'  // Unilateral modification / illusory promise
-  | 'SURVEILLANCE_NOTICE';  // Cross-context data brokerage / tracking disclosure
+  | 'SURVEILLANCE_NOTICE'   // Cross-context data brokerage / tracking disclosure
+  | 'PROSPECTIVE_DUTY';     // Enacted statutory regime with prospective commencement (e.g. UK DMCC 2024)
 
 export type TrapCategory = 
   | 'AUTO_RENEWAL'
@@ -60,6 +61,7 @@ export interface PageScanResult {
   inspectedContainers?: string[];
   durationMs?: number;
   evaluatedRulesCount?: number;
+  targetJurisdiction?: string;
   sanitizedTextPreview?: string;
   /** @deprecated Alias for sanitizedTextPreview; prefer sanitizedTextPreview directly */
   extractedTextSnippet?: string;

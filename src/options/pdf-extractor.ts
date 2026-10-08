@@ -1,4 +1,4 @@
-import { unzlibSync } from 'fflate';
+import { Unzlib } from 'fflate';
 
 /**
  * Parses embedded CMaps from PDF /ToUnicode streams.
@@ -17,6 +17,7 @@ function parseCMap(decompressedBytes: Uint8Array | null): Map<number, string> {
     const bfCharRegex = /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>/g;
     let m: RegExpExecArray | null;
     while ((m = bfCharRegex.exec(charSec[1])) !== null) {
+      if (mapping.size >= 4000) break;
       const srcCode = parseInt(m[1], 16);
       const dstHex = m[2];
       let str = '';
@@ -40,8 +41,12 @@ function parseCMap(decompressedBytes: Uint8Array | null): Map<number, string> {
       const arrayMatch = /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*\[([\s\S]*?)\]/.exec(trimmed);
       if (arrayMatch) {
         const start = parseInt(arrayMatch[1], 16);
+        const end = parseInt(arrayMatch[2], 16);
+        const maxTokens = Math.max(0, end - start + 1);
         const hexTokens = arrayMatch[3].match(/<([0-9a-fA-F]+)>/g) || [];
-        for (let i = 0; i < hexTokens.length; i++) {
+        const limit = Math.min(hexTokens.length, maxTokens);
+        for (let i = 0; i < limit; i++) {
+          if (mapping.size >= 4000) break;
           const hex = hexTokens[i].slice(1, -1);
           let str = '';
           for (let j = 0; j < hex.length; j += 4) {
@@ -58,7 +63,9 @@ function parseCMap(decompressedBytes: Uint8Array | null): Map<number, string> {
         const start = parseInt(rangeMatch[1], 16);
         const end = parseInt(rangeMatch[2], 16);
         const dstStart = parseInt(rangeMatch[3], 16);
+        if (end < start || end - start > 0xffff) continue;
         for (let c = start; c <= end; c++) {
+          if (mapping.size >= 4000) break;
           mapping.set(c, String.fromCharCode(dstStart + (c - start)));
         }
       }
@@ -109,7 +116,37 @@ function getObjectStream(latin1: string, bytes: Uint8Array, objNum: number): Uin
   const headerStr = latin1.slice(idx, sIdx);
   if (headerStr.includes('/FlateDecode')) {
     try {
-      return unzlibSync(raw);
+      const chunks: Uint8Array[] = [];
+      let totalBytes = 0;
+      let aborted = false;
+      const MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024;
+
+      const u = new Unzlib((chunk) => {
+        if (aborted) return;
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_DECOMPRESSED_BYTES) {
+          aborted = true;
+          throw new Error('Decompression limit exceeded');
+        }
+        chunks.push(chunk);
+      });
+
+      const CHUNK_SIZE = 64 * 1024;
+      for (let p = 0; p < raw.length; p += CHUNK_SIZE) {
+        if (aborted) break;
+        const slice = raw.subarray(p, Math.min(raw.length, p + CHUNK_SIZE));
+        const isFinal = p + CHUNK_SIZE >= raw.length;
+        u.push(slice, isFinal);
+      }
+      if (aborted) return null;
+
+      const out = new Uint8Array(totalBytes);
+      let offset = 0;
+      for (const c of chunks) {
+        out.set(c, offset);
+        offset += c.length;
+      }
+      return out;
     } catch {
       return null;
     }
@@ -119,14 +156,20 @@ function getObjectStream(latin1: string, bytes: Uint8Array, objNum: number): Uin
 }
 
 function unescapePdfString(str: string): string {
-  return str
-    .replace(/\\([()\\])/g, '$1')
-    .replace(/\\n/g, '\n')
-    .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t')
-    .replace(/\\b/g, '\b')
-    .replace(/\\f/g, '\f')
-    .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+  return str.replace(/\\([nrtbf()\\]|[0-7]{1,3})/g, (_, esc) => {
+    switch (esc) {
+      case 'n': return '\n';
+      case 'r': return '\r';
+      case 't': return '\t';
+      case 'b': return '\b';
+      case 'f': return '\f';
+      case '(': return '(';
+      case ')': return ')';
+      case '\\': return '\\';
+      default:
+        return String.fromCharCode(parseInt(esc, 8));
+    }
+  });
 }
 
 function decodeHexString(hex: string, cmap: Map<number, string> | null): string {
@@ -153,28 +196,44 @@ function decodeHexString(hex: string, cmap: Map<number, string> | null): string 
  */
 export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
   if (!buffer || buffer.byteLength === 0) return '';
+  // Cap input buffer at 10MB to prevent main-thread UI lockup
+  const MAX_PDF_BUFFER_BYTES = 10 * 1024 * 1024;
+  if (buffer.byteLength > MAX_PDF_BUFFER_BYTES) return '';
 
   const bytes = new Uint8Array(buffer);
   const latin1 = new TextDecoder('latin1').decode(bytes);
 
-  // 1. Discover all Font objects that specify a /ToUnicode CMap
+  // 1. Discover all Font objects that specify a /ToUnicode CMap and Page objects
+  const MAX_SCANNED_OBJECTS = 500;
+  const MAX_FONT_OBJECTS = 25;
   const fontToCmap = new Map<number, Map<number, string>>();
-  const fontRegex = /(\d+)\s+0\s+obj(?:(?!endobj)[\s\S])*?\/Type\s*\/Font(?:(?!endobj)[\s\S])*?\/ToUnicode\s+(\d+)\s+0\s+R/g;
-  let fontMatch: RegExpExecArray | null;
-  while ((fontMatch = fontRegex.exec(latin1)) !== null) {
-    const fontObjNum = Number(fontMatch[1]);
-    const cmapObjNum = Number(fontMatch[2]);
-    const stream = getObjectStream(latin1, bytes, cmapObjNum);
-    fontToCmap.set(fontObjNum, parseCMap(stream));
+  const pageBodies: string[] = [];
+
+  const objRegex = /(\d+)\s+0\s+obj([\s\S]*?)endobj/g;
+  let objMatch: RegExpExecArray | null;
+  let objectCount = 0;
+  while ((objMatch = objRegex.exec(latin1)) !== null) {
+    if (++objectCount > MAX_SCANNED_OBJECTS) break;
+    const objNum = Number(objMatch[1]);
+    const body = objMatch[2];
+    if (body.includes('/Type') && /\/Type\s*\/Font\b/.test(body)) {
+      if (fontToCmap.size < MAX_FONT_OBJECTS) {
+        const toUnicodeMatch = /\/ToUnicode\s+(\d+)\s+0\s+R/.exec(body);
+        if (toUnicodeMatch) {
+          const cmapObjNum = Number(toUnicodeMatch[1]);
+          const stream = getObjectStream(latin1, bytes, cmapObjNum);
+          fontToCmap.set(objNum, parseCMap(stream));
+        }
+      }
+    } else if (body.includes('/Type') && /\/Type\s*\/Page\b/.test(body)) {
+      pageBodies.push(body);
+    }
   }
 
   // 2. Discover all Page objects and extract their content streams
-  const pageObjRegex = /(\d+)\s+0\s+obj(?:(?!endobj)[\s\S])*?\/Type\s*\/Page\b([\s\S]*?)endobj/g;
-  let pageMatch: RegExpExecArray | null;
   const pagesText: string[] = [];
 
-  while ((pageMatch = pageObjRegex.exec(latin1)) !== null) {
-    const pageBody = pageMatch[2];
+  for (const pageBody of pageBodies) {
     const pageFontMap = new Map<string, Map<number, string>>();
 
     // Extract font aliases defined in the page resource dictionary: /Font << /F1 4 0 R /F2 5 0 R >>

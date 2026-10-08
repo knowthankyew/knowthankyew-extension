@@ -9,9 +9,9 @@ export const SeverityBadge: React.FC<SeverityBadgeProps> = ({ severity }) => {
   const getClassificationLabel = () => {
     switch (severity) {
       case 'CRITICAL':
-        return 'Watch out';
-      case 'WARNING':
         return 'This is a problem';
+      case 'WARNING':
+        return 'Watch out';
       case 'INFO':
       default:
         return 'FYI';

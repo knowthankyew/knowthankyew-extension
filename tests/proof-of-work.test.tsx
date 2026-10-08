@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { extractPageLegalContent } from '../src/content/dom-extractor';
-import { executeScan, handleHardBurnDOM, getCachedScanResult } from '../src/content/scanner';
+import { executeScan, handleHardBurnDOM, getCachedScanResult, resetHardBurnForTesting } from '../src/content/scanner';
 import { PageScanResult } from '../src/core/types';
 import { AuditReceiptCard } from '../src/popup/components/AuditReceiptCard';
 import { SparseScanWarning } from '../src/popup/components/SparseScanWarning';
@@ -18,6 +18,7 @@ describe('Milestone 7 Phase 1.5 — Clean-State Proof of Work & Scope Transparen
   let root: Root | null = null;
 
   beforeEach(() => {
+    resetHardBurnForTesting();
     container = document.createElement('div');
     document.body.appendChild(container);
   });
@@ -34,6 +35,7 @@ describe('Milestone 7 Phase 1.5 — Clean-State Proof of Work & Scope Transparen
     }
     container = null;
     handleHardBurnDOM();
+    resetHardBurnForTesting();
     document.body.innerHTML = '';
     vi.restoreAllMocks();
   });
@@ -147,7 +149,7 @@ describe('Milestone 7 Phase 1.5 — Clean-State Proof of Work & Scope Transparen
     const textContent = card!.textContent || '';
     // Proof of work header
     expect(textContent).toContain('Proof of Work · Verification Receipt');
-    expect(textContent).toContain('PASSED');
+    expect(textContent).toContain('NO TRAPS IDENTIFIED');
 
     // Telemetry stats
     expect(textContent).toContain('14,820 chars');
@@ -316,9 +318,9 @@ describe('Milestone 7 Phase 1.5 — Clean-State Proof of Work & Scope Transparen
   // -------------------------------------------------------------
   // Test 6: PII Redaction Boundary Safety (Sanitizing before truncation)
   // -------------------------------------------------------------
-  it('sanitizes full text before 2000-char preview truncation to prevent boundary leakage', async () => {
+  it('sanitizes text before 2000-char preview truncation and bounds 4000-char source buffer without boundary leakage', async () => {
     const { scanDocumentText: scanDoc } = await import('../src/core/engine');
-    // Place sensitive email so it straddles character 2000 in raw text (starts at 1971, length ~50 chars)
+    // Boundary 1: Sensitive email straddling character 2000 in raw text (starts at 1971, length ~50 chars)
     const paddingLength = 1970;
     const padding = 'x'.repeat(paddingLength);
     const emailStraddlingBoundary = 'corporate.executive@confidential-defense-firm.com';
@@ -328,5 +330,12 @@ describe('Milestone 7 Phase 1.5 — Clean-State Proof of Work & Scope Transparen
     expect(result.sanitizedTextPreview).toContain('[EMAIL REDACTED]');
     expect(result.sanitizedTextPreview).not.toContain('corporate.executive');
     expect(result.sanitizedTextPreview).not.toContain('confidential-defense-firm');
+
+    // Boundary 2: Sensitive token straddling the 4000-char raw preview source buffer boundary
+    const text4000Boundary = 'z'.repeat(3980) + ' corporate.executive@confidential-defense-firm.com ' + 'w'.repeat(500);
+    const result4000 = scanDoc(text4000Boundary, 'boundary-test.com');
+    expect(result4000.sanitizedTextPreview).not.toContain('corporate.executive');
+    expect(result4000.sanitizedTextPreview).toBeDefined();
+    expect(result4000.sanitizedTextPreview!.length).toBeLessThanOrEqual(2003);
   });
 });

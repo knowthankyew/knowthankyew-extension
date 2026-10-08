@@ -24,7 +24,7 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
   - Primary path: Dispatches `chrome.tabs.sendMessage` (`KTY_HARD_BURN_DOM`) to all active tabs in Chromium.
   - Secondary path: Concurrently broadcasts over `BroadcastChannel('kty_hard_burn')`. This ensures immediate amnesia synchronization across partitioned worker contexts, detached iframes, Options pages, and Safari containers.
 - **Idempotent Content Script Teardown**:
-  - `src/content/scanner.ts` receives the burn signal, tears down active `MutationObserver` instances, flushes local scan caches, dereferences all in-memory clause matches, and writes a permanent session tombstone trap (`sessionStorage.__KTY_HARD_BURN_TOMBSTONE__`).
+  - `src/content/scanner.ts` receives the burn signal, tears down active `MutationObserver` instances, flushes local scan caches, dereferences all in-memory clause matches, purges `sessionStorage`, and sets an in-memory amnesia lock flag.
   - Subsequent programmatic scan requests within that tab session are permanently rejected until a fresh navigation occurs.
 
 ### B. Burst-Resilient Token-Bucket Scanner Throttle (Q-SCAN-01)

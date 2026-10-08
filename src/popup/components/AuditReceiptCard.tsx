@@ -12,39 +12,51 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
   const wordCount = scanResult.wordCount ?? Math.round(charCount / 5);
   const segmentCount = scanResult.segmentCount ?? 0;
   const durationMs = scanResult.durationMs ?? 1;
-  const rulesCount = scanResult.evaluatedRulesCount ?? 42;
+  const rulesCount = scanResult.evaluatedRulesCount;
   const containers = scanResult.inspectedContainers && scanResult.inspectedContainers.length > 0
     ? scanResult.inspectedContainers
     : ['body'];
   const textSnippet = scanResult.sanitizedTextPreview || scanResult.extractedTextSnippet || '';
 
-  const checklistItems = [
+  const targetJ = (scanResult.targetJurisdiction || 'ALL').toUpperCase();
+  const allChecklistItems = [
     {
       title: 'Automatic Renewal & Negative Option',
       statute: 'ROSCA 15 U.S.C. § 8403 / State ARLs',
       description: 'Zero hidden recurring charges or cancellation hurdles detected.',
+      jurisdiction: 'US',
     },
     {
       title: 'Mandatory Binding Arbitration & Jury Trial Waivers',
       statute: 'FAA 9 U.S.C. § 2',
       description: 'No forced corporate dispute clauses or class action bans found.',
+      jurisdiction: 'US',
     },
     {
       title: 'Unilateral Terms Modification & Illusory Discretion',
       statute: 'UCC & Restatement (Second) of Contracts',
       description: 'No clauses reserving unannounced retroactive changes to terms.',
+      jurisdiction: 'US',
     },
     {
       title: 'Surveillance & Cross-Context Data Brokerage Disclosures',
       statute: 'FTC Act § 5 / State Privacy Acts (CCPA/VCDPA/CPA)',
       description: 'No undisclosed commercial tracking or data sale consent traps.',
+      jurisdiction: 'US',
     },
     {
       title: 'EU CRD / UK DMCC 2024 Pre-ticked Consent & Cooling-off Disclosures',
       statute: 'EU Directive 2011/83/EU / UK DMCC Act 2024',
       description: 'No pre-selected consent boxes or statutory cooling-off exemptions.',
+      jurisdiction: 'INTL',
     },
   ];
+
+  const checklistItems = allChecklistItems.filter(item => {
+    if (targetJ === 'ALL') return true;
+    if (targetJ === 'EU' || targetJ === 'UK') return item.jurisdiction === 'INTL';
+    return item.jurisdiction === 'US';
+  });
 
   return (
     <div
@@ -84,7 +96,7 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
               Proof of Work · Verification Receipt
             </div>
             <div style={{ fontSize: '10.5px', color: '#94a3b8' }}>
-              Full statutory battery verified clean with zero violations
+              Inspected against active statutory battery with zero detections
             </div>
           </div>
         </div>
@@ -100,7 +112,7 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
             letterSpacing: '0.03em',
           }}
         >
-          PASSED
+          NO TRAPS IDENTIFIED
         </span>
       </div>
 
@@ -131,18 +143,20 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
           <span>
             {charCount.toLocaleString()} chars · ~{wordCount.toLocaleString()} words · {segmentCount} clauses · {durationMs}ms
           </span>
-          <span
-            style={{
-              fontSize: '10px',
-              color: '#38bdf8',
-              backgroundColor: 'rgba(56, 189, 248, 0.1)',
-              padding: '1px 5px',
-              borderRadius: '3px',
-              border: '1px solid rgba(56, 189, 248, 0.2)',
-            }}
-          >
-            {rulesCount} rules evaluated
-          </span>
+          {rulesCount != null && (
+            <span
+              style={{
+                fontSize: '10px',
+                color: '#38bdf8',
+                backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                padding: '1px 5px',
+                borderRadius: '3px',
+                border: '1px solid rgba(56, 189, 248, 0.2)',
+              }}
+            >
+              {rulesCount} rules evaluated
+            </span>
+          )}
         </div>
 
         {/* Inspected Containers Attribution */}
@@ -179,7 +193,7 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
             marginBottom: '6px',
           }}
         >
-          Verified Statutory Protections
+          Evaluated Statutory Protections
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {checklistItems.map((item, idx) => (

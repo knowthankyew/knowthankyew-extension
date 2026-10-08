@@ -2,14 +2,14 @@
 
 > **Extension Name**: KnowThankYew Reality Engine  
 > **Gecko ID**: `reality-engine@knowthankyew.org`  
-> **Version**: `2.0.0`
+> **Version**: `2.1.0`
 
 ---
 
 ## 1. Build Environment & Prerequisites
 
-- **Operating System**: macOS, Linux, or Windows (WSL recommended)
-- **Node.js**: v20.x or higher (`node --version`)
+- **Operating System**: macOS, Linux, or Windows (WSL required; native Windows cmd.exe/PowerShell lacks POSIX environment variable handling and shell packaging commands)
+- **Node.js**: v20.19+ or v22.12+ (`node --version`, required for Vite 8)
 - **Package Manager**: npm v10.x or higher (`npm --version`)
 
 ---
@@ -38,4 +38,4 @@
    ```bash
    npm run package:firefox
    ```
-   Packages `dist-firefox/` into `knowthankyew-extension-v2.0.0-firefox.zip`.
+   Packages `dist-firefox/` into `knowthankyew-extension-v2.1.0-firefox.zip`.

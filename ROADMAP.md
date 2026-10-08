@@ -1,7 +1,7 @@
 # Roadmap: KnowThankYew Reality Engine (Browser Extension)
 
 > **Repository**: [`knowthankyew/knowthankyew-extension`](https://github.com/knowthankyew/knowthankyew-extension)  
-> **Status**: **v1.3.0 Live on Chrome Web Store · v1.6.0 Approved on Firefox AMO · v2.0.0 Release Complete & Packaged**
+> **Status**: **v1.6.0 Live on Chrome Web Store & Firefox AMO · v2.1.0 Release Complete & Packaged**
 
 ---
 
@@ -11,7 +11,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 - [x] **Zero-Egress Invariant**: Enforced via Manifest V3 `extension_pages` CSP (`connect-src 'none'`), compile-time dead-code elimination, and fail-closed CI bundle grep over all distribution JS.
 - [x] **Amnesiac Hard Burn**: Destroys volatile in-memory circular buffers, wipes `chrome.storage.local`, clears toolbar badges, and sets permanent tombstone traps.
-- [x] **ROSCA & Rights-Waiver Grounding**: 37 heuristic pattern matchers rooted in ROSCA 15 U.S.C. § 8403, California AB 2863, New York GBL § 527-a, and FAA § 2 rights-waiver classifications.
+- [x] **ROSCA & Rights-Waiver Grounding**: Originally 37 heuristic pattern matchers, now expanded into **19 structured policy rules with 66 regex patterns** across 4 international policy packs (`us-federal`, `state-arl`, `uk-dmcc`, `eu-crd`), rooted in ROSCA 15 U.S.C. § 8403, California AB 2863, New York GBL § 527-a, and FAA § 2 rights-waiver classifications.
 - [x] **Static ReDoS Elimination**: 100% of regular expression patterns statically verified with `safe-regex`.
 - [x] **Puppeteer E2E Network Interception**: Real Chromium browser test intercepting 100% of network traffic with negative-control CSP verification.
 - [x] **Supply Chain Attestation**: Automated CycloneDX SBOM (`bom.json`) and SLSA build provenance attestation on every `main` push.
@@ -34,7 +34,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ---
 
-## Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (`v1.3.0`) ✅ — Live on Chrome Web Store
+## Milestone 3: Engine Dashboard & Cross-Domain Burn Manager (`v1.3.0`) ✅
 
 - [x] **Full-Page Options Dashboard**: VS Code-styled options page with live memory/storage usage meters (`chrome.storage.local.getBytesInUse()`).
 - [x] **Nuclear Amnesia Across All Domains**: Global master burn clearing all local storage, volatile telemetry buffers, and broadcasting `KTY_HARD_BURN_DOM` observer teardown across all open tabs.
@@ -43,7 +43,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ## Milestone 4: Declarative Policy Packs, Multi-Browser & Neural Assist (`v1.5.0`) ✅ — Packaged & Release-Ready
 
-> **Release Status**: 86/86 baseline tests pass across unit, ReDoS, invariant, adversarial DOM, and Puppeteer real-Chromium suites. Packaged as `knowthankyew-extension-v1.5.0.zip` (Chrome) and `knowthankyew-extension-v1.5.0-firefox.zip` (Firefox / Gecko AMO).
+> **Release Status**: 86/86 baseline tests pass (expanded to **170+ automated tests** in v2.1 across unit, invariant, adversarial DOM, and real Chromium E2E suites). Packaged as `knowthankyew-extension-v1.5.0.zip` (Chrome) and `knowthankyew-extension-v1.5.0-firefox.zip` (Firefox / Gecko AMO).
 
 - [x] **Declarative JSON Policy Packs**: Statutory rules decoupled into structured JSON packs (`us-federal.json`, `state-arl.json`) with automated regex compilation at build time.
 - [x] **Automated Statutory Regulatory Monitor**: Weekly GitHub Action querying the Federal Register API to detect rule amendments (ROSCA, Negative Option, Click-to-Cancel, Arbitration). Generates Draft Pull Requests with official citation diffs for human review — no autonomous rule mutations.
@@ -55,7 +55,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ---
 
-## Milestone 5: Hardening, Multi-Tab Amnesia & Code Quality (`v1.6.0`) ✅
+## Milestone 5: Hardening, Multi-Tab Amnesia & Code Quality (`v1.6.0`) ✅ — Live on Chrome Web Store & Firefox AMO
 
 - [x] **Multi-Tab Session Amnesia Coordinator**: Dual-broadcast Hard Burn via `chrome.tabs.sendMessage` (primary Chromium path) **and** `BroadcastChannel('kty_hard_burn')` (secondary cross-context path covering Safari's partitioned worker contexts and detached frames) with idempotent DOM handler in `src/content/scanner.ts`.
 - [x] **Token Bucket Scanner Throttle** *(Q-SCAN-01)*: Replaced fixed 60-second window in `src/content/scanner.ts` with a token bucket (capacity: 15 tokens, refill rate: 1 token per 4,000ms = 15/min steady state). Eliminates cliff-edge scan starvation on dynamic single-page applications while enforcing anti-abuse boundaries.
@@ -66,6 +66,7 @@ The core reality engine is fully built, statically verified, and audited:
 - [x] **Loopback ML error handling tests** *(Q-TEST-04)*: Landed in commit `c0bd121`. Added tests covering non-200 responses (404, 500, 503), malformed JSON, and timeout handlers in `tests/local-ml-client.test.ts`.
 - [x] **`lastVerified` timestamps on `WELL_KNOWN_LEGAL_MAP`** *(Q-LINK-01)*: Landed in commit `c0bd121`. Added ISO audit timestamps to all 14 routes in `src/content/link-detector.ts`.
 - [x] **Fail-loud bundle and scanner egress verification** *(Q-BUILD-01, Q-TEST-03)*: Landed in commit `c0bd121` in `tests/fixture-dom.test.ts` and `tests/bundle-invariants.test.ts`.
+- [x] **Store Metadata & Claims Linter** (`tests/claims-linter.test.ts`): Automated CI test suite enforcing 1:1 synchronization between `manifest.json`, Web Store submission justifications (`docs/CHROMEWEBSTORE.md`), policy pack rule definitions, and release versioning. Eliminates Web Store review delays caused by unjustified manifest permissions, prevents stale release version references across multi-browser targets, and verifies zero-egress CSP disclosure accuracy.
 
 ---
 
@@ -85,7 +86,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ### New Distribution Channel
 
-- [x] **Apple Safari (macOS / iOS)**: Dedicated `TARGET_BROWSER=safari` build target outputting `dist-safari/` and packaging `knowthankyew-extension-v2.0.0-safari.zip`. Verified clean conversion via `xcrun safari-web-extension-converter`. Documented Apple App Store privacy manifest (`NSPrivacyTrackedDataTypes: []`) and zero network entitlements requirement.
+- [x] **Apple Safari (macOS / iOS)**: Dedicated `TARGET_BROWSER=safari` build target outputting `dist-safari/` and packaging `knowthankyew-extension-v2.0.0-safari.zip`. Verified clean conversion via `xcrun safari-web-extension-converter`. Documented Apple App Store privacy manifest (`NSPrivacyCollectedDataTypes: []`) and zero network entitlements requirement.
 
 ### Regulatory Upkeep Infrastructure
 
@@ -136,7 +137,7 @@ Gemini Nano explains each finding in 1–2 plain conversational sentences, on-de
 
 - [x] Nano on-device summaries per `TrapCard` via `ChromePromptAPIAdapter` (opt-in, fail-silent fallback to heuristic explanation)
 - [x] Rule IDs never surface to the user
-- [x] Severity tiers simplified to plain language: **"Watch out"** / **"This is a problem"** / **"FYI"**
+- [x] Severity tiers simplified to plain language: **"This is a problem"** (Critical) / **"Watch out"** (Warning) / **"FYI"** (Info)
 - [x] `useEffect` async/await + `AbortController` for clean inference lifecycle (burn-safe)
 - [x] Calendar reminder link for `AUTO_RENEWAL` traps (25-day pre-renewal reminder, zero new permissions)
 
@@ -168,9 +169,9 @@ Give users verifiable evidence of what the engine actually inspected when a page
 Define the intent/findings/summary JSON schema and wire the extension popup to open portfolio destination tools with pre-loaded context. No new backend. No new infrastructure.
 
 - [x] **Define `KTY_HANDOFF_PAYLOAD` schema**: structured JSON envelope containing `{ domain, scanTimestamp, findings: EvaluationMatch[], primaryLegalLink: DiscoveredLegalLink | null, summary: PageScanResult['summary'] }`
-- [x] **`postMessage` bridge**: Extension popup serializes the payload into a `sessionStorage`-safe blob and opens the destination tool URL with a `?kty_handoff=1` flag; destination reads via `window.addEventListener('message', ...)` or `sessionStorage` key with HMAC integrity check
+- [x] **Direct `sessionStorage` injection bridge**: Extension popup creates a tab for the destination tool and injects the payload directly into the destination tab's ephemeral `sessionStorage` via `chrome.scripting.executeScript`; destination tool reads `sessionStorage` on mount
 - [x] **Zero persistent storage for handoff**: Payload lives in `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
-- [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `DATA_SHARING` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
+- [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `SURVEILLANCE` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
 - [x] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
 
 ### Phase 3 — Destination Tools Receive Context ✅ (`v2.2.0`)

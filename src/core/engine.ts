@@ -32,18 +32,49 @@ export function segmentText(rawText: string): string[] {
  * Scans provided text paragraphs against statutory rule packs.
  * Runs 100% locally with zero external network dispatch.
  */
+export function isJurisdictionMatch(ruleJurisdiction?: string, targetJurisdiction?: string): boolean {
+  if (!targetJurisdiction || targetJurisdiction.toUpperCase() === 'ALL') return true;
+  const target = targetJurisdiction.trim().toUpperCase();
+  const j = (ruleJurisdiction || '').trim().toUpperCase();
+  if (!j) return true;
+
+  const isUsFederalBaseline = (
+    j === 'US FEDERAL' ||
+    j === 'US FEDERAL & MULTI-STATE' ||
+    j === 'US FEDERAL & STATE' ||
+    j === 'UNIFORM COMMERCIAL CODE' ||
+    j === 'US COMMON LAW'
+  );
+
+  if (target === 'EU') return j === 'EU';
+  if (target === 'UK') return j === 'UK';
+  if (target === 'US' || target === 'US FEDERAL') return isUsFederalBaseline;
+
+  // State target: inherit federal baseline plus matching state rules
+  if (isUsFederalBaseline) return true;
+  if (j === target) return true;
+
+  const parts = j.split(/[&,]/).map(p => p.trim());
+  return parts.includes(target);
+}
+
 export function scanDocumentText(
   text: string,
   domain = 'current-page',
-  inspectedContainers?: string[]
+  inspectedContainers?: string[],
+  targetJurisdiction?: string
 ): PageScanResult {
   const startTime = performance.now();
   const segments = segmentText(text);
   const matches: EvaluationMatch[] = [];
   const matchedRuleIds = new Set<string>();
 
+  const rulesToEvaluate = targetJurisdiction && targetJurisdiction.toUpperCase() !== 'ALL'
+    ? ALL_RULES.filter(rule => isJurisdictionMatch(rule.statute?.jurisdiction, targetJurisdiction))
+    : ALL_RULES;
+
   for (const segment of segments) {
-    for (const rule of ALL_RULES) {
+    for (const rule of rulesToEvaluate) {
       if (matchedRuleIds.has(rule.id)) continue;
 
       for (const pattern of rule.patterns) {
@@ -82,10 +113,11 @@ export function scanDocumentText(
 
   const durationMs = Math.max(1, Math.round(performance.now() - startTime));
   const wordCount = Math.round(text.length / 5);
-  const sanitizedFull = sanitizeSnippet(text);
-  const sanitizedTextPreview = sanitizedFull.length > 2000
-    ? sanitizedFull.slice(0, 2000) + '...'
-    : sanitizedFull;
+  const textForPreview = text.length > 4000 ? text.slice(0, 4000) : text;
+  const sanitizedPreviewText = sanitizeSnippet(textForPreview);
+  const sanitizedTextPreview = sanitizedPreviewText.length > 2000
+    ? sanitizedPreviewText.slice(0, 2000) + '...'
+    : sanitizedPreviewText;
 
   return {
     timestamp: new Date().toISOString(),
@@ -95,12 +127,13 @@ export function scanDocumentText(
     segmentCount: segments.length,
     inspectedContainers: inspectedContainers && inspectedContainers.length > 0 ? inspectedContainers : ['body'],
     durationMs,
-    evaluatedRulesCount: ALL_RULES.length,
+    evaluatedRulesCount: rulesToEvaluate.length,
+    targetJurisdiction,
     sanitizedTextPreview,
     extractedTextSnippet: sanitizedTextPreview,
     matches,
     riskScore,
     summary,
-    limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation.',
+    limitationsNotice: 'Scans visible on-page DOM text only. Does not audit linked external Terms pages or cross-origin iframes without direct user navigation. Findings may be jurisdiction-dependent.',
   };
 }

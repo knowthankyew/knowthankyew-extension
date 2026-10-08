@@ -100,11 +100,22 @@ export async function hardBurnAllData(): Promise<void> {
   if (typeof chrome !== 'undefined' && chrome.tabs?.query) {
     try {
       const tabs = await chrome.tabs.query({});
+      const badgeClears = tabs
+        .filter((tab) => typeof tab.id === 'number')
+        .map(async (tab) => {
+          try {
+            if (chrome.action?.setBadgeText) {
+              await chrome.action.setBadgeText({ text: '', tabId: tab.id });
+            }
+          } catch {
+            // Tab may be closed or restricted
+          }
+        });
       const notifications = tabs
         .filter((tab) => typeof tab.id === 'number')
         .map((tab) => chrome.tabs.sendMessage(tab.id as number, burnMessage));
 
-      await Promise.allSettled(notifications);
+      await Promise.allSettled([...badgeClears, ...notifications]);
     } catch {
       // The tabs API may be unavailable or disconnected; non-fatal.
     }

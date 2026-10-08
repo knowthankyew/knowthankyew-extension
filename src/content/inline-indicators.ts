@@ -92,7 +92,7 @@ export function injectIndicator(config: IndicatorConfig): Element | null {
     const badge = document.createElement('span');
     badge.className = 'kty-badge';
     badge.setAttribute('title', tooltipText);
-    badge.setAttribute('role', 'alert');
+    badge.setAttribute('role', 'note');
     badge.setAttribute('aria-label', tooltipText);
     badge.appendChild(document.createTextNode(label));
 
@@ -100,7 +100,8 @@ export function injectIndicator(config: IndicatorConfig): Element | null {
 
     // Insert as a sibling after the anchor element
     if (typeof anchorElement.insertAdjacentElement === 'function') {
-      anchorElement.insertAdjacentElement('afterend', host);
+      const inserted = anchorElement.insertAdjacentElement('afterend', host);
+      if (!inserted) return null;
     } else if (anchorElement.parentNode) {
       anchorElement.parentNode.insertBefore(host, anchorElement.nextSibling);
     } else {
@@ -131,9 +132,9 @@ export function removeAllIndicators(): void {
     }
     activeHostElements.clear();
 
-    // Fallback cleanup in case any orphaned hosts exist in DOM
+    // Fallback cleanup in case any orphaned hosts exist in DOM (restricted to our span hosts)
     if (typeof document !== 'undefined') {
-      const remaining = document.querySelectorAll('[data-kty-indicator-host]');
+      const remaining = document.querySelectorAll('span[data-kty-indicator-host="true"]');
       remaining.forEach((el) => {
         try {
           el.remove();

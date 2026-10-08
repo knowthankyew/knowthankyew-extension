@@ -30,6 +30,12 @@ describe('Arbitration & Class Action Waiver Rule Pack', () => {
     const rule = ALL_RULES.find(r => r.id === 'ARB-001')!;
     const matched = rule.patterns.some(p => p.test(text));
     expect(matched).toBe(true);
+
+    const contractorText = 'You and the contractor agree to binding arbitration for all disputes.';
+    expect(rule.patterns.some(p => p.test(contractorText))).toBe(true);
+
+    const clientText = 'You and the client agree to binding arbitration regarding any claim.';
+    expect(rule.patterns.some(p => p.test(clientText))).toBe(true);
   });
 
   it('detects class action bans', () => {
@@ -150,8 +156,8 @@ describe('Expanded State ARL Rule Pack (CO, IL, OR)', () => {
     expect(matched).toBe(true);
   });
 
-  it('detects Oregon advance renewal notice omissions (US-OR-001)', () => {
-    const text = 'Oregon residents acknowledge that no renewal notice will be issued prior to annual billing.';
+  it('detects Oregon statutory acknowledgment and cancellation omissions (US-OR-001)', () => {
+    const text = 'Oregon residents acknowledge that no written acknowledgment or cancellation details will be provided.';
     const rule = ALL_RULES.find(r => r.id === 'US-OR-001')!;
     expect(rule).toBeDefined();
     const matched = rule.patterns.some(p => p.test(text));

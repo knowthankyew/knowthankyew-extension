@@ -317,20 +317,40 @@ export const App: React.FC = () => {
 
   const handleBatchHandoff = async () => {
     if (!scanResult || scanResult.matches.length === 0) return;
-    const targetTool = resolveDestinationTool(scanResult.matches, activeHostname);
-    const payload = buildHandoffPayload(scanResult);
-    await dispatchHandoffToDestination(payload);
-    setHandoffStatus(`Launched ${targetTool.name}`);
-    setTimeout(() => setHandoffStatus(null), 3000);
+    try {
+      const targetTool = resolveDestinationTool(scanResult.matches, activeHostname);
+      const payload = buildHandoffPayload(scanResult, targetTool.id);
+      const res = await dispatchHandoffToDestination(payload);
+      if (res.success) {
+        setHandoffStatus(`Launched ${targetTool.name}`);
+      } else {
+        setHandoffStatus(`Failed to launch ${targetTool.name}`);
+      }
+      setTimeout(() => setHandoffStatus(null), 3000);
+    } catch (err) {
+      console.error('Batch handoff dispatch error:', err);
+      setHandoffStatus('Error launching destination tool');
+      setTimeout(() => setHandoffStatus(null), 3000);
+    }
   };
 
   const handleSingleHandoff = async (match: EvaluationMatch) => {
     if (!scanResult) return;
-    const targetTool = resolveDestinationTool([match], activeHostname);
-    const payload = buildHandoffPayload(scanResult, targetTool.id, match);
-    await dispatchHandoffToDestination(payload);
-    setHandoffStatus(`Launched ${targetTool.name} for ${match.title}`);
-    setTimeout(() => setHandoffStatus(null), 3000);
+    try {
+      const targetTool = resolveDestinationTool([match], activeHostname);
+      const payload = buildHandoffPayload(scanResult, targetTool.id, match);
+      const res = await dispatchHandoffToDestination(payload);
+      if (res.success) {
+        setHandoffStatus(`Launched ${targetTool.name} for ${match.title}`);
+      } else {
+        setHandoffStatus(`Failed to launch ${targetTool.name}`);
+      }
+      setTimeout(() => setHandoffStatus(null), 3000);
+    } catch (err) {
+      console.error('Single handoff dispatch error:', err);
+      setHandoffStatus('Error launching destination tool');
+      setTimeout(() => setHandoffStatus(null), 3000);
+    }
   };
 
   useEffect(() => {
@@ -603,12 +623,11 @@ export const App: React.FC = () => {
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
                 onPaste={(e) => {
-                  const pasted = e.clipboardData.getData('text');
+                  e.preventDefault();
+                  const pasted = e.clipboardData?.getData('text');
                   if (pasted && pasted.trim().length > 0) {
                     setPastedText(pasted);
-                    setTimeout(() => {
-                      handleAuditText(pasted);
-                    }, 50);
+                    handleAuditText(pasted);
                   }
                 }}
                 placeholder="Click here and press Cmd+V to paste & audit instantly..."
@@ -967,7 +986,7 @@ export const App: React.FC = () => {
                       }}
                     >
                       <span style={{ color: '#ef4444', marginRight: '4px' }}>●</span>
-                      {scanResult.summary.critical} Watch out
+                      {scanResult.summary.critical} Problem
                     </div>
                     <div
                       style={{
@@ -980,7 +999,7 @@ export const App: React.FC = () => {
                       }}
                     >
                       <span style={{ color: '#f59e0b', marginRight: '4px' }}>●</span>
-                      {scanResult.summary.warning} Problem
+                      {scanResult.summary.warning} Watch out
                     </div>
                     <div
                       style={{

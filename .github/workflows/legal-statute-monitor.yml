@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -55,19 +55,10 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: 'chore(legal): statutory update notices detected by policy monitor'
-          branch: bot/statutory-update-${{ github.run_id }}
+          branch: bot/statutory-update-review
           delete-branch: true
           title: '[Legal Update] Regulatory & Statutory Changes Detected in US, UK & EU Feeds'
           body-path: statutory-update-report.md
           labels: |
             statutory-review
-            automerge
           draft: false
-
-      - name: Auto-Merge Statutory Update PR
-        if: steps.check_statutes.outputs.has_updates == 'true' && steps.cpr.outputs.pull-request-number != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Auto-merging statutory update PR #${{ steps.cpr.outputs.pull-request-number }}..."
-          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --squash --delete-branch

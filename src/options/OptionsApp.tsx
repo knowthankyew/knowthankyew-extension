@@ -25,6 +25,7 @@ export const OptionsApp: React.FC = () => {
   const [docFileName, setDocFileName] = useState<string | null>(null);
   const [docError, setDocError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const burnGenerationRef = useRef<number>(0);
 
   const refreshDiagnostics = useCallback(async (force = false) => {
     // 1. Query chrome.storage.local usage
@@ -94,6 +95,7 @@ export const OptionsApp: React.FC = () => {
         channel = new BroadcastChannel('kty_hard_burn');
         channel.onmessage = (event) => {
           if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+            burnGenerationRef.current += 1;
             setBurned(true);
             setDocText('');
             setDocScanResult(null);
@@ -129,67 +131,92 @@ export const OptionsApp: React.FC = () => {
     setBurning(true);
     try {
       await hardBurnAllData();
+      burnGenerationRef.current += 1;
       setBurned(true);
       setDocText('');
       setDocScanResult(null);
       setDocFileName(null);
       setDocError(null);
+      setIsAuditingDoc(false);
       await refreshDiagnostics();
       setTimeout(() => setBurned(false), 4000);
     } catch (err) {
       console.error('Master burn failed:', err);
+      setIsAuditingDoc(false);
     } finally {
       setBurning(false);
     }
   };
 
-  const handleAuditDoc = (textToAudit?: string, fileName?: string) => {
+  const handleAuditDoc = async (textToAudit?: string, fileName?: string) => {
     const text = (textToAudit ?? docText).trim();
     if (!text) {
       setDocError('Please paste contract text or select a file to audit.');
       setDocScanResult(null);
       return;
     }
+    const currentGeneration = burnGenerationRef.current;
     setDocError(null);
     setIsAuditingDoc(true);
     try {
+      // Yield to the event loop so the UI renders the "Analyzing Document..." indicator
+      await new Promise((r) => setTimeout(r, 0));
+      if (burnGenerationRef.current !== currentGeneration) return;
+
       const activeName = fileName || docFileName || 'document-input';
       const result = scanDocumentText(text, activeName, ['document-auditor']);
+      if (burnGenerationRef.current !== currentGeneration) return;
       setDocScanResult(result);
     } catch (err: unknown) {
+      if (burnGenerationRef.current !== currentGeneration) return;
       const msg = err instanceof Error ? err.message : String(err);
       setDocError(`Audit failed: ${msg}`);
     } finally {
-      setIsAuditingDoc(false);
+      if (burnGenerationRef.current === currentGeneration) {
+        setIsAuditingDoc(false);
+      }
     }
   };
 
   const handlePasteClipboard = async () => {
+    const currentGeneration = burnGenerationRef.current;
     setDocError(null);
     try {
       if (typeof navigator === 'undefined' || !navigator.clipboard?.readText) {
         throw new Error('Clipboard access is not available.');
       }
       const text = await navigator.clipboard.readText();
+      if (burnGenerationRef.current !== currentGeneration) return;
       if (!text || text.trim().length === 0) {
         setDocError('Clipboard is empty. Copy text from your agreement first.');
         return;
       }
       setDocText(text);
-      handleAuditDoc(text, 'clipboard-paste');
+      await handleAuditDoc(text, 'clipboard-paste');
     } catch (err: unknown) {
+      if (burnGenerationRef.current !== currentGeneration) return;
       const msg = err instanceof Error ? err.message : String(err);
       setDocError(`Clipboard read error: ${msg}. Please paste text into the box manually.`);
     }
   };
 
   const handleFileUpload = async (file: File) => {
+    const currentGeneration = burnGenerationRef.current;
     setDocError(null);
     setDocFileName(file.name);
     try {
       if (file.name.toLowerCase().endsWith('.pdf')) {
+        if (file.size > 10 * 1024 * 1024) {
+          setDocError('PDF file exceeds maximum supported size (10MB). Please select and copy text directly from your PDF viewer and paste below.');
+          return;
+        }
         const buffer = await file.arrayBuffer();
+        if (burnGenerationRef.current !== currentGeneration) return;
+        // Yield to event loop to allow render cycle before synchronous parsing
+        await new Promise(resolve => setTimeout(resolve, 0));
+        if (burnGenerationRef.current !== currentGeneration) return;
         const extracted = extractTextFromPdfBuffer(buffer);
+        if (burnGenerationRef.current !== currentGeneration) return;
         if (!extracted || extracted.trim().length === 0) {
           setDocError(
             'This PDF appears to use custom font encodings or scanned images without embedded text streams. Please select and copy (Cmd+A, Cmd+C) text directly from your PDF viewer and paste below.'
@@ -198,13 +225,15 @@ export const OptionsApp: React.FC = () => {
           return;
         }
         setDocText(extracted);
-        handleAuditDoc(extracted, file.name);
+        await handleAuditDoc(extracted, file.name);
       } else {
         const text = await file.text();
+        if (burnGenerationRef.current !== currentGeneration) return;
         setDocText(text);
-        handleAuditDoc(text, file.name);
+        await handleAuditDoc(text, file.name);
       }
     } catch (err: unknown) {
+      if (burnGenerationRef.current !== currentGeneration) return;
       const msg = err instanceof Error ? err.message : String(err);
       setDocError(`Failed to read file: ${msg}`);
     }
@@ -789,7 +818,15 @@ export const OptionsApp: React.FC = () => {
                 textAlign: 'center',
                 cursor: 'pointer',
               }}
+              role="button"
+              tabIndex={0}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();

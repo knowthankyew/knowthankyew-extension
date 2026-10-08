@@ -19,6 +19,18 @@ On Chromium-based browsers (Chrome 128+ Dev/Canary or Chrome 131+ Stable):
 
 If you are using Firefox, Safari, or an operating system where Chrome's built-in Prompt API is unavailable, you can run a local loopback worker on `127.0.0.1:8420`.
 
+> [!IMPORTANT]
+> **Prerequisite Extension Build**:  
+> Standard production releases enforce strict CSP `connect-src 'none'`, which blocks all network calls (including loopback). To use the local loopback worker, you must compile an unpacked extension with loopback support enabled:
+> ```bash
+> # Build Chrome/Chromium Local Assist variant
+> npm run build:local-assist
+>
+> # Or build Firefox with Local ML loopback enabled
+> VITE_LOCAL_ML_ENABLED=true TARGET_BROWSER=firefox npm run build:firefox
+> ```
+> Load the resulting unpacked build from `dist/` or `dist-firefox/` into your browser before starting the worker.
+
 ### Why a Loopback Worker?
 - **Pillar 1 Invariant (Zero Cloud Egress)**: Data is transmitted strictly across your machine's loopback interface (`localhost` / `127.0.0.1`). Nothing leaves your device.
 - **Pillar 5 Invariant (Hard Burn Handshake)**: When you click "Burn Local Data", KnowThankYew sends a `/burn` command to the local worker to flush all in-memory cache and prompt buffers.

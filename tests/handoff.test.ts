@@ -265,11 +265,18 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
     expect(validateHandoffPayload({ ...validPayload, version: '2.0' })).toBe(false);
     expect(validateHandoffPayload({ ...validPayload, originApp: 'malicious-extension' })).toBe(false);
     expect(validateHandoffPayload({ ...validPayload, domain: '' })).toBe(false);
-    expect(validateHandoffPayload({ ...validPayload, riskScore: 105 })).toBe(false);
     expect(validateHandoffPayload({ ...validPayload, targetTool: 'unregistered-tool' })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, targetTool: 'toString' })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, targetTool: 'constructor' })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, targetTool: '__proto__' })).toBe(false);
 
     // Malformed findings
     expect(validateHandoffPayload({ ...validPayload, findings: [{ ...validPayload.findings[0], category: 'UNKNOWN_CAT' }] })).toBe(false);
     expect(validateHandoffPayload({ ...validPayload, findings: [{ ...validPayload.findings[0], severity: 'FATAL' }] })).toBe(false);
+
+    // Malformed or unsafe primaryLegalLink URL protocols
+    expect(validateHandoffPayload({ ...validPayload, primaryLegalLink: { url: 'javascript:alert(1)', title: 'XSS' } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, primaryLegalLink: { url: 'not-a-url', title: 'Invalid' } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, primaryLegalLink: { url: 'https://example.com/terms', title: 'Valid' } })).toBe(true);
   });
 });

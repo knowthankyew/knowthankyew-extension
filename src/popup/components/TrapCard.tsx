@@ -4,19 +4,36 @@ import { SeverityBadge } from './SeverityBadge';
 import { ChromePromptAPIAdapter } from '../../ml/chrome-ai-adapter';
 import { ClauseSummary } from '../../ml/nano-types';
 
+let sharedPromptAdapter: ChromePromptAPIAdapter | null = null;
+
+export function getSharedPromptAdapter(): ChromePromptAPIAdapter {
+  if (!sharedPromptAdapter) {
+    sharedPromptAdapter = new ChromePromptAPIAdapter(true);
+  }
+  return sharedPromptAdapter;
+}
+
+export function resetSharedPromptAdapter(): void {
+  if (sharedPromptAdapter) {
+    sharedPromptAdapter.burn();
+    sharedPromptAdapter = null;
+  }
+}
+
 interface TrapCardProps {
   match: EvaluationMatch;
   sourceDomain?: string;
   onHandoff?: (match: EvaluationMatch) => void;
 }
 
-export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain, onHandoff }) => {
+export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain: _sourceDomain, onHandoff }) => {
   const [expanded, setExpanded] = useState(false);
   const [nanoSummary, setNanoSummary] = useState<ClauseSummary | null>(null);
 
   useEffect(() => {
+    setNanoSummary(null);
     let isCancelled = false;
-    const adapter = new ChromePromptAPIAdapter(true);
+    const adapter = getSharedPromptAdapter();
     const controller = new AbortController();
 
     (async () => {
@@ -39,7 +56,6 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain, onHando
     return () => {
       isCancelled = true;
       controller.abort();
-      adapter.burn();
     };
   }, [match.matchedSnippet, match.category]);
 
@@ -49,7 +65,6 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain, onHando
   const isAutoRenewal = match.category === 'AUTO_RENEWAL';
   let calendarUrl = '';
   if (isAutoRenewal) {
-    const domain = sourceDomain || 'Subscription';
     const now = new Date();
     // Default reminder date: 25 days from today (before typical 30-day renewal cycle)
     const reminderDate = new Date(now.getTime() + 25 * 24 * 60 * 60 * 1000);
@@ -57,9 +72,9 @@ export const TrapCard: React.FC<TrapCardProps> = ({ match, sourceDomain, onHando
     const endDate = new Date(reminderDate.getTime() + 60 * 60 * 1000);
     const endIso = endDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
-    const eventTitle = encodeURIComponent(`Cancel ${domain} subscription before renewal`);
+    const eventTitle = encodeURIComponent('Review recurring subscription before renewal');
     const eventDetails = encodeURIComponent(
-      `Reminder from KnowThankYew:\n${plainLanguageText}\n\nReview your subscription settings or bank card before the recurring billing date.`
+      'Reminder from KnowThankYew:\nReview your recurring subscription terms and cancellation options before the billing cycle renews.'
     );
     calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startIso}/${endIso}&details=${eventDetails}`;
   }

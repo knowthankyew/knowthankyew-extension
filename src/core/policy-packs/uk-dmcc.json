@@ -3,58 +3,58 @@
   "name": "UK Digital Markets, Competition and Consumers Act 2024",
   "version": "1.0.0",
   "jurisdiction": "UK",
-  "description": "Statutory rules covering the UK DMCC Act 2024 mandatory pre-renewal disclosure schedules and 14-day cooling-off rights for UK consumers.",
+  "description": "Statutory rules covering the UK DMCC Act 2024 mandatory pre-renewal disclosure schedules and 14-day cooling-off rights for UK consumers (prospective regime, anticipated commencement Spring 2027).",
   "rules": [
     {
       "id": "UK-AR-001",
-      "title": "Mandatory Pre-Renewal Reminder Schedule",
+      "title": "Prospective Pre-Renewal Reminder Schedule (DMCC Spring 2027)",
       "category": "AUTO_RENEWAL",
-      "classification": "STATUTORY_VIOLATION",
-      "severity": "CRITICAL",
+      "classification": "PROSPECTIVE_DUTY",
+      "severity": "WARNING",
       "statute": {
-        "code": "UK DMCC Act 2024, Part 2, Chapter 1",
-        "title": "Subscription Contracts — Pre-Renewal Reminders",
+        "code": "UK DMCC Act 2024, Part 4, Chapter 2",
+        "title": "Subscription Contracts — Pre-Renewal Reminders (Commencement Spring 2027)",
         "jurisdiction": "UK",
-        "plainExplanation": "The UK DMCC Act 2024 requires traders to provide timely, conspicuous reminder notices before a subscription automatically renews or converts from a trial."
+        "plainExplanation": "The UK DMCC Act 2024 (Part 4, Chapter 2; anticipated commencement Spring 2027) mandates that traders send conspicuous pre-renewal reminder notices before consumer subscription renewal or trial rollover."
       },
       "patterns": [
         "(?:subscription|contract)\\s+(?:will|shall)\\s+(?:automatically\\s+renew|continue)[^.\\n]{0,80}(?:without\\s+notice|without\\s+prior\\s+notice|no\\s+reminder\\s+notice)",
         "no\\s+(?:renewal\\s+reminder|advance\\s+notice)[^.\\n]{0,60}(?:sent|provided)\\s+(?:prior\\s+to|before)\\s+(?:renewal|billing)",
         "(?:you\\s+agree|agrees)\\s+that\\s+no\\s+(?:reminder|notice)\\s+(?:will|shall)\\s+be\\s+given\\s+prior\\s+to\\s+auto(?:matic)?-?renewal"
       ],
-      "explanation": "The terms state or imply that the subscription will auto-renew without mandatory pre-renewal reminder notices sent to you.",
-      "recommendation": "Verify that the trader has committed to sending advance renewal reminders before charges recur. Under UK law, failure to send reminders renders renewal unenforceable.",
+      "explanation": "The terms state or imply that the subscription will auto-renew without advance reminder notices. Note: under the prospective UK DMCC Act 2024 regime (Part 4, Chapter 2, anticipated commencement Spring 2027), traders will be required to provide advance reminder notices before renewal charges.",
+      "recommendation": "Verify that the trader commits to advance reminder notices before renewal. Under the upcoming UK DMCC regime, failure to provide statutory reminders will render subscription renewal terms unenforceable.",
       "tracking": {
         "agency": "Competition and Markets Authority (CMA)",
         "jurisdiction": "UK",
-        "statuteCode": "UK DMCC Act 2024, Part 2, Chapter 1",
+        "statuteCode": "UK DMCC Act 2024, Part 4, Chapter 2",
         "apiKeywords": ["DMCC 2024", "Subscription Contracts", "UK Consumer Rights"],
         "lastVerifiedDate": "2026-09-01"
       }
     },
     {
       "id": "UK-AR-002",
-      "title": "14-Day Statutory Cooling-Off Rights Obstruction",
+      "title": "Prospective 14-Day Cooling-Off Rights Obstruction (DMCC Spring 2027)",
       "category": "AUTO_RENEWAL",
-      "classification": "STATUTORY_VIOLATION",
-      "severity": "CRITICAL",
+      "classification": "PROSPECTIVE_DUTY",
+      "severity": "WARNING",
       "statute": {
-        "code": "UK DMCC Act 2024, Part 2, Chapter 1 (Cancellation Rights)",
-        "title": "14-Day Subscription Cooling-Off Rights",
+        "code": "UK DMCC Act 2024, Part 4, Chapter 2 (Cancellation Rights)",
+        "title": "14-Day Subscription Cooling-Off Rights (Commencement Spring 2027)",
         "jurisdiction": "UK",
-        "plainExplanation": "UK consumers possess an unwaivable statutory right to cancel a subscription contract within a 14-day cooling-off window at inception and upon material renewal."
+        "plainExplanation": "UK consumers possess an unwaivable statutory right to cancel a subscription contract within a 14-day cooling-off window at inception and upon each 12-month renewal."
       },
       "patterns": [
         "waiv(?:e|es|ed)\\s+(?:cooling-off|cancellation)\\s+(?:rights?|period)",
         "no\\s+(?:right\\s+to\\s+cancel|cooling-off\\s+period)[^.\\n]{0,60}(?:once|after)\\s+(?:order|subscription|access\\s+is\\s+granted)",
         "cancellation\\s+(?:is\\s+not\\s+permitted|cannot\\s+be\\s+made)[^.\\n]{0,60}within\\s+(?:14\\s+days|the\\s+first\\s+14\\s+days)"
       ],
-      "explanation": "The contract denies, restricts, or claims to waive your statutory 14-day cooling-off cancellation rights.",
-      "recommendation": "Do not waive cooling-off cancellation rights. UK law prohibits traders from excluding statutory 14-day withdrawal windows for consumer subscriptions.",
+      "explanation": "The contract denies, restricts, or claims to waive 14-day cooling-off cancellation rights. Note: under the prospective UK DMCC Act 2024 regime (Part 4, Chapter 2, anticipated commencement Spring 2027), traders will be strictly prohibited from excluding statutory 14-day withdrawal windows.",
+      "recommendation": "Do not waive cooling-off cancellation rights. The upcoming DMCC Act regime will prohibit traders from excluding statutory 14-day withdrawal windows for consumer subscriptions.",
       "tracking": {
         "agency": "Competition and Markets Authority (CMA)",
         "jurisdiction": "UK",
-        "statuteCode": "UK DMCC Act 2024, Part 2",
+        "statuteCode": "UK DMCC Act 2024, Part 4, Chapter 2",
         "apiKeywords": ["DMCC 2024", "Cooling-Off", "Cancellation Rights"],
         "lastVerifiedDate": "2026-09-01"
       }

@@ -83,10 +83,10 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - Surfaces a prominent **"Take Action: Dispute or Cancel"** banner in the popup when critical or warning terms are discovered.
   - Automatically routes users to specialist portfolio tools:
     - `AUTO_RENEWAL` / `ROSCA` violations $\rightarrow$ **Bill of Rights Bot** ([github.com/knowthankyew/bill-of-rights-bot](https://github.com/knowthankyew/bill-of-rights-bot))
-    - `DATA_SHARING` violations $\rightarrow$ **CareCheck** ([github.com/knowthankyew/care-check](https://github.com/knowthankyew/care-check))
+    - `SURVEILLANCE` violations $\rightarrow$ **CareCheck** ([github.com/knowthankyew/care-check](https://github.com/knowthankyew/care-check))
     - `ARBITRATION` / `UNILATERAL_CHANGE` $\rightarrow$ **Lease-Audit** ([github.com/knowthankyew/lease-audit](https://github.com/knowthankyew/lease-audit)) or **Bill of Rights Bot**
 - **Ephemeral Session Security**:
-  - Transferred via `sessionStorage` with HMAC verification and target URL flag (`?kty_handoff=1`). Zero cloud persistence, zero cookies, zero external telemetry.
+  - Transferred via `sessionStorage` with typed schema validation and target URL flag (`?kty_handoff=1`). Zero cloud persistence, zero cookies, zero external telemetry.
   - Purged automatically on tab close or Nuclear Hard Burn.
 
 ### E. Plain-Language BS Translator & Severity Tiers (Milestone 7 Phase 1)
@@ -94,8 +94,8 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - In Chrome browsers with Prompt API support, translates complex legal jargon into 1–2 plain, conversational sentences locally.
 - **Human-Centric Severity Tiers**:
   - Replaced opaque technical error badges with clear human labels:
-    - **"Watch out"** (Critical statutory violation / financial trap)
-    - **"This is a problem"** (Warning / rights surrender)
+    - **"This is a problem"** (Critical statutory violation / financial trap)
+    - **"Watch out"** (Warning / rights surrender)
     - **"FYI"** (Informational disclosure)
 - **1-Click Pre-Renewal Calendar Reminder**:
   - Automatically generates standard `.ics` / Web Calendar URLs for subscription signups (setting a notification for 25 days post-signup) without requiring calendar permissions.
@@ -116,11 +116,11 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - Accessible via the Options dashboard or direct link from the popup.
   - **Drag-and-Drop File Upload**: Evaluates uploaded `.pdf`, `.txt`, `.md`, and `.html` contracts entirely client-side using Web APIs.
   - **Direct Text Input**: Large paste area for long-form commercial agreements.
-  - **Full Statutory Battery**: Evaluates text against all 42+ compiled rules across all jurisdictions, complete with interactive risk score meters, statutory pass breakdowns, and Action Engine dispatch.
+  - **Full Statutory Battery**: Evaluates text against all 19 compiled rules (with 42+ pattern heuristics) across all jurisdictions, complete with interactive risk score meters, statutory pass breakdowns, and Action Engine dispatch.
   - **Dedicated Nuclear Hard Burn**: Instantly purges file names, extracted text, and audit results from browser memory.
 
 ### H. Visual Polish & Portfolio Tooling Standardization
-- **500px Widened Popup**: Increased popup dimensions from 400px to 500px, accommodating multi-line legal findings, statutory receipts, and action buttons.
+- **500px Widened Popup**: Increased popup dimensions from 420px to 500px, accommodating multi-line legal findings, statutory receipts, and action buttons.
 - **Sleek Custom Scrollbars**: Injected modern CSS `scrollbar-width: thin; scrollbar-color: #334155 transparent;` across both popup and options dashboard, eliminating unsightly OS default scrollbars.
 - **Standardized Playwright & FFmpeg Discovery**: Updated `scripts/record-demo.js` to eliminate lateral sibling workspace imports, adopting the unified portfolio discovery cascade matching all sister repositories.
 

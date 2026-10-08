@@ -53,20 +53,12 @@ jobs:
         id: version
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
-      - name: Package Chrome Web Store ZIP Bundle (Zero-Egress Production)
+      - name: Package Multi-Browser Distribution Bundles (Chrome, Firefox, Safari, Local-Assist)
         run: |
-          cd dist
-          zip -r ../knowthankyew-extension-v${{ steps.version.outputs.version }}.zip .
-          cd ..
-
-      - name: Build & Package Local Assist Developer Bundle
-        run: |
-          VITE_LOCAL_ML_ENABLED=true npx vite build
-          cd dist
-          zip -r ../knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip .
-          cd ..
-          # Rebuild pristine production zero-egress extension to leave dist clean
-          npm run build
+          npm run package
+          npm run package:firefox
+          npm run package:safari
+          npm run package:local-assist
 
       - name: Generate Checksums
         run: |
@@ -83,6 +75,8 @@ jobs:
           subject-path: |
             bom.json
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-firefox.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-safari.zip
             knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip
 
       - name: Create GitHub Release
@@ -93,20 +87,10 @@ jobs:
             ## KnowThankYew Reality Engine v${{ steps.version.outputs.version }}
 
             ### Package Options
-            - **Standard Zero-Egress Edition**: `knowthankyew-extension-v${{ steps.version.outputs.version }}.zip`
-              - 100% air-gapped on-device heuristic engine.
-              - Physically strips all network primitives (`connect-src 'none'`).
-              - Official build submitted to the Chrome Web Store.
+            - **Chrome / Chromium (MV3)**: `knowthankyew-extension-v${{ steps.version.outputs.version }}.zip`
+            - **Mozilla Firefox (Gecko)**: `knowthankyew-extension-v${{ steps.version.outputs.version }}-firefox.zip`
+            - **Apple Safari (macOS / iOS)**: `knowthankyew-extension-v${{ steps.version.outputs.version }}-safari.zip`
             - **Developer Local Assist Edition**: `knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip`
-              - Includes loopback client (`http://127.0.0.1:8420`) for AppSec researchers running local LLMs (Ollama, llama.cpp, FTaaS).
-              - See `docs/SECURITY.md` for the explicit trust delta and security boundary.
-
-            ### Installation (Unpacked Developer Mode)
-            1. Download your preferred package zip below
-            2. Unzip the downloaded file
-            3. Navigate to `chrome://extensions` (or `brave://extensions`)
-            4. Enable **Developer mode** (toggle in top-right)
-            5. Click **Load unpacked** and select the unzipped folder
 
             ### Verification & Supply Chain Integrity
             - SHA256 checksums: see `SHA256SUMS`
@@ -114,6 +98,8 @@ jobs:
             - Cryptographic build provenance: SLSA Level 3 attestation attached to this release
           files: |
             knowthankyew-extension-v${{ steps.version.outputs.version }}.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-firefox.zip
+            knowthankyew-extension-v${{ steps.version.outputs.version }}-safari.zip
             knowthankyew-extension-v${{ steps.version.outputs.version }}-local-assist.zip
             SHA256SUMS
             bom.json

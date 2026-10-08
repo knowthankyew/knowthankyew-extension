@@ -77,7 +77,7 @@
       },
       "patterns": [
         "any\\s+dispute[^.\\n]{0,80}resolved\\s+by\\s+binding\\s+arbitration",
-        "(?:you\\s+and\\s+(?:the\\s+company|we|contractor|client)\\s+agree|disputes?\\s+resolved\\s+exclusively)\\s+by\\s+binding\\s+arbitration",
+        "(?:you\\s+and\\s+(?:the\\s+(?:company|contractor|client)|we|contractor|client)\\s+agree|disputes?\\s+resolved\\s+exclusively)\\s+(?:by|to)\\s+binding\\s+arbitration",
         "waive\\s+(?:any\\s+right\\s+to\\s+a|the\\s+right\\s+to\\s+a)\\s+jury\\s+trial",
         "administered\\s+by\\s+the\\s+american\\s+arbitration\\s+association",
         "administered\\s+by\\s+jams\\s+(?:pursuant\\s+to|under)",

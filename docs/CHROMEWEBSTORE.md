@@ -14,8 +14,8 @@
 - **Summary / Teaser**:
   Instant consumer advocate in your toolbar. Flags hidden subscription traps, automatic renewal billing, and forced arbitration waivers in real-time with zero data collection.
 - **Category**: Productivity / Privacy & Security
-- **Version**: `1.3.0` (Live & Approved in Chrome Web Store) • `2.0.0` (Release Complete & Packaged for Upload)
-- **Manual Upload ZIP**: `knowthankyew-extension-v2.0.0.zip` (SHA256: `7d94f21cfec6d6ab8e24c5e172a92e901ba81e09a5568fe4a2d449c9d1be32cc`)
+- **Version**: `1.6.0` (Live & Approved in Chrome Web Store & Firefox AMO) • `2.1.0` (Release Complete & Packaged for Upload)
+- **Manual Upload ZIP**: `knowthankyew-extension-v2.1.0.zip`
 - **Support / Source URL**: https://github.com/knowthankyew/knowthankyew-extension
 
 ### Detailed Description (Store-Facing)
@@ -105,15 +105,14 @@ The KnowThankYew Reality Engine is built on the principle that consumer protecti
 - [ ] Verify privacy policy is live at `https://knowthankyew.github.io/knowthankyew-extension/privacy.html`
 
 ### Step 1: Get the Store ZIP
-Locate `knowthankyew-extension-v1.5.0.zip` in the repository root or build locally:
+Locate `knowthankyew-extension-v2.1.0.zip` in the repository root or build locally:
 ```bash
 npm run package
 ```
-*(Package SHA256: `85bd46608f105146c241dbe2c40042baa92d3db6c0b844c785bb22215a4e9fef`)*
 
 ### Step 2: Upload Updated Package in Developer Dashboard
 1. Go to https://chrome.google.com/webstore/devconsole
-2. Click on **KnowThankYew Reality Engine** → **Package** → **Upload new package** → Upload `knowthankyew-extension-v1.5.0.zip`
+2. Click on **KnowThankYew Reality Engine** → **Package** → **Upload new package** → Upload `knowthankyew-extension-v2.1.0.zip`
 
 ### Step 3: Fill in Store Listing Tab
 | Field | Value |
@@ -153,11 +152,12 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
+| **2.1.0** | October 8, 2026 | Milestone 7 release packaged for multi-browser distribution (`knowthankyew-extension-v2.1.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Gemini Nano conversational explanations, BS Translator with human-centric severity tiers ("This is a problem" / "Watch out" / "FYI"), structured cross-portfolio remediation handoff bridge to advocate tools (Bill of Rights Bot, CareCheck, Lease-Audit), clean-state Proof of Work & Audit Receipt transparency drawer, PDF agreement detection with zero-permission quick-paste scratchpad and air-gapped document auditor tab, stream-bounded PDF decompression bomb protection, strict tab-scoped badge amnesia, and comprehensive 24-suite test coverage. |
 | **2.0.0** | October 1, 2026 | Milestone 6 release packaged for multi-browser distribution (`knowthankyew-extension-v2.0.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Implemented ambient frontline visual layer via Closed Shadow DOM inline indicators next to deceptive consent checkboxes; added international policy packs (UK DMCC Act 2024, EU CRD Directive 2011/83/EU, expanded State ARLs for CO, IL, OR); automated EUR-Lex and UK legislation regulatory upkeep monitoring; added Apple Safari packaging pipeline; and expanded test suite to 125/125 passing tests. |
-| **1.6.0** | October 1, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.6.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`). Implemented Multi-Tab Session Amnesia dual-broadcast transport (`BroadcastChannel` + `chrome.tabs.sendMessage`), token-bucket MutationObserver throttling (15 capacity / 1 refill per 4s) to eliminate SPA scan starvation, senior code audit hardening, and 100+ verified passing tests. |
+| **1.6.0 (LIVE)** | October 1, 2026 | **Live & Approved on Chrome Web Store & Firefox AMO**. Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.6.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`). Implemented Multi-Tab Session Amnesia dual-broadcast transport (`BroadcastChannel` + `chrome.tabs.sendMessage`), token-bucket MutationObserver throttling (15 capacity / 1 refill per 4s) to eliminate SPA scan starvation, senior code audit hardening, and 100+ verified passing tests. |
 | **1.5.0** | September 29, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.5.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`). Integrated declarative JSON policy packs, zero-setup Chrome Built-in Prompt API adapter (Gemini Nano / `ai.languageModel`), 50k character DOM extraction ceiling, OTLP enterprise badge preservation, senior code audit hardening, and 98/98 verified passing tests. |
 | **1.4.0 (Release Candidate)** | September 24, 2026 | Prepared for Chrome Web Store upload (`knowthankyew-extension-v1.4.0.zip`). Resolved baseline issues, aligned statutory policy packs with current ROSCA / FTC Act § 5 / State ARL law, 50k char DOM extraction ceiling, OTLP enterprise badge preservation, and 85/85 tests passing. |
-| **1.3.0 (LIVE)** | September 22, 2026 | **Live & Approved on Chrome Web Store**. Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |
+| **1.3.0** | September 22, 2026 | Added full-page Options / Engine Dashboard (VS Code extension style), global "Burn All Data Across All Domains" master amnesia switch, live memory/storage meters, and popup dashboard shortcut. |
 | **1.2.0** | September 21, 2026 | Automated governing terms link detection with 1-click contract navigation, dynamic checkout observer. Approved & Live in Chrome Web Store. |
 | **1.1.0** | September 20, 2026 | Initial public release with statutory rule matching (ROSCA, FAA, State ARL), atomic Hard Burn, zero-egress CSP enforcement. |
 
