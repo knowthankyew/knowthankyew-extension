@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { extractTextFromPdfBuffer } from '../src/options/pdf-extractor';
 import { scanDocumentText } from '../src/core/engine';
 import { existsSync, readFileSync } from 'fs';
+import path from 'path';
+import os from 'os';
 
 describe('PDF Text Extractor (pdf-extractor.test.ts)', () => {
   it('returns empty string for empty buffer', () => {
@@ -24,7 +26,7 @@ endobj`;
     expect(text).toContain('This is an arbitration clause.');
   });
 
-  const testPdfPath = '/Users/cl0rkster/Downloads/06.26.2025.pdf';
+  const testPdfPath = process.env.TEST_PDF_PATH || path.join(os.homedir(), 'Downloads', '06.26.2025.pdf');
   if (existsSync(testPdfPath)) {
     it('accurately extracts and audits FlateDecode CMap PDF (06.26.2025.pdf)', async () => {
       const buffer = readFileSync(testPdfPath).buffer;

@@ -102,7 +102,7 @@ flowchart LR
 ### 2.3 Architectural Concern: Module-Level Side Effects in `scanner.ts`
 
 > [!WARNING]
-> **Finding S-ARCH-01**: Lines 122–132 of [`scanner.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts#L122-L132) execute side effects (starting observer + initial scan) at **module import time**.
+> **Finding S-ARCH-01**: Lines 122–132 of [`scanner.ts`](../src/content/scanner.ts#L122-L132) execute side effects (starting observer + initial scan) at **module import time**.
 
 This is intentionally correct for a content script (it needs to activate when injected), but creates testability challenges. The file is tested via `jsdom` which doesn't fully replicate this lifecycle. This is an acceptable trade-off for the extension architecture but should be documented.
 
@@ -132,7 +132,7 @@ export const telemetry = new TelemetryManager(
 
 ### 3.2 Pillar 2: Compile-Time Dead Code — ✅ VERIFIED
 
-The `air-gap-zero-egress` Vite plugin in [`vite.config.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/vite.config.ts#L14-L47) performs 3 layers of fetch stripping:
+The `air-gap-zero-egress` Vite plugin in [`vite.config.ts`](../vite.config.ts#L14-L47) performs 3 layers of fetch stripping:
 
 1. **Function body replacement** (L24-27): Replaces entire async fetch functions with empty stubs
 2. **Minified function fallback** (L29-32): Catches minified single-letter function names
@@ -163,7 +163,7 @@ export const EXTENSION_ALLOWLIST_KEYS = [
 
 ### 3.4 Pillar 4: Single Source of Truth for UI Claims — ✅ VERIFIED
 
-[`App.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx#L265-L312) correctly derives privacy badge state from `telemetry.getPrivacyClaims()`:
+[`App.tsx`](../src/popup/App.tsx#L265-L312) correctly derives privacy badge state from `telemetry.getPrivacyClaims()`:
 
 ```typescript
 const claims = telemetry.getPrivacyClaims();
@@ -179,7 +179,7 @@ const badgeLabel = isEnterprise
 
 ### 3.5 Pillar 5: Hard Burn Protocol — ✅ VERIFIED WITH 1 FINDING
 
-The [`hardBurnAllData()`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/telemetry/client.ts#L59-L97) function correctly:
+The [`hardBurnAllData()`](../src/telemetry/client.ts#L59-L97) function correctly:
 1. Burns telemetry manager (`telemetry.burn()`)
 2. Clears `chrome.storage.local`
 3. Clears action badge
@@ -217,7 +217,7 @@ The [`hardBurnAllData()`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src
 
 ## 4. CODE QUALITY: FILE-BY-FILE FINDINGS
 
-### 4.1 [`engine.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/core/engine.ts) — Core Scan Engine
+### 4.1 [`engine.ts`](../src/core/engine.ts) — Core Scan Engine
 
 **Quality: EXCELLENT**
 
@@ -232,7 +232,7 @@ The [`hardBurnAllData()`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src
 > [!NOTE]
 > **Finding Q-ENG-01**: The `segmentText()` regex on L25 uses a lookbehind `(?<=[.!?])` which is supported in V8 (Chrome) and SpiderMonkey (Firefox ≥78), but could be a concern for Safari ≤14. Since Safari support is listed as a future milestone, this is fine for now but should be flagged when the Safari conversion begins.
 
-### 4.2 [`dom-extractor.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/dom-extractor.ts) — DOM Text Extraction
+### 4.2 [`dom-extractor.ts`](../src/content/dom-extractor.ts) — DOM Text Extraction
 
 **Quality: VERY GOOD — 1 finding**
 
@@ -257,7 +257,7 @@ const seen = new WeakSet<Element>();
 if (!seen.has(n)) { seen.add(n); candidateNodes.push(n); }
 ```
 
-### 4.3 [`scanner.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts) — Content Script Orchestrator
+### 4.3 [`scanner.ts`](../src/content/scanner.ts) — Content Script Orchestrator
 
 **Quality: EXCELLENT**
 
@@ -272,7 +272,7 @@ if (!seen.has(n)) { seen.add(n); candidateNodes.push(n); }
 > [!TIP]
 > **Finding Q-SCAN-01 (Priority: LOW)**: The `windowResetTimer` (L87-90) uses a 60-second reset window. If 15 scans fire in the first 5 seconds, the throttle blocks for the remaining 55 seconds. Consider using a sliding window or token bucket for smoother behavior on legitimately dynamic pages.
 
-### 4.4 [`link-detector.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/link-detector.ts) — Legal Link Discovery
+### 4.4 [`link-detector.ts`](../src/content/link-detector.ts) — Legal Link Discovery
 
 **Quality: EXCELLENT**
 
@@ -286,7 +286,7 @@ Standout features:
 > [!NOTE]
 > **Finding Q-LINK-01**: The `WELL_KNOWN_LEGAL_MAP` uses hardcoded paths. If platforms change their URL structure, these will silently fail (no stale entry detection). Consider adding a `lastVerified` timestamp to each entry for future automation.
 
-### 4.5 [`service-worker.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/background/service-worker.ts) — Background Service Worker
+### 4.5 [`service-worker.ts`](../src/background/service-worker.ts) — Background Service Worker
 
 **Quality: VERY GOOD — 1 observation**
 
@@ -295,7 +295,7 @@ Clean and minimal. The zero-findings badge clearing (L21-23) with a comment expl
 > [!NOTE]
 > **Finding Q-SW-01**: The service worker uses `return true` to keep the message channel open for async responses (L27, L35). This is correct MV3 behavior.
 
-### 4.6 [`telemetry/client.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/telemetry/client.ts) — Telemetry & Burn Controller
+### 4.6 [`telemetry/client.ts`](../src/telemetry/client.ts) — Telemetry & Burn Controller
 
 **Quality: EXCELLENT**
 
@@ -308,7 +308,7 @@ The `hardBurnAllData()` function is the most security-critical code path and it'
 
 ## 5. BUILD SYSTEM & SUPPLY CHAIN
 
-### 5.1 [`vite.config.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/vite.config.ts) — Build Configuration
+### 5.1 [`vite.config.ts`](../vite.config.ts) — Build Configuration
 
 **Quality: VERY GOOD — 2 findings**
 
@@ -340,7 +340,7 @@ Strengths:
 
 **Dev dependencies** are all well-known, actively maintained tools (TypeScript 7, Vite 8, Vitest 5, Puppeteer 25).
 
-### 5.3 [`tsconfig.json`](file:///Users/cl0rkster/Dev/knowthankyew-extension/tsconfig.json)
+### 5.3 [`tsconfig.json`](../tsconfig.json)
 
 **Quality: EXCELLENT**
 
@@ -399,7 +399,7 @@ The test suite spans 16 files covering 86 test cases across 6 distinct testing c
 
 ## 7. ML SUBSYSTEM REVIEW
 
-### 7.1 [`chrome-ai-adapter.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/ml/chrome-ai-adapter.ts) — Chrome Prompt API Adapter
+### 7.1 [`chrome-ai-adapter.ts`](../src/ml/chrome-ai-adapter.ts) — Chrome Prompt API Adapter
 
 **Quality: EXCEPTIONAL**
 
@@ -418,7 +418,7 @@ This is the highest-quality Prompt API integration I've reviewed:
 > [!TIP]
 > **Finding Q-ML-01**: The `summarizeTrapClause` prompt on L271-286 limits `obligationSummary` to "max 160 characters" in the prompt but validates post-hoc against `MAX_OBLIGATION_LENGTH = 200`. This is intentional slack (instruct for 160, accept up to 200) and is correct defensive design.
 
-### 7.2 [`local-ml-client.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/ml/local-ml-client.ts) — Loopback ML Client
+### 7.2 [`local-ml-client.ts`](../src/ml/local-ml-client.ts) — Loopback ML Client
 
 **Quality: VERY GOOD**
 
@@ -426,7 +426,7 @@ This is the highest-quality Prompt API integration I've reviewed:
 - `isFeatureEnabled()` checks `__LOCAL_ML_ENABLED__` compile-time constant — correctly tree-shaken in consumer builds
 - Health response caching with 15-second TTL prevents excessive loopback polling
 
-### 7.3 Type Safety: [`nano-types.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/ml/nano-types.ts) & [`types.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/ml/types.ts)
+### 7.3 Type Safety: [`nano-types.ts`](../src/ml/nano-types.ts) & [`types.ts`](../src/ml/types.ts)
 
 **Quality: EXCELLENT**
 
@@ -436,7 +436,7 @@ The `CATEGORY_HEURISTIC_MAP` (nano-types.ts L37-43) correctly maps between the e
 
 ## 8. UI/UX COMPONENT REVIEW
 
-### 8.1 [`App.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx) — Main Popup
+### 8.1 [`App.tsx`](../src/popup/App.tsx) — Main Popup
 
 **Quality: GOOD — 2 findings**
 
@@ -458,19 +458,19 @@ This would reduce `performScan` to ~40 lines and improve testability.
 > [!NOTE]
 > **Finding Q-UI-02 (Priority: LOW)**: Inline styles throughout all components. While this avoids CSS specificity issues in the extension popup, it means no theming capability and ~30% larger JSX. Acceptable for a popup that prioritizes render isolation.
 
-### 8.2 [`BurnButton.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/BurnButton.tsx)
+### 8.2 [`BurnButton.tsx`](../src/popup/components/BurnButton.tsx)
 
 **Quality: EXCELLENT** — Clean, minimal, single-responsibility. The 3-second visual feedback timer (L18) is good UX.
 
-### 8.3 [`TrapCard.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx)
+### 8.3 [`TrapCard.tsx`](../src/popup/components/TrapCard.tsx)
 
 **Quality: EXCELLENT** — Clean expansion toggle, statute code display, advocate tip formatting. The matched snippet is displayed inside a `<div>` as text content (not `dangerouslySetInnerHTML`), which is correct for XSS prevention.
 
-### 8.4 [`DiscoveredLinksCard.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/DiscoveredLinksCard.tsx)
+### 8.4 [`DiscoveredLinksCard.tsx`](../src/popup/components/DiscoveredLinksCard.tsx)
 
 **Quality: EXCELLENT** — Category-colored badges, one-click audit navigation, URL path display with ellipsis overflow.
 
-### 8.5 [`OptionsApp.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx)
+### 8.5 [`OptionsApp.tsx`](../src/options/OptionsApp.tsx)
 
 **Quality: VERY GOOD** — 771 lines but well-organized into tabbed sections. The diagnostics dashboard (storage bytes, span count, audit log count, tab count, ML status) provides genuine transparency.
 
@@ -478,7 +478,7 @@ This would reduce `performScan` to ~40 lines and improve testability.
 
 ## 9. POLICY PACK & STATUTORY ENGINE REVIEW
 
-### 9.1 [`us-federal.json`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/us-federal.json) — 7 Rules
+### 9.1 [`us-federal.json`](../src/core/policy-packs/us-federal.json) — 7 Rules
 
 | Rule ID | Statute | Severity | Assessment |
 |:--------|:--------|:---------|:----------|
@@ -490,7 +490,7 @@ This would reduce `performScan` to ~40 lines and improve testability.
 | UNI-001 | Restatement Contracts § 211 | INFO | ✅ 3 patterns for unilateral modification |
 | UNI-002 | FTC Act § 5 | INFO | ✅ 3 patterns for passive deemed consent |
 
-### 9.2 [`state-arl.json`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/state-arl.json) — 3 Rules
+### 9.2 [`state-arl.json`](../src/core/policy-packs/state-arl.json) — 3 Rules
 
 | Rule ID | Statute | Severity | Assessment |
 |:--------|:--------|:---------|:----------|
@@ -500,7 +500,7 @@ This would reduce `performScan` to ~40 lines and improve testability.
 
 ### 9.3 Policy Compilation Pipeline
 
-The [`index.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/index.ts) compiler correctly:
+The [`index.ts`](../src/core/policy-packs/index.ts) compiler correctly:
 1. Imports JSON policy packs at build time
 2. Compiles string patterns to `RegExp` with case-insensitive flag
 3. Exports flat `COMPILED_POLICY_RULES` array
@@ -527,19 +527,19 @@ No blocking issues found. The codebase is ship-ready as-is.
 
 | # | Finding | File | Description | Effort |
 |:--|:--------|:-----|:-----------|:-------|
-| 1 | Q-TEST-01 | [`tests/rules.test.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/rules.test.ts) | Add positive match tests for `ARB-003` (30-day opt-out) and `SURV-002` (biometric/geolocation). Add 3+ negative test cases ensuring benign terms don't false-positive. | 30 min |
-| 2 | Q-UI-01 | [`App.tsx`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx#L17-L193) | Extract `performScan()` callback nesting into 2 helper async functions to reduce complexity and improve maintainability | 30 min |
-| 3 | Q-DOM-01 | [`dom-extractor.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/dom-extractor.ts#L46-L54) | Replace `candidateNodes.includes()` with `WeakSet` for O(1) deduplication | 10 min |
+| 1 | Q-TEST-01 | [`tests/rules.test.ts`](../tests/rules.test.ts) | Add positive match tests for `ARB-003` (30-day opt-out) and `SURV-002` (biometric/geolocation). Add 3+ negative test cases ensuring benign terms don't false-positive. | 30 min |
+| 2 | Q-UI-01 | [`App.tsx`](../src/popup/App.tsx#L17-L193) | Extract `performScan()` callback nesting into 2 helper async functions to reduce complexity and improve maintainability | 30 min |
+| 3 | Q-DOM-01 | [`dom-extractor.ts`](../src/content/dom-extractor.ts#L46-L54) | Replace `candidateNodes.includes()` with `WeakSet` for O(1) deduplication | 10 min |
 | 4 | Q-TEST-02 | `tests/` | Add unit test for MutationObserver throttle: simulate 20 rapid mutations, assert only 15 scans execute within 60s window | 45 min |
 
 ### 🟢 P2 — Non-Blocking Improvements (5 items)
 
 | # | Finding | File | Description | Effort |
 |:--|:--------|:-----|:-----------|:-------|
-| 5 | Q-SCAN-01 | [`scanner.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts#L77-L93) | Consider sliding window or token bucket for scan throttle instead of fixed 60s reset | 1 hr |
-| 6 | Q-LINK-01 | [`link-detector.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/src/content/link-detector.ts#L13-L57) | Add `lastVerified` field to `WELL_KNOWN_LEGAL_MAP` entries for staleness tracking | 20 min |
-| 7 | Q-TEST-03 | [`tests/fixture-dom.test.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/fixture-dom.test.ts) | Make bundle invariant check fail-loud when `dist/` is missing instead of silent `if (existsSync)` pass-through | 10 min |
-| 8 | Q-TEST-04 | [`tests/local-ml-client.test.ts`](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/local-ml-client.test.ts) | Add tests for non-200 HTTP responses (404, 500), malformed JSON, and network timeout handling from loopback worker | 30 min |
+| 5 | Q-SCAN-01 | [`scanner.ts`](../src/content/scanner.ts#L77-L93) | Consider sliding window or token bucket for scan throttle instead of fixed 60s reset | 1 hr |
+| 6 | Q-LINK-01 | [`link-detector.ts`](../src/content/link-detector.ts#L13-L57) | Add `lastVerified` field to `WELL_KNOWN_LEGAL_MAP` entries for staleness tracking | 20 min |
+| 7 | Q-TEST-03 | [`tests/fixture-dom.test.ts`](../tests/fixture-dom.test.ts) | Make bundle invariant check fail-loud when `dist/` is missing instead of silent `if (existsSync)` pass-through | 10 min |
+| 8 | Q-TEST-04 | [`tests/local-ml-client.test.ts`](../tests/local-ml-client.test.ts) | Add tests for non-200 HTTP responses (404, 500), malformed JSON, and network timeout handling from loopback worker | 30 min |
 | 9 | Q-BUILD-01 | CI | Confirm `bundle-invariants.test.ts` covers `dist/content/scanner.js` specifically for residual `fetch`/`XMLHttpRequest`/`sendBeacon`/`WebSocket` (content scripts run outside extension CSP) | 15 min |
 
 ---

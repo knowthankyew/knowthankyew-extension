@@ -138,17 +138,17 @@ Test Files  22 passed (22)
 
 | Test Suite | File | Focus & Assertions Verified |
 | :--- | :--- | :--- |
-| **Handoff Bridge & Actions** | [tests/handoff-bridge.test.tsx](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/handoff-bridge.test.tsx) | Ephemeral `sessionStorage` dispatch, `?kty_handoff=1` flags, PDF quick-paste `Cmd+V` auto-scan, Hard Burn purge |
-| **Proof of Work & Scope** | [tests/proof-of-work.test.tsx](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/proof-of-work.test.tsx) | Telemetry extraction metrics, statutory checklist rendering, low-watermark sparse scan warnings (< 250 chars) |
-| **Closed Shadow DOM Defense** | [tests/inline-indicators.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/inline-indicators.test.ts) | Encapsulation inside `mode: 'closed'`, pure text node safety, zero CSS host leakage, atomic DOM cleanup |
-| **Amnesia & Multi-Tab Sync** | [tests/amnesia-coordinator.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/amnesia-coordinator.test.ts) | Dual-broadcast `BroadcastChannel` synchronization, OptionsApp state sync, permanent tombstone flags |
-| **Options Document Burn** | [tests/options-burn.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/options-burn.test.ts) | Standalone document auditor memory incinerator, tab switching resilience, byte meter accuracy |
-| **International Policy Packs** | [tests/policy-packs.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/policy-packs.test.ts) | Schema validation and regex compilation for US Federal, State ARL, UK DMCC, and EU CRD packs |
-| **Static ReDoS Elimination** | [tests/redos-static.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/redos-static.test.ts) | Mathematical verification via `safe-regex` proving 0 exponential backtracking across all 42+ patterns |
-| **Real Chromium E2E** | [tests/chromium-e2e.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/chromium-e2e.test.ts) | Puppeteer Chromium browser test verifying 0 external network requests during checkout inspection |
-| **Bundle Egress Invariants** | [tests/bundle-invariants.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts) | 100% absence of `fetch`/XHR primitives in `dist/`, CSP `connect-src 'none'`, Safari/Firefox manifest invariants |
-| **Local ML Loopback E2E** | [tests/chromium-local-ml-e2e.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/chromium-local-ml-e2e.test.ts) | Loopback ML worker connection, options status indicators, popup tooltipped badge, `/burn` handshake |
-| **Adversarial DOM** | [tests/adversarial-dom.test.ts](file:///Users/cl0rkster/Dev/knowthankyew-extension/tests/adversarial-dom.test.ts) | Deeply nested trees, shadow roots, SVG containers, bounded memory/CPU extraction ceiling |
+| **Handoff Bridge & Actions** | [tests/handoff-bridge.test.tsx](../tests/handoff-bridge.test.tsx) | Ephemeral `sessionStorage` dispatch, `?kty_handoff=1` flags, PDF quick-paste `Cmd+V` auto-scan, Hard Burn purge |
+| **Proof of Work & Scope** | [tests/proof-of-work.test.tsx](../tests/proof-of-work.test.tsx) | Telemetry extraction metrics, statutory checklist rendering, low-watermark sparse scan warnings (< 250 chars) |
+| **Closed Shadow DOM Defense** | [tests/inline-indicators.test.ts](../tests/inline-indicators.test.ts) | Encapsulation inside `mode: 'closed'`, pure text node safety, zero CSS host leakage, atomic DOM cleanup |
+| **Amnesia & Multi-Tab Sync** | [tests/amnesia-coordinator.test.ts](../tests/amnesia-coordinator.test.ts) | Dual-broadcast `BroadcastChannel` synchronization, OptionsApp state sync, permanent tombstone flags |
+| **Options Document Burn** | [tests/options-burn.test.ts](../tests/options-burn.test.ts) | Standalone document auditor memory incinerator, tab switching resilience, byte meter accuracy |
+| **International Policy Packs** | [tests/policy-packs.test.ts](../tests/policy-packs.test.ts) | Schema validation and regex compilation for US Federal, State ARL, UK DMCC, and EU CRD packs |
+| **Static ReDoS Elimination** | [tests/redos-static.test.ts](../tests/redos-static.test.ts) | Mathematical verification via `safe-regex` proving 0 exponential backtracking across all 42+ patterns |
+| **Real Chromium E2E** | [tests/chromium-e2e.test.ts](../tests/chromium-e2e.test.ts) | Puppeteer Chromium browser test verifying 0 external network requests during checkout inspection |
+| **Bundle Egress Invariants** | [tests/bundle-invariants.test.ts](../tests/bundle-invariants.test.ts) | 100% absence of `fetch`/XHR primitives in `dist/`, CSP `connect-src 'none'`, Safari/Firefox manifest invariants |
+| **Local ML Loopback E2E** | [tests/chromium-local-ml-e2e.test.ts](../tests/chromium-local-ml-e2e.test.ts) | Loopback ML worker connection, options status indicators, popup tooltipped badge, `/burn` handshake |
+| **Adversarial DOM** | [tests/adversarial-dom.test.ts](../tests/adversarial-dom.test.ts) | Deeply nested trees, shadow roots, SVG containers, bounded memory/CPU extraction ceiling |
 
 ---
 
@@ -165,7 +165,7 @@ All distribution packages have been compiled, verified, and checksummed via `npm
 
 ### Cryptographic Attestation (`SHA256SUMS`)
 
-The canonical checksums are recorded in [SHA256SUMS](file:///Users/cl0rkster/Dev/knowthankyew-extension/SHA256SUMS):
+The canonical checksums are recorded in [SHA256SUMS](../SHA256SUMS):
 ```text
 3cb20cceb6baecda4086ad345151ee661c9e8fb85c490ffc1868fcda324e9432  knowthankyew-extension-v2.1.0-firefox.zip
 14a38f36dd31da9f55e5b61c169eb9ee8ea1c1729c159846387fb88d6c702a0a  knowthankyew-extension-v2.1.0-local-assist.zip
