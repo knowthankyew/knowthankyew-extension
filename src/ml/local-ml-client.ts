@@ -145,7 +145,7 @@ export class LocalMLClient implements LocalMLProvider {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'PURGE_ALL_SESSION_STATE' }),
-        signal: AbortSignal.timeout(1000),
+        signal: AbortSignal.timeout(2500),
       });
 
       if (!response?.ok) {

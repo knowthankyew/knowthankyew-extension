@@ -23,10 +23,15 @@ function resolvePlaywright(repoRoot) {
     path.resolve(repoRoot, '../node_modules/playwright-core'),
   ];
   for (const c of candidates) {
+    let resolved;
     try {
-      const mod = require(c);
-      if (mod.chromium) return mod.chromium;
-    } catch {}
+      resolved = require.resolve(c);
+    } catch (err) {
+      if (err?.code === 'MODULE_NOT_FOUND') continue;
+      throw err;
+    }
+    const mod = require(resolved);
+    if (mod.chromium) return mod.chromium;
   }
   throw new Error('Playwright not found in repo or portfolio root. Run npm install at repo or portfolio root.');
 }

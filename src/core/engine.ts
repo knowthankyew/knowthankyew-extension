@@ -113,8 +113,7 @@ export function scanDocumentText(
 
   const durationMs = Math.max(1, Math.round(performance.now() - startTime));
   const wordCount = Math.round(text.length / 5);
-  const textForPreview = text.length > 4000 ? text.slice(0, 4000) : text;
-  const sanitizedPreviewText = sanitizeSnippet(textForPreview);
+  const sanitizedPreviewText = sanitizeSnippet(text.slice(0, 4000));
   const sanitizedTextPreview = sanitizedPreviewText.length > 2000
     ? sanitizedPreviewText.slice(0, 2000) + '...'
     : sanitizedPreviewText;

@@ -52,7 +52,6 @@ describe('Background Service Worker Badge Scoping & Navigation Lifecycle (servic
     // 1. Exercise onInstalled listener
     await onInstalledCallback();
     expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '' });
-    expect(chrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#ef4444' });
 
     vi.mocked(chrome.action.setBadgeText).mockClear();
 
@@ -153,10 +152,10 @@ describe('Background Service Worker Badge Scoping & Navigation Lifecycle (servic
     );
 
     expect(handled).toBe(true);
-    // Allow async execution
-    await new Promise((r) => setTimeout(r, 10));
-    expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '2', tabId: 707 });
-    expect(sendResponse).toHaveBeenCalledWith({ status: 'badge_updated' });
+    await vi.waitFor(() => {
+      expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '2', tabId: 707 });
+      expect(sendResponse).toHaveBeenCalledWith({ status: 'badge_updated' });
+    });
   });
 
   it('handleRuntimeMessage processes KTY_TRIGGER_HARD_BURN and executes hardBurnAllData', async () => {
@@ -168,9 +167,10 @@ describe('Background Service Worker Badge Scoping & Navigation Lifecycle (servic
     );
 
     expect(handled).toBe(true);
-    await new Promise((r) => setTimeout(r, 10));
-    expect(sendResponse).toHaveBeenCalledWith({ status: 'burned', success: true });
-    expect(chrome.storage.local.clear).toHaveBeenCalled();
+    await vi.waitFor(() => {
+      expect(sendResponse).toHaveBeenCalledWith({ status: 'burned', success: true });
+      expect(chrome.storage.local.clear).toHaveBeenCalled();
+    });
   });
 
   it('ensures findings on Tab 101 do not bleed into or affect Tab 102', async () => {

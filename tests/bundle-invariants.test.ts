@@ -7,13 +7,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
   const distDir = resolve(__dirname, '../dist');
 
   beforeAll(() => {
-    // Ensure standard production build exists for testing
-    if (
-      !existsSync(resolve(distDir, 'background/service-worker.js')) ||
-      !existsSync(resolve(distDir, 'content/scanner.js'))
-    ) {
-      execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
-    }
+    // Ensure fresh standard production build exists for testing
+    execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
   });
 
   function getJsFilesRecursively(dir: string): string[] {
@@ -73,10 +68,10 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     // Content scripts injected into host tabs execute as classic scripts.
     // If Vite/Rollup code-splits or treats the content script as an ES module,
     // browsers throw: "Uncaught SyntaxError: Cannot use import statement outside a module"
-    const hasImport = /^\s*import\b/m.test(content);
+    const hasImport = /(?:^|[;\s])import(?:\s|[(]|\*)/.test(content);
     expect(hasImport, 'dist/content/scanner.js must NOT contain any ES module import statements').toBe(false);
 
-    const hasExport = /^\s*export\b/m.test(content);
+    const hasExport = /(?:^|[;\s])export(?:\s|[{*]|\bdefault\b)/.test(content);
     expect(hasExport, 'dist/content/scanner.js must NOT contain any ES module export statements').toBe(false);
 
     // Must be compiled as an executable self-contained script
@@ -96,7 +91,11 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     const rootDir = resolve(__dirname, '..');
     const testDistMl = resolve(__dirname, '../dist-test-ml');
     try {
-      execSync('VITE_LOCAL_ML_ENABLED=true npx vite build --outDir dist-test-ml', { cwd: rootDir, stdio: 'pipe' });
+      execSync('npx vite build --outDir dist-test-ml', {
+        cwd: rootDir,
+        stdio: 'pipe',
+        env: { ...process.env, VITE_LOCAL_ML_ENABLED: 'true' },
+      });
       const jsFiles = getJsFilesRecursively(testDistMl);
       const hasLoopbackClient = jsFiles.some(f => readFileSync(f, 'utf-8').includes('127.0.0.1:8420'));
       expect(hasLoopbackClient).toBe(true);
@@ -113,7 +112,11 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     const rootDir = resolve(__dirname, '..');
     const testDistFfx = resolve(__dirname, '../dist-test-firefox');
     try {
-      execSync('TARGET_BROWSER=firefox npx vite build --outDir dist-test-firefox', { cwd: rootDir, stdio: 'pipe' });
+      execSync('npx vite build --outDir dist-test-firefox', {
+        cwd: rootDir,
+        stdio: 'pipe',
+        env: { ...process.env, TARGET_BROWSER: 'firefox' },
+      });
       const manifest = JSON.parse(readFileSync(resolve(testDistFfx, 'manifest.json'), 'utf-8'));
       expect(manifest.browser_specific_settings?.gecko?.id).toBe('reality-engine@knowthankyew.org');
       expect(manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required).toEqual(['none']);
@@ -127,8 +130,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       const scannerFfx = resolve(testDistFfx, 'content/scanner.js');
       expect(existsSync(scannerFfx)).toBe(true);
       const scannerContent = readFileSync(scannerFfx, 'utf-8');
-      expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
-      expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
+      expect(/(?:^|[;\s])import(?:\s|[(]|\*)/.test(scannerContent)).toBe(false);
+      expect(/(?:^|[;\s])export(?:\s|[{*]|\bdefault\b)/.test(scannerContent)).toBe(false);
 
       const forbiddenPatterns = [
         /\bfetch\s*\(/,
@@ -155,7 +158,11 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     const rootDir = resolve(__dirname, '..');
     const testDistSafari = resolve(__dirname, '../dist-test-safari');
     try {
-      execSync('TARGET_BROWSER=safari npx vite build --outDir dist-test-safari', { cwd: rootDir, stdio: 'pipe' });
+      execSync('npx vite build --outDir dist-test-safari', {
+        cwd: rootDir,
+        stdio: 'pipe',
+        env: { ...process.env, TARGET_BROWSER: 'safari' },
+      });
       const manifest = JSON.parse(readFileSync(resolve(testDistSafari, 'manifest.json'), 'utf-8'));
       expect(manifest.browser_specific_settings).toBeUndefined();
       expect(manifest.background?.service_worker).toBe('background/service-worker.js');
@@ -166,8 +173,8 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       const scannerSafari = resolve(testDistSafari, 'content/scanner.js');
       expect(existsSync(scannerSafari)).toBe(true);
       const scannerContent = readFileSync(scannerSafari, 'utf-8');
-      expect(/^\s*import\b/m.test(scannerContent)).toBe(false);
-      expect(/^\s*export\b/m.test(scannerContent)).toBe(false);
+      expect(/(?:^|[;\s])import(?:\s|[(]|\*)/.test(scannerContent)).toBe(false);
+      expect(/(?:^|[;\s])export(?:\s|[{*]|\bdefault\b)/.test(scannerContent)).toBe(false);
 
       const forbiddenPatterns = [
         /\bfetch\s*\(/,
@@ -189,4 +196,20 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       rmSync(testDistSafari, { recursive: true, force: true });
     }
   }, 30000);
+
+  it('correctly detects and rejects same-line ES module import/export statements in classic scripts', () => {
+    const importRegex = /(?:^|[;\s])import(?:\s|[(]|\*)/;
+    const exportRegex = /(?:^|[;\s])export(?:\s|[{*]|\bdefault\b)/;
+
+    // Positive controls: same-line or minified statements must be detected
+    expect(importRegex.test('(()=>{})();import "./chunk.js";')).toBe(true);
+    expect(importRegex.test('const x=1;import("./dynamic.js");')).toBe(true);
+    expect(importRegex.test('import*as foo from"bar";')).toBe(true);
+    expect(exportRegex.test('(()=>{})();export default foo;')).toBe(true);
+    expect(exportRegex.test('const a=1;export{a};')).toBe(true);
+
+    // Negative controls: identifier substrings like "important" or "exporting" must not trigger
+    expect(importRegex.test('const important = true;')).toBe(false);
+    expect(exportRegex.test('function exportingData() {}')).toBe(false);
+  });
 });

@@ -55,25 +55,31 @@ export default defineConfig(({ mode }) => {
           // Manifest V3 content scripts run as classic scripts, not ES modules.
           // Embedding scanner in the multi-entry ES build causes code-splitting of shared modules (e.g. engine.ts),
           // producing invalid ES 'import' statements in content scripts.
-          await build({
-            configFile: false,
-            publicDir: false,
-            plugins: [airGapTransformPlugin],
-            build: {
-              outDir,
-              emptyOutDir: false,
-              lib: {
-                entry: resolve('src/content/scanner.ts'),
-                name: 'KtyContentScanner',
-                formats: ['iife'],
-                fileName: () => 'content/scanner.js',
+          try {
+            await build({
+              configFile: false,
+              publicDir: false,
+              mode,
+              plugins: [airGapTransformPlugin],
+              build: {
+                outDir,
+                emptyOutDir: false,
+                lib: {
+                  entry: resolve('src/content/scanner.ts'),
+                  name: 'KtyContentScanner',
+                  formats: ['iife'],
+                  fileName: () => 'content/scanner.js',
+                },
               },
-            },
-            define: {
-              __OTEL_EXPORTER_ENDPOINT__: JSON.stringify(process.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT || ''),
-              __LOCAL_ML_ENABLED__: JSON.stringify(process.env.VITE_LOCAL_ML_ENABLED === 'true'),
-            },
-          });
+              define: {
+                __OTEL_EXPORTER_ENDPOINT__: JSON.stringify(process.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT || ''),
+                __LOCAL_ML_ENABLED__: JSON.stringify(process.env.VITE_LOCAL_ML_ENABLED === 'true'),
+              },
+            });
+          } catch (err) {
+            console.error('Failed to compile content/scanner.js as an isolated IIFE script:', err);
+            throw err;
+          }
 
           // 2. Adjust manifest.json per target browser / features
           const manifestPath = resolve(outDir, 'manifest.json');
@@ -114,12 +120,6 @@ export default defineConfig(({ mode }) => {
             if (targetBrowser === 'safari') {
               manifest.version_name = manifest.version;
               delete manifest.browser_specific_settings;
-              if (!isLocalMl) {
-                delete manifest.host_permissions;
-                manifest.content_security_policy = {
-                  extension_pages: "default-src 'self'; connect-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self';",
-                };
-              }
             }
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
           }

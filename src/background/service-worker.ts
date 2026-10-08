@@ -85,7 +85,6 @@ export function handleRuntimeMessage(
 if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {
   chrome.runtime.onInstalled.addListener(async () => {
     await chrome.action.setBadgeText({ text: '' });
-    await chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
   });
 }
 

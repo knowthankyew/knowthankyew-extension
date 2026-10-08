@@ -52,7 +52,8 @@ async function loadTrackingTargets() {
  */
 async function checkFederalRegister(keyword, sinceDate) {
   const url = new URL('https://www.federalregister.gov/api/v1/documents.json');
-  url.searchParams.set('conditions[term]', keyword);
+  const quotedTerm = keyword.includes(' ') && !keyword.startsWith('"') ? `"${keyword}"` : keyword;
+  url.searchParams.set('conditions[term]', quotedTerm);
   url.searchParams.set('conditions[publication_date][gte]', sinceDate);
   url.searchParams.set('order', 'newest');
   url.searchParams.set('per_page', '5');
@@ -65,34 +66,51 @@ async function checkFederalRegister(keyword, sinceDate) {
 
     if (!res.ok) {
       console.warn(`[Statute Monitor] Federal Register query for "${keyword}" returned status ${res.status}`);
-      return [];
+      return { results: [], error: `HTTP ${res.status}` };
     }
 
     const data = await res.json();
-    return data.results || [];
+    return { results: data.results || [], error: null };
   } catch (err) {
-    console.warn(`[Statute Monitor] Failed to reach Federal Register API for "${keyword}":`, err instanceof Error ? err.message : err);
-    return [];
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[Statute Monitor] Failed to reach Federal Register API for "${keyword}":`, msg);
+    return { results: [], error: msg };
   }
 }
 
 /**
- * Queries the EUR-Lex ELI REST API / canonical endpoint for amendments to covered directives.
+ * Queries the EUR-Lex ELI REST API / canonical landing endpoint for consolidated version,
+ * corrigenda, and amendment metadata for covered EU directives and regulations.
  */
 async function checkEurLex(baselineDate = '2026-09-01') {
   const trackedDirectives = [
-    { id: 'dir/2011/83', title: 'Consumer Rights Directive (2011/83/EU)', url: 'https://eur-lex.europa.eu/eli/dir/2011/83/oj', baselineDate },
-    { id: 'reg/2016/679', title: 'General Data Protection Regulation (2016/679)', url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', baselineDate }
+    {
+      id: 'dir/2011/83',
+      title: 'Consumer Rights Directive (2011/83/EU)',
+      canonicalUrl: 'https://eur-lex.europa.eu/eli/dir/2011/83',
+      eliPrefix: 'eli/dir/2011/83',
+      baselineDate,
+    },
+    {
+      id: 'reg/2016/679',
+      title: 'General Data Protection Regulation (2016/679)',
+      canonicalUrl: 'https://eur-lex.europa.eu/eli/reg/2016/679',
+      eliPrefix: 'eli/reg/2016/679',
+      baselineDate,
+    },
   ];
 
   const results = [];
   const errors = [];
   for (const item of trackedDirectives) {
     try {
-      const res = await fetch(item.url, {
-        method: 'HEAD',
-        headers: { 'User-Agent': 'KnowThankYew-Statute-Monitor/1.0' },
-        signal: AbortSignal.timeout(8000),
+      const res = await fetch(item.canonicalUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml',
+          'User-Agent': 'KnowThankYew-Statute-Monitor/1.0',
+        },
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!res.ok) {
@@ -100,17 +118,50 @@ async function checkEurLex(baselineDate = '2026-09-01') {
         continue;
       }
 
-      const lastModified = res.headers.get('last-modified');
-      if (lastModified) {
-        const modDate = new Date(lastModified).toISOString().split('T')[0];
-        if (modDate > item.baselineDate) {
-          results.push({
-            directive: item.title,
-            lastAmended: modDate,
-            abstractText: `Checked canonical EUR-Lex ELI repository for amendments or corrigenda.`,
-            eurLexUrl: item.url,
-          });
+      const html = await res.text();
+      // Extract consolidated version dates from ELI metadata (e.g. eli/dir/2011/83/2026-09-27)
+      const consolidatedRegex = new RegExp(`${item.eliPrefix}/(\\d{4}-\\d{2}-\\d{2})`, 'g');
+      // Extract corrigendum publication dates (e.g. eli/reg/2016/679/corrigendum/2021-03-04)
+      const corrigendumRegex = new RegExp(`${item.eliPrefix}/corrigendum/(\\d{4}-\\d{2}-\\d{2})`, 'g');
+
+      const matches = [...html.matchAll(consolidatedRegex)];
+      const corrMatches = [...html.matchAll(corrigendumRegex)];
+
+      let latestConsolidatedDate = null;
+      for (const m of matches) {
+        const d = m[1];
+        if (!latestConsolidatedDate || d > latestConsolidatedDate) {
+          latestConsolidatedDate = d;
         }
+      }
+
+      let latestCorrigendumDate = null;
+      for (const m of corrMatches) {
+        const d = m[1];
+        if (!latestCorrigendumDate || d > latestCorrigendumDate) {
+          latestCorrigendumDate = d;
+        }
+      }
+
+      const latestUpdateDate = [latestConsolidatedDate, latestCorrigendumDate]
+        .filter(Boolean)
+        .sort()
+        .pop() || null;
+
+      const isCorrigendum = latestUpdateDate === latestCorrigendumDate && latestCorrigendumDate !== latestConsolidatedDate;
+
+      if (latestUpdateDate && latestUpdateDate > item.baselineDate) {
+        results.push({
+          directive: item.title,
+          lastAmended: latestUpdateDate,
+          updateType: isCorrigendum ? 'Corrigendum' : 'Consolidated version',
+          abstractText: isCorrigendum
+            ? `EUR-Lex corrigendum published on ${latestUpdateDate}.`
+            : `EUR-Lex consolidated version published on ${latestUpdateDate}.`,
+          eurLexUrl: isCorrigendum
+            ? `${item.canonicalUrl}/corrigendum/${latestUpdateDate}`
+            : `${item.canonicalUrl}/${latestUpdateDate}`,
+        });
       }
     } catch (err) {
       console.warn(`[Statute Monitor] EUR-Lex check for ${item.title} failed (non-blocking):`, err instanceof Error ? err.message : err);
@@ -121,21 +172,31 @@ async function checkEurLex(baselineDate = '2026-09-01') {
 }
 
 /**
- * Queries UK legislation.gov.uk for statutory revisions to covered acts.
+ * Queries UK legislation.gov.uk affected-legislation changes feed for statutory revisions to covered acts.
  */
 async function checkUkLegislation(baselineDate = '2026-09-01') {
   const trackedActs = [
-    { title: 'Digital Markets, Competition and Consumers Act 2024', url: 'https://www.legislation.gov.uk/ukpga/2024/13/data.feed', baselineDate },
-    { title: 'Consumer Rights Act 2015', url: 'https://www.legislation.gov.uk/ukpga/2015/15/data.feed', baselineDate }
+    {
+      title: 'Digital Markets, Competition and Consumers Act 2024',
+      changesFeedUrl: 'https://www.legislation.gov.uk/changes/affected/ukpga/2024/13/data.feed',
+      actUrl: 'https://www.legislation.gov.uk/ukpga/2024/13',
+      baselineDate,
+    },
+    {
+      title: 'Consumer Rights Act 2015',
+      changesFeedUrl: 'https://www.legislation.gov.uk/changes/affected/ukpga/2015/15/data.feed',
+      actUrl: 'https://www.legislation.gov.uk/ukpga/2015/15',
+      baselineDate,
+    },
   ];
 
   const results = [];
   const errors = [];
   for (const item of trackedActs) {
     try {
-      const res = await fetch(item.url, {
+      const res = await fetch(item.changesFeedUrl, {
         headers: { 'Accept': 'application/atom+xml, text/xml', 'User-Agent': 'KnowThankYew-Statute-Monitor/1.0' },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(10000),
       });
 
       if (!res.ok) {
@@ -143,16 +204,35 @@ async function checkUkLegislation(baselineDate = '2026-09-01') {
         continue;
       }
 
-      const lastModified = res.headers.get('last-modified');
-      if (lastModified) {
-        const modDate = new Date(lastModified).toISOString().split('T')[0];
-        if (modDate > item.baselineDate) {
-          results.push({
-            act: item.title,
-            lastAmended: modDate,
-            amendmentUrl: item.url.replace('/data.feed', ''),
-          });
+      const xml = await res.text();
+      // Extract affecting change entries newer than baseline
+      const entryMatches = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/gi)];
+      let latestChangeDate = null;
+      let latestTitle = '';
+
+      for (const m of entryMatches) {
+        const entryContent = m[1];
+        const updatedMatch = /<updated>([^<]+)<\/updated>/i.exec(entryContent);
+        if (!updatedMatch) continue;
+        const parsed = new Date(updatedMatch[1].trim());
+        if (Number.isNaN(parsed.getTime())) continue;
+        const d = parsed.toISOString().split('T')[0];
+        if (d > item.baselineDate) {
+          if (!latestChangeDate || d > latestChangeDate) {
+            latestChangeDate = d;
+            const titleMatch = /<title>([^<]+)<\/title>/i.exec(entryContent);
+            if (titleMatch) latestTitle = titleMatch[1].trim();
+          }
         }
+      }
+
+      if (latestChangeDate) {
+        results.push({
+          act: item.title,
+          lastAmended: latestChangeDate,
+          changeTitle: latestTitle,
+          amendmentUrl: item.actUrl,
+        });
       }
     } catch (err) {
       console.warn(`[Statute Monitor] UK legislation check for ${item.title} failed (non-blocking):`, err instanceof Error ? err.message : err);
@@ -174,6 +254,7 @@ async function main() {
   console.log(`Loaded ${targets.length} tracked statutory rules across policy packs.\n`);
 
   const findings = [];
+  const usErrors = [];
 
   if (isMock) {
     console.log('[Mode: MOCK] Simulating regulatory updates for automated testing.');
@@ -211,11 +292,14 @@ async function main() {
         new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
       );
 
-      const docs = await checkFederalRegister(kw, oldestDate);
-      if (docs.length > 0) {
-        console.log(`  Found ${docs.length} regulatory notice(s) for "${kw}".`);
+      const res = await checkFederalRegister(kw, oldestDate);
+      if (res.error) {
+        usErrors.push({ keyword: kw, error: res.error });
+      }
+      if (res.results.length > 0) {
+        console.log(`  Found ${res.results.length} regulatory notice(s) for "${kw}".`);
         for (const target of relevantTargets) {
-          findings.push({ target, documents: docs });
+          findings.push({ target, documents: res.results });
         }
       }
 
@@ -256,7 +340,7 @@ async function main() {
     euFindings = [{ directive: 'Consumer Rights Directive (2011/83/EU)', lastAmended: '2026-09-10', abstractText: 'Consolidated text verified.', eurLexUrl: 'https://eur-lex.europa.eu/eli/dir/2011/83/oj' }];
   }
 
-  console.log(`\nScan complete. Total US notices: ${uniqueFindings.size}, UK updates: ${ukFindings.length} (${ukErrors.length} errors), EU updates: ${euFindings.length} (${euErrors.length} errors)`);
+  console.log(`\nScan complete. Total US notices: ${uniqueFindings.size} (${usErrors.length} errors), UK updates: ${ukFindings.length} (${ukErrors.length} errors), EU updates: ${euFindings.length} (${euErrors.length} errors)`);
 
   // Build report markdown
   let reportMd = `# Statutory & Regulatory Update Report\n\n`;
@@ -265,8 +349,13 @@ async function main() {
   reportMd += `**Statutory Notices Found:** ${uniqueFindings.size + ukFindings.length + euFindings.length}\n\n`;
 
   reportMd += `## 🇺🇸 US Federal Register Updates\n\n`;
+  if (usErrors.length > 0) {
+    reportMd += `> [!WARNING]\n> Could not query Federal Register API for keywords: ${usErrors.map(e => `"${e.keyword}" (${e.error})`).join(', ')}\n\n`;
+  }
   if (uniqueFindings.size === 0) {
-    reportMd += `> [!NOTE]\n> All tracked US federal statutes remain up to date. No pending rule amendments detected.\n\n`;
+    if (usErrors.length === 0) {
+      reportMd += `> [!NOTE]\n> All tracked US federal statutes remain up to date. No pending rule amendments detected.\n\n`;
+    }
   } else {
     reportMd += `| Rule ID | Statute | Notice Title | Type | Published | Official Link |\n`;
     reportMd += `| :--- | :--- | :--- | :--- | :--- | :--- |\n`;
@@ -281,7 +370,9 @@ async function main() {
     reportMd += `> [!WARNING]\n> Could not query UK legislation endpoints for: ${ukErrors.map(e => `${e.title} (${e.error})`).join(', ')}\n\n`;
   }
   if (ukFindings.length === 0) {
-    reportMd += `> [!NOTE]\n> No amendments or changes detected for covered UK legislation since baseline.\n\n`;
+    if (ukErrors.length === 0) {
+      reportMd += `> [!NOTE]\n> No amendments or changes detected for covered UK legislation since baseline.\n\n`;
+    }
   } else {
     reportMd += `| Enactment | Last Modified | Canonical Link |\n`;
     reportMd += `| :--- | :--- | :--- |\n`;
@@ -296,7 +387,9 @@ async function main() {
     reportMd += `> [!WARNING]\n> Could not query EUR-Lex canonical endpoints for: ${euErrors.map(e => `${e.title} (${e.error})`).join(', ')}\n\n`;
   }
   if (euFindings.length === 0) {
-    reportMd += `> [!NOTE]\n> No revisions or corrigenda detected for covered EU directives since baseline.\n\n`;
+    if (euErrors.length === 0) {
+      reportMd += `> [!NOTE]\n> No revisions or corrigenda detected for covered EU directives since baseline.\n\n`;
+    }
   } else {
     reportMd += `| Directive / Regulation | Verified Date | Canonical ELI Link |\n`;
     reportMd += `| :--- | :--- | :--- |\n`;
@@ -318,7 +411,8 @@ async function main() {
   if (process.env.GITHUB_OUTPUT) {
     const totalCount = uniqueFindings.size + ukFindings.length + euFindings.length;
     const hasUpdates = totalCount > 0 ? 'true' : 'false';
-    const outputContent = `has_updates=${hasUpdates}\nfindings_count=${totalCount}\n`;
+    const checkFailed = usErrors.length > 0 || ukErrors.length > 0 || euErrors.length > 0 ? 'true' : 'false';
+    const outputContent = `has_updates=${hasUpdates}\nfindings_count=${totalCount}\ncheck_failed=${checkFailed}\n`;
     writeFileSync(process.env.GITHUB_OUTPUT, outputContent, { flag: 'a' });
   }
 }

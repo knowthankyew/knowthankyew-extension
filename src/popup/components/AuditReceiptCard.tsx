@@ -54,8 +54,9 @@ export const AuditReceiptCard: React.FC<AuditReceiptCardProps> = ({ scanResult }
 
   const checklistItems = allChecklistItems.filter(item => {
     if (targetJ === 'ALL') return true;
-    if (targetJ === 'EU' || targetJ === 'UK') return item.jurisdiction === 'INTL';
-    return item.jurisdiction === 'US';
+    if (targetJ === 'EU' || targetJ === 'UK' || targetJ === 'INTL') return item.jurisdiction === 'INTL';
+    if (targetJ.startsWith('US')) return item.jurisdiction === 'US';
+    return true;
   });
 
   return (

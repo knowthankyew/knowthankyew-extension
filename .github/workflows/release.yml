@@ -60,6 +60,15 @@ jobs:
           npm run package:safari
           npm run package:local-assist
 
+      - name: Verify Zero-Egress Invariant across Production Bundles
+        run: |
+          echo "Scanning all production bundles (dist, dist-firefox, dist-safari) for network egress primitives..."
+          if grep -rEn "fetch\(|WebSocket|sendBeacon|XMLHttpRequest|EventSource|importScripts" dist dist-firefox dist-safari --include='*.js'; then
+            echo "ERROR: Network egress primitive detected in production extension bundle!"
+            exit 1
+          fi
+          echo "PASS: Absolute zero-egress verified across all production bundles."
+
       - name: Generate Checksums
         run: |
           shasum -a 256 knowthankyew-extension-v${{ steps.version.outputs.version }}*.zip > SHA256SUMS

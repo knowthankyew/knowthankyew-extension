@@ -20,14 +20,16 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
 ## 2. Key Capabilities & Innovations Delivered in v1.6.0
 
 ### A. Multi-Tab Session Amnesia Coordinator
+
 - **Dual-Broadcast Hard Burn**:
   - Primary path: Dispatches `chrome.tabs.sendMessage` (`KTY_HARD_BURN_DOM`) to all active tabs in Chromium.
   - Secondary path: Concurrently broadcasts over `BroadcastChannel('kty_hard_burn')`. This ensures immediate amnesia synchronization across partitioned worker contexts, detached iframes, Options pages, and Safari containers.
 - **Idempotent Content Script Teardown**:
   - `src/content/scanner.ts` receives the burn signal, tears down active `MutationObserver` instances, flushes local scan caches, dereferences all in-memory clause matches, purges `sessionStorage`, and sets an in-memory amnesia lock flag.
-  - Subsequent programmatic scan requests within that tab session are permanently rejected until a fresh navigation occurs.
+  - Subsequent programmatic scan requests within that tab session are permanently rejected until a fresh navigation occurs (architectural foundation established in v1.6.0; hardened with in-memory lock in v2.1.0).
 
 ### B. Burst-Resilient Token-Bucket Scanner Throttle (Q-SCAN-01)
+
 - **Problem**: Fixed 60-second throttling windows caused cliff-edge scan starvation on dynamic single-page applications (SPAs) undergoing rapid checkout modal or accordion transitions.
 - **Solution**: Replaced fixed windows with a mathematically sound **Token Bucket** in `src/content/scanner.ts`:
   - **Bucket Capacity**: 15 tokens.
@@ -35,6 +37,7 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
   - Permits rapid bursts during interactive multi-step checkout forms while bounding worst-case DOM inspection costs and preventing denial-of-service/CPU lockups.
 
 ### C. Declarative JSON Policy Packs & Upstream Regulatory Monitor
+
 - **Declarative Statutory Rules**:
   - Hardcoded regex matchers decoupled into structured JSON policy packs:
     - `src/core/policy-packs/us-federal.json`: Federal ROSCA (15 U.S.C. § 8403), FTC Act § 5 Symmetrical Cancellation, Federal Arbitration Act (9 U.S.C. § 2), and Class Action Waivers.
@@ -45,6 +48,7 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
   - Automatically drafts a **Draft Pull Request** with citation diffs for human legal review. Autonomous, unverified rule mutations are prohibited by design.
 
 ### D. Client-Side Local ML Integration & TOS Link Discovery
+
 - **2-Stage Legal Link Discovery Cascade**:
   - Stage 1: Fast heuristic DOM extractor gathers governing legal links from footers, headers, and consent sections.
   - Stage 2: When Local ML is active, candidate links are dispatched to `POST /classify-links` (`http://127.0.0.1:8420`), semantically reranking multi-sided marketplace terms (e.g., DoorDash Consumer vs. Courier vs. Merchant terms) to promote the primary consumer agreement to the top of the popup list.
@@ -55,6 +59,7 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
   - Zero-setup in-browser adapter implementing `LocalMLProvider` via `window.ai.languageModel` with rigid schema enforcement and 4-state availability tracking (`ready`, `downloading`, `unsupported`, `disabled`).
 
 ### E. Senior Code Audit Hardening & Quality Refactoring
+
 - **WeakSet O(1) DOM Node Deduplication (Q-DOM-01)**: Replaced $O(n)$ array lookup in `dom-extractor.ts` with an $O(1)$ `WeakSet` deduplicator.
 - **Modularized Scan Execution (Q-UI-01)**: Refactored `performScan()` in `App.tsx` into isolated `injectAndRetryScan()` and `attemptMLRerank()` helpers.
 - **Audit Timestamps on Legal Routes (Q-LINK-01)**: Added verified ISO audit timestamps to all 14 routes in `WELL_KNOWN_LEGAL_MAP`.
@@ -65,6 +70,7 @@ The extension strictly preserves its foundational **Zero-Egress Invariant**:
 ## 3. Test & Verification Results (v1.6.0)
 
 ### Vitest Suite (86 / 86 Tests Passed Across 16 Test Suites)
+
 - **`policy-packs.test.ts`**: Validated JSON schema integrity, citation presence, and successful regex compilation.
 - **`redos-static.test.ts`**: Statically proved with `safe-regex` that all declarative patterns are free of exponential backtracking.
 - **`scanner-throttle.test.ts`**: Verified token-bucket capacity bounds, 4,000ms refill timing, and burst resilience.

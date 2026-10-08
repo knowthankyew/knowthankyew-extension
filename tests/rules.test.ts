@@ -118,8 +118,10 @@ describe('EU Consumer Rights Directive (2011/83/EU) Rule Pack', () => {
     const text = 'The monthly subscription checkbox is pre-selected for your convenience at checkout.';
     const rule = ALL_RULES.find(r => r.id === 'EU-AR-001')!;
     expect(rule).toBeDefined();
-    const matched = rule.patterns.some(p => p.test(text));
-    expect(matched).toBe(true);
+    expect(rule.patterns.some(p => p.test(text))).toBe(true);
+
+    const directText = 'An additional fee is checked by default at checkout.';
+    expect(rule.patterns.some(p => p.test(directText))).toBe(true);
   });
 
   it('detects statutory withdrawal right waivers (EU-AR-002)', () => {

@@ -64,6 +64,9 @@ export function resetTokenBucket(): void {
  * Caches the result and broadcasts the summary to the background service worker.
  */
 export function executeScan(): PageScanResult {
+  if (hardBurned) {
+    throw new Error('Scanner disabled after hard burn');
+  }
   ensureBurnBroadcastChannel();
   const { text, inspectedContainers } = extractPageLegalContent();
   const hostname = (typeof window !== 'undefined' && window.location?.hostname) || 'current-page';
@@ -276,12 +279,15 @@ if (!isAlreadyInitialized) {
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
+        if (hardBurned) return;
         startDynamicObserver();
         executeScan();
       });
     } else {
-      startDynamicObserver();
-      executeScan();
+      if (!hardBurned) {
+        startDynamicObserver();
+        executeScan();
+      }
     }
   }
 }

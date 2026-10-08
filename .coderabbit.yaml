@@ -33,7 +33,7 @@ reviews:
         Evaluate code against these non-negotiable architectural invariants:
 
         1. ZERO-EGRESS & CSP INTEGRITY (CRITICAL):
-           - Prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches).
+           - In production extension runtime code (`src/` excluding opt-in developer loopback assist in `src/ml/local-ml-client.ts`), prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches). Offline statutory monitoring scripts in `scripts/check-statutory-updates.mjs` run strictly in isolated CI environments.
            - Ensure all telemetry routing through `src/telemetry/` conforms to `@knowthankyew/privacy-telemetry` without outbound transmissions.
 
         2. CLOSED SHADOW DOM DEFENSE (`src/content/`):

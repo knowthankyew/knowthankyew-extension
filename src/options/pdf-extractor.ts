@@ -32,7 +32,7 @@ function parseCMap(decompressedBytes: Uint8Array | null): Map<number, string> {
   const bfRangeSectionRegex = /beginbfrange([\s\S]*?)endbfrange/g;
   let rangeSec: RegExpExecArray | null;
   while ((rangeSec = bfRangeSectionRegex.exec(text)) !== null) {
-    const rangeLines = rangeSec[1].trim().split('\n');
+    const rangeLines = rangeSec[1].trim().split(/\r\n|\r|\n/);
     for (const line of rangeLines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
@@ -78,21 +78,34 @@ function parseCMap(decompressedBytes: Uint8Array | null): Map<number, string> {
 /**
  * Extracts raw or Flate-decompressed byte stream from an indirect PDF object.
  */
-function getObjectStream(latin1: string, bytes: Uint8Array, objNum: number): Uint8Array | null {
-  // Find object header e.g. "12 0 obj" bounded by newline or start-of-file
-  let header = `\n${objNum} 0 obj`;
-  let idx = latin1.indexOf(header);
-  if (idx === -1) {
-    if (latin1.startsWith(`${objNum} 0 obj`)) {
-      idx = 0;
+function getObjectStream(
+  latin1: string,
+  bytes: Uint8Array,
+  objNum: number,
+  budget?: { bytesRemaining: number },
+  objectIndices?: Map<number, number>
+): Uint8Array | null {
+  if (budget && budget.bytesRemaining <= 0) return null;
+
+  let idx = -1;
+  if (objectIndices && objectIndices.has(objNum)) {
+    idx = objectIndices.get(objNum)!;
+  } else {
+    // Find object header e.g. "12 0 obj" bounded by newline or start-of-file
+    let header = `\n${objNum} 0 obj`;
+    idx = latin1.indexOf(header);
+    if (idx === -1) {
+      if (latin1.startsWith(`${objNum} 0 obj`)) {
+        idx = 0;
+      } else {
+        header = `\r${objNum} 0 obj`;
+        idx = latin1.indexOf(header);
+        if (idx === -1) return null;
+        idx += 1;
+      }
     } else {
-      header = `\r${objNum} 0 obj`;
-      idx = latin1.indexOf(header);
-      if (idx === -1) return null;
       idx += 1;
     }
-  } else {
-    idx += 1;
   }
 
   const endObj = latin1.indexOf('endobj', idx);
@@ -115,30 +128,43 @@ function getObjectStream(latin1: string, bytes: Uint8Array, objNum: number): Uin
 
   const headerStr = latin1.slice(idx, sIdx);
   if (headerStr.includes('/FlateDecode')) {
+    let totalBytes = 0;
+    let budgetCharged = false;
+    const chargeBudget = () => {
+      if (budget && !budgetCharged) {
+        budget.bytesRemaining -= totalBytes;
+        budgetCharged = true;
+      }
+    };
     try {
       const chunks: Uint8Array[] = [];
-      let totalBytes = 0;
       let aborted = false;
-      const MAX_DECOMPRESSED_BYTES = 20 * 1024 * 1024;
+      const MAX_STREAM_BYTES = 20 * 1024 * 1024;
+      const maxAllowed = budget ? Math.min(MAX_STREAM_BYTES, budget.bytesRemaining) : MAX_STREAM_BYTES;
 
       const u = new Unzlib((chunk) => {
         if (aborted) return;
         totalBytes += chunk.length;
-        if (totalBytes > MAX_DECOMPRESSED_BYTES) {
+        if (totalBytes > maxAllowed) {
           aborted = true;
           throw new Error('Decompression limit exceeded');
         }
         chunks.push(chunk);
       });
 
-      const CHUNK_SIZE = 64 * 1024;
+      const CHUNK_SIZE = 4 * 1024;
       for (let p = 0; p < raw.length; p += CHUNK_SIZE) {
         if (aborted) break;
         const slice = raw.subarray(p, Math.min(raw.length, p + CHUNK_SIZE));
         const isFinal = p + CHUNK_SIZE >= raw.length;
         u.push(slice, isFinal);
       }
-      if (aborted) return null;
+      if (aborted) {
+        chargeBudget();
+        return null;
+      }
+
+      chargeBudget();
 
       const out = new Uint8Array(totalBytes);
       let offset = 0;
@@ -148,6 +174,7 @@ function getObjectStream(latin1: string, bytes: Uint8Array, objNum: number): Uin
       }
       return out;
     } catch {
+      chargeBudget();
       return null;
     }
   }
@@ -206,34 +233,67 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
   // 1. Discover all Font objects that specify a /ToUnicode CMap and Page objects
   const MAX_SCANNED_OBJECTS = 500;
   const MAX_FONT_OBJECTS = 25;
+  const MAX_DOCUMENT_DECOMPRESSED_BYTES = 25 * 1024 * 1024;
+  const MAX_PAGE_TEXT_CHARS = 500_000;
+  const MAX_TOTAL_TEXT_CHARS = 2_000_000;
+  const MAX_STREAMS_PER_PAGE = 50;
+  const MAX_TOTAL_CONTENT_STREAMS = 200;
+
+  const budget = { bytesRemaining: MAX_DOCUMENT_DECOMPRESSED_BYTES };
+  const objectIndices = new Map<number, number>();
   const fontToCmap = new Map<number, Map<number, string>>();
   const pageBodies: string[] = [];
 
-  const objRegex = /(\d+)\s+0\s+obj([\s\S]*?)endobj/g;
-  let objMatch: RegExpExecArray | null;
+  // 1. Discover all Font objects that specify a /ToUnicode CMap and Page objects
+  // Use linear indexOf search to prevent catastrophic O(n²) backtracking on malformed PDFs lacking endobj
+  const headerRegex = /(\d+)\s+0\s+obj/g;
+  let headerMatch: RegExpExecArray | null;
   let objectCount = 0;
-  while ((objMatch = objRegex.exec(latin1)) !== null) {
+  const startTime = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  const MAX_EXTRACTION_TIME_MS = 2500;
+
+  while ((headerMatch = headerRegex.exec(latin1)) !== null) {
     if (++objectCount > MAX_SCANNED_OBJECTS) break;
-    const objNum = Number(objMatch[1]);
-    const body = objMatch[2];
+    if ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime > MAX_EXTRACTION_TIME_MS) {
+      break;
+    }
+
+    const objNum = Number(headerMatch[1]);
+    const objStart = headerMatch.index;
+    const bodyStart = headerRegex.lastIndex;
+    const endObjIdx = latin1.indexOf('endobj', bodyStart);
+    if (endObjIdx === -1) {
+      // Unterminated object header: stop search immediately rather than scanning whole buffer repeatedly
+      break;
+    }
+
+    objectIndices.set(objNum, objStart);
+    const body = latin1.slice(bodyStart, endObjIdx);
+
     if (body.includes('/Type') && /\/Type\s*\/Font\b/.test(body)) {
       if (fontToCmap.size < MAX_FONT_OBJECTS) {
         const toUnicodeMatch = /\/ToUnicode\s+(\d+)\s+0\s+R/.exec(body);
         if (toUnicodeMatch) {
           const cmapObjNum = Number(toUnicodeMatch[1]);
-          const stream = getObjectStream(latin1, bytes, cmapObjNum);
+          const stream = getObjectStream(latin1, bytes, cmapObjNum, budget, objectIndices);
           fontToCmap.set(objNum, parseCMap(stream));
         }
       }
     } else if (body.includes('/Type') && /\/Type\s*\/Page\b/.test(body)) {
       pageBodies.push(body);
     }
+
+    // Advance regex pointer to end of this object to avoid re-scanning internal stream bytes
+    headerRegex.lastIndex = endObjIdx + 6;
   }
 
   // 2. Discover all Page objects and extract their content streams
   const pagesText: string[] = [];
+  let totalStreamsProcessed = 0;
+  let totalTextLength = 0;
 
   for (const pageBody of pageBodies) {
+    if (totalTextLength >= MAX_TOTAL_TEXT_CHARS) break;
     const pageFontMap = new Map<string, Map<number, string>>();
 
     // Extract font aliases defined in the page resource dictionary: /Font << /F1 4 0 R /F2 5 0 R >>
@@ -251,7 +311,7 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
     }
 
     // Extract /Contents object references
-    const contentsMatch = /\/Contents\s+(?:(\d+)\s+0\s+R|\[([\s\S]*?)\])/.exec(pageBody);
+    const contentsMatch = /\/Contents\s+(?:(\d+)\s+0\s+R|\[([^\]]*)\])/.exec(pageBody);
     if (!contentsMatch) continue;
 
     const contentObjNums: number[] = [];
@@ -266,8 +326,13 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
     }
 
     let pageText = '';
-    for (const cNum of contentObjNums) {
-      const streamBytes = getObjectStream(latin1, bytes, cNum);
+    const streamsToProcess = contentObjNums.slice(0, MAX_STREAMS_PER_PAGE);
+    for (const cNum of streamsToProcess) {
+      if (++totalStreamsProcessed > MAX_TOTAL_CONTENT_STREAMS) break;
+      if (pageText.length >= MAX_PAGE_TEXT_CHARS) break;
+      if ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime > MAX_EXTRACTION_TIME_MS) break;
+
+      const streamBytes = getObjectStream(latin1, bytes, cNum, budget, objectIndices);
       if (!streamBytes) continue;
       const streamStr = new TextDecoder('latin1').decode(streamBytes);
 
@@ -275,10 +340,16 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
       let activeCmap: Map<number, string> | null = null;
 
       // Match font selects (/F1 16 Tf), hex Tj (<...> Tj), literal Tj ((...) Tj), TJ arrays ([...] TJ)
-      const tokenRegex = /\/(F\w+)\s+[\d.]+\s+Tf|<([0-9a-fA-F]+)>\s*Tj|\(([\s\S]*?)\)\s*(?:Tj|'|")|\[([\s\S]*?)\]\s*TJ/g;
+      // Bounded character sets prevent catastrophic backtracking on unterminated or malformed stream inputs
+      const tokenRegex = /\/(F\w+)\s+[\d.]+\s+Tf|<([0-9a-fA-F]+)>\s*Tj|\(((?:\\.|[^)\r\n\\]){0,2000})\)\s*(?:Tj|'|")|\[([^\]]{0,10000})\]\s*TJ/g;
       let tok: RegExpExecArray | null;
+      let tokCount = 0;
+      const MAX_TOKENS_PER_STREAM = 10_000;
 
       while ((tok = tokenRegex.exec(streamStr)) !== null) {
+        if (++tokCount > MAX_TOKENS_PER_STREAM) break;
+        if ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime > MAX_EXTRACTION_TIME_MS) break;
+
         if (tok[1]) {
           currentFont = tok[1];
           activeCmap = pageFontMap.get(currentFont) || null;
@@ -288,9 +359,12 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
           pageText += unescapePdfString(tok[3]);
         } else if (tok[4]) {
           const arrayContent = tok[4];
-          const subTokRegex = /<([0-9a-fA-F]+)>|\(([\s\S]*?)\)|(-?[\d.]+)/g;
+          const subTokRegex = /<([0-9a-fA-F]+)>|\(((?:\\.|[^)\r\n\\]){0,2000})\)|(-?[\d.]+)/g;
           let sub: RegExpExecArray | null;
+          let subTokCount = 0;
+          const MAX_SUB_TOKENS = 5_000;
           while ((sub = subTokRegex.exec(arrayContent)) !== null) {
+            if (++subTokCount > MAX_SUB_TOKENS) break;
             if (sub[1]) {
               pageText += decodeHexString(sub[1], activeCmap);
             } else if (sub[2]) {
@@ -309,16 +383,20 @@ export function extractTextFromPdfBuffer(buffer: ArrayBuffer): string {
 
     if (pageText.trim()) {
       pagesText.push(pageText);
+      totalTextLength += pageText.length;
     }
   }
 
   // Fallback for simple/uncompressed PDFs without standard Page objects
   if (pagesText.length === 0) {
-    const tjRegex = /\(([^)]+)\)\s*(?:Tj|'|")/g;
+    const tjRegex = /\(([^)\r\n]{0,2000})\)\s*(?:Tj|'|")/g;
     let match: RegExpExecArray | null;
     const fallbackMatches: string[] = [];
+    const MAX_FALLBACK_MATCHES = 1000;
     while ((match = tjRegex.exec(latin1)) !== null) {
+      if ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - startTime > MAX_EXTRACTION_TIME_MS) break;
       fallbackMatches.push(unescapePdfString(match[1]));
+      if (fallbackMatches.length >= MAX_FALLBACK_MATCHES) break;
     }
     if (fallbackMatches.length > 0) {
       pagesText.push(fallbackMatches.join(' '));

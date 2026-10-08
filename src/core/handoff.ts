@@ -120,6 +120,23 @@ export function buildDestinationUrl(toolId: DestinationToolId, isDev = false): s
   return `${baseUrl}${separator}kty_handoff=1`;
 }
 
+function sanitizeLegalLink(link: DiscoveredLegalLink): DiscoveredLegalLink | null {
+  if (!link || typeof link.url !== 'string') return null;
+  try {
+    const parsed = new URL(link.url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null;
+    }
+    return {
+      ...link,
+      title: sanitizeSnippet(link.title || ''),
+      url: `${parsed.protocol}//${parsed.host}${parsed.pathname}`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Builds a strictly-sanitized, schema-compliant handoff payload from scan results.
  * Guarantees zero raw PII (emails, cards) enter the handoff envelope via sanitizeSnippet().
@@ -133,11 +150,11 @@ export function buildHandoffPayload(
 
   const findings: KtyHandoffFinding[] = matchesToProcess.map(match => ({
     ruleId: match.ruleId,
-    title: match.title,
+    title: sanitizeSnippet(match.title || match.ruleId || 'Untitled finding'),
     category: match.category,
     severity: match.severity,
-    statuteCode: match.statute?.code || '',
-    statuteTitle: match.statute?.title || '',
+    statuteCode: sanitizeSnippet(match.statute?.code || ''),
+    statuteTitle: sanitizeSnippet(match.statute?.title || ''),
     matchedSnippet: sanitizeSnippet(match.matchedSnippet || ''),
     explanation: sanitizeSnippet(match.explanation || ''),
     recommendation: sanitizeSnippet(match.recommendation || ''),
@@ -151,12 +168,21 @@ export function buildHandoffPayload(
     for (const cat of preferredCategories) {
       const found = scanResult.discoveredLinks.find(l => l.category === cat);
       if (found) {
-        primaryLegalLink = found;
-        break;
+        const sanitized = sanitizeLegalLink(found);
+        if (sanitized) {
+          primaryLegalLink = sanitized;
+          break;
+        }
       }
     }
     if (!primaryLegalLink) {
-      primaryLegalLink = scanResult.discoveredLinks[0];
+      for (const link of scanResult.discoveredLinks) {
+        const sanitized = sanitizeLegalLink(link);
+        if (sanitized) {
+          primaryLegalLink = sanitized;
+          break;
+        }
+      }
     }
   }
 
@@ -212,14 +238,11 @@ export function validateHandoffPayload(payload: unknown): payload is KtyHandoffP
   if (p.originApp !== 'knowthankyew-extension') return false;
   if (typeof p.domain !== 'string' || p.domain.trim().length === 0) return false;
   if (typeof p.scanTimestamp !== 'string' || Number.isNaN(Date.parse(p.scanTimestamp))) return false;
-  if (typeof p.riskScore !== 'number' || p.riskScore < 0 || p.riskScore > 100) return false;
+  if (!Number.isFinite(p.riskScore) || p.riskScore < 0 || p.riskScore > 100) return false;
 
   if (!p.summary || typeof p.summary !== 'object') return false;
-  if (
-    typeof p.summary.critical !== 'number' ||
-    typeof p.summary.warning !== 'number' ||
-    typeof p.summary.info !== 'number'
-  ) {
+  const isCount = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 0;
+  if (!isCount(p.summary.critical) || !isCount(p.summary.warning) || !isCount(p.summary.info)) {
     return false;
   }
 

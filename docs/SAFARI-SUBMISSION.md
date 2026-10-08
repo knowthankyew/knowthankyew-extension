@@ -10,7 +10,7 @@
 ## 1. Overview & Architecture
 
 Safari uses the standard Manifest V3 specification with an Xcode native container application wrapper. The KnowThankYew Safari distribution is built from the identical source codebase as Chrome and Firefox, utilizing:
-- **`dist-safari/`**: Standard MV3 assets tailored for WebKit (`TARGET_BROWSER=safari npm run build:safari`).
+- **`dist-safari/`**: Standard MV3 assets tailored for WebKit (`npm run build:safari`).
 - **Closed Shadow DOM Overlays**: Fully supported in Safari 15.4+.
 - **Zero-Egress CSP Invariant**: `connect-src 'none'` enforced across all extension pages.
 - **Cross-Context Session Amnesia**: `BroadcastChannel('kty_hard_burn')` supported natively in Safari 15.4+.
@@ -80,7 +80,7 @@ Apple requires all App Store submissions to include a `PrivacyInfo.xcprivacy` di
 
 - **`NSPrivacyTracking`**: `false` (KnowThankYew never tracks users across third-party websites or apps).
 - **`NSPrivacyCollectedDataTypes`**: Empty array `[]` (0 bytes of PII, location, browsing history, or diagnostics are stored or transmitted).
-- **Physical Verification**: Statically enforced by `tests/bundle-invariants.test.ts`.
+- **Physical Verification**: Zero-egress JS and `connect-src 'none'` CSP in the Safari distribution are statically enforced by `tests/bundle-invariants.test.ts`.
 
 ---
 

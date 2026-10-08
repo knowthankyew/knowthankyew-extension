@@ -7,27 +7,27 @@
   "rules": [
     {
       "id": "UK-AR-001",
-      "title": "Prospective Pre-Renewal Reminder Schedule (DMCC Spring 2027)",
+      "title": "Prospective Pre-Renewal Reminder Schedule Prompt (DMCC Spring 2027)",
       "category": "AUTO_RENEWAL",
       "classification": "PROSPECTIVE_DUTY",
       "severity": "WARNING",
       "statute": {
-        "code": "UK DMCC Act 2024, Part 4, Chapter 2",
-        "title": "Subscription Contracts — Pre-Renewal Reminders (Commencement Spring 2027)",
+        "code": "UK DMCC Act 2024, Part 4, Chapter 2 (Section 258)",
+        "title": "Subscription Contracts — Pre-Renewal Reminder Schedule (Commencement Spring 2027)",
         "jurisdiction": "UK",
-        "plainExplanation": "The UK DMCC Act 2024 (Part 4, Chapter 2; anticipated commencement Spring 2027) mandates that traders send conspicuous pre-renewal reminder notices before consumer subscription renewal or trial rollover."
+        "plainExplanation": "Under the UK DMCC Act 2024 (Part 4, Chapter 2, Section 258; anticipated commencement Spring 2027), traders must provide reminder notices before qualifying renewals (including the end of concessionary/trial periods and at 6-month renewal intervals)."
       },
       "patterns": [
         "(?:subscription|contract)\\s+(?:will|shall)\\s+(?:automatically\\s+renew|continue)[^.\\n]{0,80}(?:without\\s+notice|without\\s+prior\\s+notice|no\\s+reminder\\s+notice)",
         "no\\s+(?:renewal\\s+reminder|advance\\s+notice)[^.\\n]{0,60}(?:sent|provided)\\s+(?:prior\\s+to|before)\\s+(?:renewal|billing)",
         "(?:you\\s+agree|agrees)\\s+that\\s+no\\s+(?:reminder|notice)\\s+(?:will|shall)\\s+be\\s+given\\s+prior\\s+to\\s+auto(?:matic)?-?renewal"
       ],
-      "explanation": "The terms state or imply that the subscription will auto-renew without advance reminder notices. Note: under the prospective UK DMCC Act 2024 regime (Part 4, Chapter 2, anticipated commencement Spring 2027), traders will be required to provide advance reminder notices before renewal charges.",
-      "recommendation": "Verify that the trader commits to advance reminder notices before renewal. Under the upcoming UK DMCC regime, failure to provide statutory reminders will render subscription renewal terms unenforceable.",
+      "explanation": "The terms state or imply that the subscription will auto-renew without advance reminder notice. Note: under the prospective UK DMCC Act 2024 regime (Part 4, Chapter 2, Section 258, anticipated commencement Spring 2027), traders will be required to provide advance reminder notices before qualifying renewals (including post-trial rollovers and six-month renewal intervals). Prompt: verify whether this subscription schedule falls within Section 258 reminder requirements.",
+      "recommendation": "Review the trader's renewal terms against UK DMCC Act Section 258 statutory reminder schedules. When commenced in Spring 2027, failure to issue pre-renewal notices for qualifying renewal intervals will limit contract enforceability.",
       "tracking": {
         "agency": "Competition and Markets Authority (CMA)",
         "jurisdiction": "UK",
-        "statuteCode": "UK DMCC Act 2024, Part 4, Chapter 2",
+        "statuteCode": "UK DMCC Act 2024, Part 4, Chapter 2 (Section 258)",
         "apiKeywords": ["DMCC 2024", "Subscription Contracts", "UK Consumer Rights"],
         "lastVerifiedDate": "2026-09-01"
       }

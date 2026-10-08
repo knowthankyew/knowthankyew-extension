@@ -279,4 +279,75 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
     expect(validateHandoffPayload({ ...validPayload, primaryLegalLink: { url: 'not-a-url', title: 'Invalid' } })).toBe(false);
     expect(validateHandoffPayload({ ...validPayload, primaryLegalLink: { url: 'https://example.com/terms', title: 'Valid' } })).toBe(true);
   });
+
+  it('filters out non-HTTP links (javascript:, data:) when building handoff payload', () => {
+    const scanWithBadLinks: PageScanResult = {
+      timestamp: '2026-10-04T12:00:00.000Z',
+      urlDomain: 'bad-link-site.com',
+      scannedLength: 1000,
+      riskScore: 50,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Visible text only',
+      matches: [],
+      discoveredLinks: [
+        { url: 'javascript:void(0)', title: 'Deceptive Link', category: 'TERMS', source: 'DOM_ANCHOR' },
+        { url: 'https://example.com/legal/terms?tracking=1#section2', title: 'Real Terms', category: 'TERMS', source: 'DOM_ANCHOR' },
+      ],
+    };
+
+    const payload = buildHandoffPayload(scanWithBadLinks);
+    expect(payload.primaryLegalLink).not.toBeNull();
+    expect(payload.primaryLegalLink?.url).toBe('https://example.com/legal/terms');
+    expect(validateHandoffPayload(payload)).toBe(true);
+  });
+
+  it('strips sensitive URL userinfo credentials (user:pass@) when building handoff payload', () => {
+    const scanWithCredentials: PageScanResult = {
+      timestamp: '2026-10-04T12:00:00.000Z',
+      urlDomain: 'corp.internal',
+      scannedLength: 1000,
+      riskScore: 50,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Visible text only',
+      matches: [],
+      discoveredLinks: [
+        { url: 'https://admin:secretToken123@corp.internal/legal/terms?token=leak#hash', title: 'Terms', category: 'TERMS', source: 'DOM_ANCHOR' },
+      ],
+    };
+
+    const payload = buildHandoffPayload(scanWithCredentials);
+    expect(payload.primaryLegalLink?.url).toBe('https://corp.internal/legal/terms');
+    expect(payload.primaryLegalLink?.url).not.toContain('admin');
+    expect(payload.primaryLegalLink?.url).not.toContain('secretToken123');
+    expect(validateHandoffPayload(payload)).toBe(true);
+  });
+
+  it('rejects payloads with non-finite riskScore or invalid/negative summary counts', () => {
+    const validPayload = buildHandoffPayload({
+      timestamp: '2026-10-04T12:00:00.000Z',
+      urlDomain: 'example.com',
+      scannedLength: 500,
+      riskScore: 25,
+      summary: { critical: 0, warning: 1, info: 0 },
+      limitationsNotice: 'test',
+      matches: [],
+      discoveredLinks: [],
+    });
+
+    expect(validateHandoffPayload(validPayload)).toBe(true);
+
+    // Non-finite riskScore
+    expect(validateHandoffPayload({ ...validPayload, riskScore: NaN })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, riskScore: Infinity })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, riskScore: -1 })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, riskScore: 101 })).toBe(false);
+
+    // Invalid summary counts
+    expect(validateHandoffPayload({ ...validPayload, summary: { critical: -1, warning: 0, info: 0 } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, summary: { critical: 1.5, warning: 0, info: 0 } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, summary: { critical: NaN, warning: 0, info: 0 } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, summary: { critical: Infinity, warning: 0, info: 0 } })).toBe(false);
+    expect(validateHandoffPayload({ ...validPayload, summary: null })).toBe(false);
+  });
 });
+

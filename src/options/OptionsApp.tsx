@@ -101,6 +101,7 @@ export const OptionsApp: React.FC = () => {
             setDocScanResult(null);
             setDocFileName(null);
             setDocError(null);
+            setIsAuditingDoc(false);
             refreshDiagnostics();
             if (timerId) clearTimeout(timerId);
             timerId = setTimeout(() => {
@@ -203,11 +204,13 @@ export const OptionsApp: React.FC = () => {
   const handleFileUpload = async (file: File) => {
     const currentGeneration = burnGenerationRef.current;
     setDocError(null);
+    setDocScanResult(null);
     setDocFileName(file.name);
     try {
       if (file.name.toLowerCase().endsWith('.pdf')) {
         if (file.size > 10 * 1024 * 1024) {
           setDocError('PDF file exceeds maximum supported size (10MB). Please select and copy text directly from your PDF viewer and paste below.');
+          setDocScanResult(null);
           return;
         }
         const buffer = await file.arrayBuffer();
@@ -222,6 +225,7 @@ export const OptionsApp: React.FC = () => {
             'This PDF appears to use custom font encodings or scanned images without embedded text streams. Please select and copy (Cmd+A, Cmd+C) text directly from your PDF viewer and paste below.'
           );
           setDocText('');
+          setDocScanResult(null);
           return;
         }
         setDocText(extracted);
@@ -236,6 +240,7 @@ export const OptionsApp: React.FC = () => {
       if (burnGenerationRef.current !== currentGeneration) return;
       const msg = err instanceof Error ? err.message : String(err);
       setDocError(`Failed to read file: ${msg}`);
+      setDocScanResult(null);
     }
   };
 
@@ -301,7 +306,7 @@ export const OptionsApp: React.FC = () => {
                 fontFamily: 'ui-monospace, monospace',
               }}
             >
-              v2.0.0
+              {typeof chrome !== 'undefined' && chrome.runtime?.getManifest ? `v${chrome.runtime.getManifest().version}` : 'v2.1.0'}
             </span>
           </div>
 
@@ -680,6 +685,7 @@ export const OptionsApp: React.FC = () => {
 
             <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
               <button
+                data-testid="master-burn-button"
                 onClick={handleBurnAll}
                 disabled={burning}
                 style={{

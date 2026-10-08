@@ -359,23 +359,24 @@ ${clauseText.trim()}
   }
 
   private prepareInferenceController(externalSignal?: AbortSignal): AbortController {
-    this.currentAbortController = new AbortController();
+    const controller = new AbortController();
+    this.currentAbortController = controller;
 
     if (this.isBurned) {
-      this.currentAbortController.abort();
-      return this.currentAbortController;
+      controller.abort();
+      return controller;
     }
 
     if (externalSignal) {
       if (externalSignal.aborted) {
-        this.currentAbortController.abort();
+        controller.abort();
       } else {
         externalSignal.addEventListener('abort', () => {
-          this.currentAbortController?.abort();
+          controller.abort();
         }, { once: true });
       }
     }
 
-    return this.currentAbortController;
+    return controller;
   }
 }

@@ -8,7 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
 [![Zero Egress Verified](https://img.shields.io/badge/Egress-0%20Bytes%20(Local%20Only)-10b981.svg)](https://github.com/knowthankyew/knowthankyew-extension/actions/workflows/ci.yml)
 [![Release: v1.6.0 Live](https://img.shields.io/badge/Release-v1.6.0%20(Live%20on%20CWS)-blue.svg)](https://chromewebstore.google.com/detail/knowthankyew-reality-engi/pbgjjgggmeecalifcgggiondfminilnl)
-[![Firefox AMO: v1.6.0 Live](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Live)-orange.svg)](https://addons.mozilla.org)
+[![Firefox AMO: v1.6.0 Live](https://img.shields.io/badge/Firefox%20AMO-v1.6.0%20(Live)-orange.svg)](https://addons.mozilla.org/en-US/firefox/addon/knowthankyew/)
 [![v2.1.0: Release Complete](https://img.shields.io/badge/v2.1.0-Release%20Complete%20%26%20Packaged-success.svg)](ROADMAP.md)
 
 > [!IMPORTANT]
@@ -122,13 +122,16 @@ npm run demo
 ```
 
 ### Apple Safari Packaging & Xcode Integration
+
 To convert the Safari distribution into a native macOS/iOS Safari Web Extension:
+
 ```bash
 npm run build:safari
 xcrun safari-web-extension-converter dist-safari --app-name "KnowThankYew"
 ```
+
 - **App Sandbox Entitlements**: Zero network entitlements required. `com.apple.security.network.client` is **NOT** included in the consumer build because all analysis runs 100% locally under `connect-src 'none'`.
-- **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyCollectedDataTypes: []` and `NSPrivacyTracking: false` (zero collected data types), verified by physical bundle invariant testing.
+- **Apple Privacy Manifest**: In accordance with App Store guidelines, declare `NSPrivacyCollectedDataTypes: []` and `NSPrivacyTracking: false` (zero collected data types).
 
 - **Architecture Details**: See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
 - **Store Publication Spec**: See [`docs/CHROMEWEBSTORE.md`](./docs/CHROMEWEBSTORE.md)

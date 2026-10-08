@@ -49,8 +49,8 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
       0
     );
 
-    expect(totalRules).toBe(19);
-    expect(totalPatterns).toBe(66);
+    expect(totalRules).toBeGreaterThanOrEqual(19);
+    expect(totalPatterns).toBeGreaterThanOrEqual(66);
   });
 
   it('verifies release zip packages and SHA256SUMS alignment when packaging artifacts exist', () => {

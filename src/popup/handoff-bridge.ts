@@ -32,17 +32,42 @@ export async function dispatchHandoffToDestination(
           return { success: false, url: targetUrl };
         }
         try {
-          await chrome.scripting.executeScript({
+          if (newTab.status && newTab.status !== 'complete' && chrome.tabs?.onUpdated) {
+            await new Promise<void>((resolve) => {
+              const listener = (tabId: number, info: { status?: string }) => {
+                if (tabId === newTab.id && info.status === 'complete') {
+                  chrome.tabs.onUpdated.removeListener(listener);
+                  resolve();
+                }
+              };
+              chrome.tabs.onUpdated.addListener(listener);
+              setTimeout(() => {
+                try {
+                  chrome.tabs.onUpdated.removeListener(listener);
+                } catch {
+                  // Non-fatal if listener removal fails
+                }
+                resolve();
+              }, 2000);
+            });
+          }
+
+          const results = await chrome.scripting.executeScript({
             target: { tabId: newTab.id },
             func: (key: string, data: string) => {
               try {
                 sessionStorage.setItem(key, data);
+                return true;
               } catch {
-                // Non-fatal if sessionStorage is blocked
+                return false;
               }
             },
             args: [KTY_HANDOFF_SESSION_KEY, serialized],
           });
+          const written = Boolean(results?.[0]?.result);
+          if (!written) {
+            return { success: false, url: targetUrl };
+          }
         } catch {
           return { success: false, url: targetUrl };
         }

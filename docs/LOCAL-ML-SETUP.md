@@ -29,7 +29,7 @@ If you are using Firefox, Safari, or an operating system where Chrome's built-in
 > # Or build Firefox with Local ML loopback enabled
 > VITE_LOCAL_ML_ENABLED=true TARGET_BROWSER=firefox npm run build:firefox
 > ```
-> Load the resulting unpacked build from `dist/` or `dist-firefox/` into your browser before starting the worker.
+> Load the resulting unpacked build from `dist-local-assist/` or `dist-firefox/` into your browser before starting the worker.
 
 ### Why a Loopback Worker?
 - **Pillar 1 Invariant (Zero Cloud Egress)**: Data is transmitted strictly across your machine's loopback interface (`localhost` / `127.0.0.1`). Nothing leaves your device.

@@ -185,14 +185,6 @@ export const App: React.FC = () => {
             recordScanMetrics(result.summary, duration);
             setScanning(false);
             setIsPdfDetected(false);
-            if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
-              chrome.runtime.sendMessage({
-                type: 'KTY_SCAN_COMPLETED',
-                tabId: tab.id,
-                summary: result.summary,
-                riskScore: result.riskScore,
-              }).catch(() => {});
-            }
 
             await attemptMLRerank(result, hostname);
           }
@@ -422,7 +414,9 @@ export const App: React.FC = () => {
   };
 
   const handleOpenDashboardAudit = () => {
-    if (typeof chrome !== 'undefined' && chrome.runtime?.openOptionsPage) {
+    if (typeof chrome !== 'undefined' && chrome.tabs?.create && chrome.runtime?.getURL) {
+      chrome.tabs.create({ url: chrome.runtime.getURL('options.html#document') });
+    } else if (typeof chrome !== 'undefined' && chrome.runtime?.openOptionsPage) {
       chrome.runtime.openOptionsPage();
     } else {
       window.open('options.html#document', '_blank');
@@ -774,12 +768,11 @@ export const App: React.FC = () => {
                 value={pastedText}
                 onChange={(e) => setPastedText(e.target.value)}
                 onPaste={(e) => {
+                  e.preventDefault();
                   const pasted = e.clipboardData.getData('text');
                   if (pasted && pasted.trim().length > 0) {
                     setPastedText(pasted);
-                    setTimeout(() => {
-                      handleAuditText(pasted);
-                    }, 50);
+                    handleAuditText(pasted);
                   }
                 }}
                 placeholder="Or paste agreement text here (Cmd+V) to audit..."

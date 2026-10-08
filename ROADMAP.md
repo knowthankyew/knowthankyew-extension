@@ -86,7 +86,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ### New Distribution Channel
 
-- [x] **Apple Safari (macOS / iOS)**: Dedicated `TARGET_BROWSER=safari` build target outputting `dist-safari/` and packaging `knowthankyew-extension-v2.0.0-safari.zip`. Verified clean conversion via `xcrun safari-web-extension-converter`. Documented Apple App Store privacy manifest (`NSPrivacyCollectedDataTypes: []`) and zero network entitlements requirement.
+- [x] **Apple Safari (macOS / iOS)**: Dedicated `TARGET_BROWSER=safari` build target outputting `dist-safari/` and packaging `knowthankyew-extension-v2.1.0-safari.zip`. Verified clean conversion via `xcrun safari-web-extension-converter`. Documented Apple App Store privacy manifest (`NSPrivacyCollectedDataTypes: []`) and zero network entitlements requirement.
 
 ### Regulatory Upkeep Infrastructure
 
@@ -174,9 +174,9 @@ Define the intent/findings/summary JSON schema and wire the extension popup to o
 - [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `SURVEILLANCE` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
 - [x] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
 
-### Phase 3 — Destination Tools Receive Context ✅ (`v2.2.0`)
+### Phase 3 — Destination Tools Receive Context ✅ (Delivered in Ecosystem Repos for `v2.2.0` Integration)
 
-`bill-of-rights-bot`, `careCheck`, and `lease-audit` detect the handoff payload and skip their intake flow, jumping directly to findings display.
+`bill-of-rights-bot`, `careCheck`, and `lease-audit` detect the handoff payload and skip their intake flow, jumping directly to findings display (delivered in respective destination tool repositories):
 
 - [x] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `sessionStorage` on mount; returns typed payload or `null`
 - [x] **Intake bypass in `bill-of-rights-bot`**: When hook returns a payload, render findings panel directly with `findings[]` pre-populated; intake dropzone is replaced by the domain banner + "Back to scan" affordance

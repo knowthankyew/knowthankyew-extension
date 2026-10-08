@@ -115,7 +115,7 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
 
   it('injects payload via chrome.scripting.executeScript in dev mode', async () => {
     const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'http://localhost:3000?kty_handoff=1' });
-    const mockExecuteScript = vi.fn().mockResolvedValue([{ result: undefined }]);
+    const mockExecuteScript = vi.fn().mockResolvedValue([{ result: true }]);
 
     (globalThis as any).chrome = {
       tabs: { create: mockCreate },
@@ -132,6 +132,21 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       target: { tabId: 101 },
       args: [KTY_HANDOFF_SESSION_KEY, JSON.stringify(payload)],
     }));
+  });
+
+  it('returns success: false when chrome.scripting.executeScript fails to write payload', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'http://localhost:3000?kty_handoff=1' });
+    const mockExecuteScript = vi.fn().mockResolvedValue([{ result: false }]);
+
+    (globalThis as any).chrome = {
+      tabs: { create: mockCreate },
+      scripting: { executeScript: mockExecuteScript },
+    };
+
+    const payload = buildHandoffPayload(sampleScan);
+    const result = await dispatchHandoffToDestination(payload, true);
+
+    expect(result.success).toBe(false);
   });
 
   it('returns success: false when chrome.scripting.executeScript rejects', async () => {

@@ -140,4 +140,43 @@ endobj
     const extracted = extractTextFromPdfBuffer(buffer);
     expect(extracted).toContain('AB');
   });
+
+  it('handles unterminated object headers without quadratic backtracking or hanging', () => {
+    // Generate a crafted buffer with many "N 0 obj" headers lacking closing "endobj"
+    let malformed = '%PDF-1.4\n';
+    for (let i = 1; i <= 2000; i++) {
+      malformed += `${i} 0 obj\n<< /Type /Unknown >>\n`;
+    }
+    const buffer = new TextEncoder().encode(malformed).buffer;
+    const start = Date.now();
+    const extracted = extractTextFromPdfBuffer(buffer);
+    const elapsed = Date.now() - start;
+    expect(extracted).toBe('');
+    expect(elapsed).toBeLessThan(5000);
+  });
+
+  it('handles unterminated stream tokens without hanging', () => {
+    const rawPdf = `%PDF-1.4
+1 0 obj
+<< /Type /Page /Contents 2 0 R >>
+endobj
+2 0 obj
+<< /Length 200 >>
+stream
+BT
+/F1 12 Tf
+(Unterminated text without closing paren
+[(Unterminated TJ array
+ET
+endstream
+endobj
+%%EOF`;
+    const buffer = new TextEncoder().encode(rawPdf).buffer;
+    const start = Date.now();
+    const extracted = extractTextFromPdfBuffer(buffer);
+    const elapsed = Date.now() - start;
+    expect(typeof extracted).toBe('string');
+    expect(elapsed).toBeLessThan(5000);
+  });
 });
+

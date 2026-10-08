@@ -113,6 +113,7 @@ describe('Dual-Broadcast Amnesia Coordinator & OptionsApp Sync (amnesia-coordina
     expect(postedMessages).toEqual([{ type: 'KTY_HARD_BURN_DOM' }]);
     expect(receivedEvent).toEqual({ type: 'KTY_HARD_BURN_DOM' });
     expect(chrome.storage.local.clear).toHaveBeenCalled();
+    expect(chrome.action.setBadgeText).toHaveBeenCalledWith({ text: '', tabId: 101 });
     expect(telemetry.getBufferedSpans().length).toBe(0);
   });
 

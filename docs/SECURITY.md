@@ -8,7 +8,7 @@ The KnowThankYew Reality Engine is built on the principle of **Zero-Egress Invar
 
 | Version | Supported | Distribution Channel | Security Posture |
 | :--- | :--- | :--- | :--- |
-| **v2.1.0 (Release Candidate)** | :white_check_mark: | Manual CWS Upload / GitHub | Air-gapped (`connect-src 'none'`), Zero-Egress |
+| **v2.1.0 (Release Complete & Packaged)** | :white_check_mark: | Chrome Web Store / Firefox AMO / Safari / GitHub | Air-gapped (`connect-src 'none'`), Zero-Egress |
 | **v1.6.0 (Current Live)** | :white_check_mark: | Chrome Web Store / Firefox AMO | Air-gapped (`connect-src 'none'`), Zero-Egress |
 | **< v1.6.0** | :x: | Legacy | Deprecated |
 

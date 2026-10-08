@@ -9,7 +9,7 @@
 ## 1. Build Environment & Prerequisites
 
 - **Operating System**: macOS, Linux, or Windows (WSL required; native Windows cmd.exe/PowerShell lacks POSIX environment variable handling and shell packaging commands)
-- **Node.js**: v20.19+ or v22.12+ (`node --version`, required for Vite 8)
+- **Node.js**: v22.12+ (`node --version`, required for Vite 8 and Vitest 5)
 - **Package Manager**: npm v10.x or higher (`npm --version`)
 
 ---
@@ -18,7 +18,7 @@
 
 1. **Install Dependencies**:
    ```bash
-   npm install
+   npm ci
    ```
 
 2. **Compile the Firefox Extension**:
@@ -26,13 +26,13 @@
    npm run build:firefox
    ```
    *Technical Execution*: This runs `tsc` for TypeScript typechecking followed by `TARGET_BROWSER=firefox vite build`.
-   *Output*: All compiled, unminified-asset extension files and the gecko-tailored `manifest.json` are placed into the `dist-firefox/` directory.
+   *Output*: All compiled production extension files and the gecko-tailored `manifest.json` are placed into the `dist-firefox/` directory.
 
 3. **(Optional) Run Test Suite**:
    ```bash
    npm test
    ```
-   Verifies all 125 invariant, ReDoS, and DOM parsing tests pass with 0 errors.
+   Verifies all 189 invariant, ReDoS, and DOM parsing tests across 25 suites pass with 0 errors.
 
 4. **Package the Release Archive**:
    ```bash

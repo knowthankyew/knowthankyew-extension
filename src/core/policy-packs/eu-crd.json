@@ -18,7 +18,7 @@
         "plainExplanation": "EU law strictly prohibits traders from inferring consumer consent through pre-ticked checkboxes or default options for additional payments or add-on subscriptions beyond the main purchase."
       },
       "patterns": [
-        "(?:checkbox|box|option)\\s+is\\s+(?:pre-?selected|checked\\s+by\\s+default)",
+        "(?:additional|add[- ]on|monthly)\\s+(?:subscription|charge|fee|payment)\\s+(?:(?:checkbox|box|option)\\s+is|is)\\s+(?:pre-?selected|checked\\s+by\\s+default)",
         "unless\\s+you\\s+(?:uncheck|deselect)[^.\\n]{0,60}(?:subscription|monthly|recurring|enrolled)",
         "(?:automatically\\s+included|added\\s+by\\s+default)[^.\\n]{0,60}(?:opt-out|uncheck\\s+to\\s+remove)"
       ],
@@ -36,21 +36,21 @@
       "id": "EU-AR-002",
       "title": "Statutory 14-Day EU Withdrawal Right Waiver",
       "category": "AUTO_RENEWAL",
-      "classification": "STATUTORY_VIOLATION",
+      "classification": "RIGHTS_WAIVER",
       "severity": "WARNING",
       "statute": {
-        "code": "Directive 2011/83/EU, Articles 9 & 25",
-        "title": "Unwaivable Right of Withdrawal",
+        "code": "Directive 2011/83/EU, Articles 9, 16(m) & 25",
+        "title": "14-Day Right of Withdrawal & Article 16 Digital Exemptions",
         "jurisdiction": "EU",
-        "plainExplanation": "EU consumers possess a statutory 14-day right of withdrawal from distance and digital subscription contracts that cannot be waived or contracted away."
+        "plainExplanation": "EU consumers possess a statutory 14-day right of withdrawal from distance contracts. While Article 16(m) permits loss of withdrawal rights for digital content upon prior express consent and acknowledgment of loss of withdrawal, blanket waivers outside this statutory exception are void under Article 25."
       },
       "patterns": [
         "(?:waiv(?:e|es|ing)|forfeit(?:s|ing)?)\\s+(?:right\\s+of\\s+withdrawal|your\\s+right\\s+of\\s+withdrawal|withdrawal\\s+right|your\\s+withdrawal\\s+right|cooling-off\\s+period)",
         "(?:by\\s+proceeding|by\\s+subscribing|by\\s+purchasing)[^.\\n]{0,60}(?:you\\s+waive|waiving|lose)\\s+(?:right|your\\s+right|statutory\\s+right|your\\s+statutory\\s+right)\\s+of\\s+withdrawal",
         "no\\s+statutory\\s+right\\s+of\\s+withdrawal[^.\\n]{0,60}(?:under\\s+any\\s+circumstances|is\\s+recognized)"
       ],
-      "explanation": "The clause purports to enforce a blanket waiver or forfeiture of statutory EU withdrawal rights. Note that Directive 2011/83/EU Art. 16 permits narrow exceptions for digital content if express consent and acknowledgment of loss of withdrawal are provided.",
-      "recommendation": "Under Directive 2011/83/EU Article 25, contractual clauses derogating from consumer withdrawal rights outside narrow Art. 16 digital exemptions are null and void across the European Union.",
+      "explanation": "The clause states that you waive or forfeit your 14-day statutory right of withdrawal / cooling-off period. Under Directive 2011/83/EU Art. 16(m), withdrawal rights may only be extinguished for digital content if the consumer gave prior express consent and expressly acknowledged forfeiture of the right; blanket or non-exempt waivers are null and void under Art. 25.",
+      "recommendation": "If you did not provide prior express consent and explicit acknowledgment for immediate digital performance, the trader cannot extinguish your statutory 14-day withdrawal right under Directive 2011/83/EU Article 25.",
       "tracking": {
         "agency": "European Commission / National Consumer Authorities",
         "jurisdiction": "EU",

@@ -116,7 +116,7 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - Accessible via the Options dashboard or direct link from the popup.
   - **Drag-and-Drop File Upload**: Evaluates uploaded `.pdf`, `.txt`, `.md`, and `.html` contracts entirely client-side using Web APIs.
   - **Direct Text Input**: Large paste area for long-form commercial agreements.
-  - **Full Statutory Battery**: Evaluates text against all 19 compiled rules (with 42+ pattern heuristics) across all jurisdictions, complete with interactive risk score meters, statutory pass breakdowns, and Action Engine dispatch.
+  - **Full Statutory Battery**: Evaluates text against all 19 compiled rules (with 66 declarative regex patterns) across all jurisdictions, complete with interactive risk score meters, statutory pass breakdowns, and Action Engine dispatch.
   - **Dedicated Nuclear Hard Burn**: Instantly purges file names, extracted text, and audit results from browser memory.
 
 ### H. Visual Polish & Portfolio Tooling Standardization
@@ -128,12 +128,11 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 
 ## 3. Test & Verification Matrix (v2.1.0)
 
-### Vitest Suite (156 / 156 Tests Passed Across 22 Test Suites)
+### Vitest Suite (189 / 189 Tests Passed Across 25 Test Suites)
 
 ```
-Test Files  22 passed (22)
-     Tests  156 passed (156)
-  Duration  7.19s
+Test Files  25 passed (25)
+     Tests  189 passed (189)
 ```
 
 | Test Suite | File | Focus & Assertions Verified |
@@ -144,7 +143,7 @@ Test Files  22 passed (22)
 | **Amnesia & Multi-Tab Sync** | [tests/amnesia-coordinator.test.ts](../tests/amnesia-coordinator.test.ts) | Dual-broadcast `BroadcastChannel` synchronization, OptionsApp state sync, permanent tombstone flags |
 | **Options Document Burn** | [tests/options-burn.test.ts](../tests/options-burn.test.ts) | Standalone document auditor memory incinerator, tab switching resilience, byte meter accuracy |
 | **International Policy Packs** | [tests/policy-packs.test.ts](../tests/policy-packs.test.ts) | Schema validation and regex compilation for US Federal, State ARL, UK DMCC, and EU CRD packs |
-| **Static ReDoS Elimination** | [tests/redos-static.test.ts](../tests/redos-static.test.ts) | Mathematical verification via `safe-regex` proving 0 exponential backtracking across all 42+ patterns |
+| **Static ReDoS Elimination** | [tests/redos-static.test.ts](../tests/redos-static.test.ts) | Mathematical verification via `safe-regex` proving 0 exponential backtracking across all 66 patterns |
 | **Real Chromium E2E** | [tests/chromium-e2e.test.ts](../tests/chromium-e2e.test.ts) | Puppeteer Chromium browser test verifying 0 external network requests during checkout inspection |
 | **Bundle Egress Invariants** | [tests/bundle-invariants.test.ts](../tests/bundle-invariants.test.ts) | 100% absence of `fetch`/XHR primitives in `dist/`, CSP `connect-src 'none'`, Safari/Firefox manifest invariants |
 | **Local ML Loopback E2E** | [tests/chromium-local-ml-e2e.test.ts](../tests/chromium-local-ml-e2e.test.ts) | Loopback ML worker connection, options status indicators, popup tooltipped badge, `/burn` handshake |
@@ -160,15 +159,13 @@ All distribution packages have been compiled, verified, and checksummed via `npm
 | :--- | :--- | :--- | :--- |
 | **`knowthankyew-extension-v2.1.0.zip`** | **Chrome Web Store** | Manifest V3 · `connect-src 'none'` · Least-privilege permissions (`activeTab`, `storage`, `scripting`) | Pre-packaged for ID `pbgjjgggmeecalifcgggiondfminilnl` |
 | **`knowthankyew-extension-v2.1.0-firefox.zip`** | **Firefox Add-ons (AMO)** | Manifest V3 · Gecko ID `reality-engine@knowthankyew.org` · Mobile Firefox Android bottom sheet support | Pre-packaged for Mozilla Add-on Hub |
-| **`knowthankyew-extension-v2.1.0-safari.zip`** | **Apple Safari (macOS/iOS)** | Manifest V3 · `version_name` synchronization · Ready for `xcrun safari-web-extension-converter` | Zero network entitlements · `NSPrivacyTrackedDataTypes: []` |
+| **`knowthankyew-extension-v2.1.0-safari.zip`** | **Apple Safari (macOS/iOS)** | Manifest V3 · `version_name` synchronization · Ready for `xcrun safari-web-extension-converter` | Zero network entitlements · `NSPrivacyCollectedDataTypes: []` |
 | **`knowthankyew-extension-v2.1.0-local-assist.zip`** | **Developer / Sidecar ML** | Manifest V3 · `connect-src 'self' http://127.0.0.1:8420` · Loopback host permissions | Verified loopback assist build for local ML workflows |
 
 ### Cryptographic Attestation (`SHA256SUMS`)
 
-The canonical checksums are recorded in [SHA256SUMS](../SHA256SUMS):
-```text
-3cb20cceb6baecda4086ad345151ee661c9e8fb85c490ffc1868fcda324e9432  knowthankyew-extension-v2.1.0-firefox.zip
-14a38f36dd31da9f55e5b61c169eb9ee8ea1c1729c159846387fb88d6c702a0a  knowthankyew-extension-v2.1.0-local-assist.zip
-d9ae87ecb1fc0647c4e5e4933dd78f24b22c7a5d3f115998a4427181c2f1f316  knowthankyew-extension-v2.1.0-safari.zip
-bb8b8db44a33cb86c23a7bb7d5d0ddbdf7598c4749f7cf7d1596706e22ba9321  knowthankyew-extension-v2.1.0.zip
+Canonical SHA-256 checksums for all release archives are generated at build time and recorded directly in [SHA256SUMS](../SHA256SUMS). Verify archive integrity with:
+
+```bash
+shasum -a 256 -c SHA256SUMS
 ```

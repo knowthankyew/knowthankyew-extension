@@ -16,6 +16,10 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: bot-statutory-update-review
+  cancel-in-progress: false
+
 jobs:
   monitor:
     name: Check Federal Register, EUR-Lex & UK Legislation Feeds
@@ -23,10 +27,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: 'npm'
@@ -51,9 +57,10 @@ jobs:
 
       - name: Create Pull Request on Statutory Change
         id: cpr
-        if: steps.check_statutes.outputs.has_updates == 'true'
-        uses: peter-evans/create-pull-request@v8
+        if: steps.check_statutes.outputs.has_updates == 'true' || steps.check_statutes.outputs.check_failed == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: 'chore(legal): statutory update notices detected by policy monitor'
           branch: bot/statutory-update-review
           delete-branch: true
@@ -61,4 +68,5 @@ jobs:
           body-path: statutory-update-report.md
           labels: |
             statutory-review
-          draft: false
+            needs-attorney-review
+          draft: true

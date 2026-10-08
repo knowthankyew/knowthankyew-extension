@@ -156,21 +156,20 @@ describe('Real-Chromium Local ML Assist E2E Verification (chromium-local-ml-e2e.
     await page.goto(`chrome-extension://${extensionId}/options.html`, { waitUntil: 'networkidle0' });
 
     // Click the master hard burn button
-    const burnButton = await page.waitForSelector('button');
+    const burnButton = await page.waitForSelector('[data-testid="master-burn-button"]');
     expect(burnButton).not.toBeNull();
-
-    await page.evaluate(() => {
-      const btn = Array.from(document.querySelectorAll('button')).find((b) =>
-        b.textContent?.includes('BURN ALL DATA')
-      );
-      if (btn) btn.click();
-    });
+    await burnButton!.click();
 
     // Wait for handshake
     await page.waitForFunction(
       () => document.body.innerText.includes('ALL DATA INCINERATED') || document.body.innerText.includes('Amnesia engaged'),
       { timeout: 5000 }
     );
+
+    // Give asynchronous loopback fetch event loop a moment to resolve under test runner load
+    for (let i = 0; i < 25 && !burnReceived; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
 
     expect(burnReceived).toBe(true);
     await page.close();
