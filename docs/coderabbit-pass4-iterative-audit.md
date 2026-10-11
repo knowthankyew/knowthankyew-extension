@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.coderabbit.yaml:15.coderabbit.yaml:15]8;;
+  → .coderabbit.yaml:15
 
   Confirm that reviewing draft PRs is intended.
 
@@ -33,7 +33,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.coderabbit.yaml:4.coderabbit.yaml:4]8;;
+  → .coderabbit.yaml:4
 
   Remove the unsupported top-level version key, or confirm it is
   intentional.
@@ -51,7 +51,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/pdf-extractor.test.ts:27tests/pdf-extractor.test.ts:27-48]8;;
+  → tests/pdf-extractor.test.ts:27-48
 
   Add tests for malformed PDFs and decompression bombs.
 
@@ -67,7 +67,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:41src/options/pdf-extractor.ts:41-54]8;;
+  → src/options/pdf-extractor.ts:41-54
 
   Limit the array form of bfrange to the declared range and to the mapping
   cap.
@@ -80,7 +80,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:113src/options/pdf-extractor.ts:113-139]8;;
+  → src/options/pdf-extractor.ts:113-139
 
   Bound the compressed-stream decompression before it allocates memory.
 
@@ -113,7 +113,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:811src/options/OptionsApp.tsx:811-829]8;;
+  → src/options/OptionsApp.tsx:811-829
 
   Make the drop zone reachable from the keyboard.
 
@@ -125,7 +125,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:148src/options/pdf-extractor.ts:148-157]8;;
+  → src/options/pdf-extractor.ts:148-157
 
   Decode octal escapes before the other escape replacements.
 
@@ -138,7 +138,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/handoff-bridge.test.tsx:78tests/handoff-bridge.test.tsx:78-96]8;;
+  → tests/handoff-bridge.test.tsx:78-96
 
   Cover the executeScript injection path.
 
@@ -151,7 +151,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:16src/popup/handoff-bridge.ts:16-22]8;;
+  → src/popup/handoff-bridge.ts:16-22
 
   Validate the payload before dispatch.
 
@@ -163,7 +163,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:53src/popup/handoff-bridge.ts:53-66]8;;
+  → src/popup/handoff-bridge.ts:53-66
 
   Return success: false when the fallback cannot deliver the payload.
 
@@ -180,7 +180,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:123docs/WALKTHROUGH-v2.1.md:123]8;;
+  → docs/WALKTHROUGH-v2.1.md:123
 
   Fix the stated previous popup width.
 
@@ -193,7 +193,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/AuditReceiptCard.tsx:21src/popup/components/AuditReceiptCard.tsx:21-47]8;;
+  → src/popup/components/AuditReceiptCard.tsx:21-47
 
   Do not claim statutory checks the scan did not run.
 
@@ -207,7 +207,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/engine.ts:46src/core/engine.ts:46-52]8;;
+  → src/core/engine.ts:46-52
 
   Fix the jurisdiction filter: substring matching on an empty or short
   target bypasses filtering.
@@ -223,7 +223,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/ROADMAP.md:171ROADMAP.md:171]8;;
+  → ROADMAP.md:171
 
   Correct the handoff description to match the code.
 
@@ -237,7 +237,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/proof-of-work.test.tsx:25tests/proof-of-work.test.tsx:25-39]8;;
+  → tests/proof-of-work.test.tsx:25-39
 
   Reset the hard-burn state between tests.
 
@@ -252,7 +252,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx:625src/popup/App.tsx:625-633]8;;
+  → src/popup/App.tsx:625-633
 
   Remove the double audit on paste.
 
@@ -267,7 +267,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/statutory-update-report.md:1statutory-update-report.md:1-29]8;;
+  → statutory-update-report.md:1-29
 
   Remove the committed mock report.
 
@@ -281,7 +281,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/uk-dmcc.json:12src/core/policy-packs/uk-dmcc.json:12]8;;
+  → src/core/policy-packs/uk-dmcc.json:12
 
   Do not label the prospective DMCC rules as current statutory violations.
 
@@ -308,7 +308,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SECURITY.md:52docs/SECURITY.md:52]8;;
+  → docs/SECURITY.md:52
 
   Update the supported version to v2.1.0.
 
@@ -324,7 +324,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/legal-statute-monitor.yml:26.github/workflows/legal-statute-monitor.yml:26-32]8;;
+  → .github/workflows/legal-statute-monitor.yml:26-32
 
   Security: Security Misconfiguration (CWE-829)
   Reachability: Internal · Exploitability: Difficult
@@ -345,7 +345,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/service-worker-badge.test.ts:2tests/service-worker-badge.test.ts:2-8]8;;
+  → tests/service-worker-badge.test.ts:2-8
 
   Exercise listener registration in the badge lifecycle tests.
 
@@ -358,7 +358,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/inline-indicators.ts:103src/content/inline-indicators.ts:103]8;;
+  → src/content/inline-indicators.ts:103
 
   Check whether the indicator was inserted.
 
@@ -380,7 +380,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/inline-indicators.ts:136src/content/inline-indicators.ts:136]8;;
+  → src/content/inline-indicators.ts:136
 
   Restrict fallback cleanup to owned hosts.
 
@@ -396,7 +396,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:15scripts/record-demo.js:15-21]8;;
+  → scripts/record-demo.js:15-21
 
   Declare a browser driver that the demo can resolve.
 
@@ -409,7 +409,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:12docs/BUILD.md:12]8;;
+  → docs/BUILD.md:12
 
   Correct the Node.js prerequisites for Vite 8. Both guides permit Node.js
   20 releases that cannot run their documented Vite build. Vite 8 requires

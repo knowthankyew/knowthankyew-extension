@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:123src/core/handoff.ts:123-129]8;;
+  → src/core/handoff.ts:123-129
 
   Reject non-HTTP legal links at build time.
 
@@ -37,7 +37,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:208src/options/OptionsApp.tsx:208-218]8;;
+  → src/options/OptionsApp.tsx:208-218
 
   Move PDF extraction off the main thread, or bound its regex work.
 
@@ -54,7 +54,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:238src/options/pdf-extractor.ts:238-242]8;;
+  → src/options/pdf-extractor.ts:238-242
 
   Fix the quadratic backtracking in object discovery.
 
@@ -71,7 +71,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:15scripts/record-demo.js:15-17]8;;
+  → scripts/record-demo.js:15-17
 
   Declare the browser driver used by the demo.
 
@@ -83,7 +83,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:119docs/WALKTHROUGH-v2.1.md:119]8;;
+  → docs/WALKTHROUGH-v2.1.md:119
 
   Make the rule and pattern counts consistent across the documentation.
 
@@ -101,7 +101,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:104scripts/check-statutory-updates.mjs:104-109]8;;
+  → scripts/check-statutory-updates.mjs:104-109
 
   Track EU amendments rather than the original act's HTTP timestamp.
 
@@ -116,7 +116,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:149scripts/check-statutory-updates.mjs:149-160]8;;
+  → scripts/check-statutory-updates.mjs:149-160
 
   Query changes affecting each UK Act.
 
@@ -131,7 +131,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:329scripts/check-statutory-updates.mjs:329-331]8;;
+  → scripts/check-statutory-updates.mjs:329-331
 
   Preserve the scheduled review when statutory endpoints fail.
 
@@ -161,7 +161,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:134README.md:134]8;;
+  → README.md:134
 
   Remove the unsupported Privacy Manifest verification claim.
 
@@ -173,7 +173,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:11README.md:11]8;;
+  → README.md:11
 
   Link the Firefox badge to the extension listing.
 
@@ -184,7 +184,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/package.json:14package.json:14-16]8;;
+  → package.json:14-16
 
   Create each browser archive from a clean ZIP.
 
@@ -197,7 +197,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:12docs/BUILD.md:12]8;;
+  → docs/BUILD.md:12
 
   Require Node 22.12 or newer for the verification steps.
 
@@ -210,7 +210,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:29docs/BUILD.md:29]8;;
+  → docs/BUILD.md:29
 
   Do not describe the build output as unminified.
 

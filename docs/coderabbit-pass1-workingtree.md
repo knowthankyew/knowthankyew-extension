@@ -1,5 +1,5 @@
 Most recent local review with findings: 24 stored findings
-Review directory: /Users/cl0rkster/Dev/knowthankyew-extension
+Review directory: knowthankyew-extension
 Base branch: main
 
 ────────────────────────────────────────────────────────────────────────

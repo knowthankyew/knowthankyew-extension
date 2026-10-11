@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.coderabbit.yaml:35.coderabbit.yaml:35-37]8;;
+  → .coderabbit.yaml:35-37
 
   Scope the zero-egress review instruction.
 
@@ -37,7 +37,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/us-federal.json:80src/core/policy-packs/us-federal.json:80]8;;
+  → src/core/policy-packs/us-federal.json:80
 
   The bare agree\s+to\s+binding\s+arbitration alternative makes the other
   alternatives redundant.
@@ -52,7 +52,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:241src/core/handoff.ts:241-250]8;;
+  → src/core/handoff.ts:241-250
 
   Reject non-finite riskScore and invalid summary counts.
 
@@ -83,7 +83,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:217scripts/check-statutory-updates.mjs:217]8;;
+  → scripts/check-statutory-updates.mjs:217
 
   An invalid `` value throws and discards the entire feed.
 
@@ -103,7 +103,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx:416src/popup/App.tsx:416-422]8;;
+  → src/popup/App.tsx:416-422
 
   Open the options page on the #document section.
 
@@ -122,7 +122,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/engine.ts:116src/core/engine.ts:116-119]8;;
+  → src/core/engine.ts:116-119
 
   Bound the preview input before you call sanitizeSnippet.
 
@@ -144,7 +144,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:96src/options/OptionsApp.tsx:96-109]8;;
+  → src/options/OptionsApp.tsx:96-109
 
   Reset isAuditingDoc in the external-burn handler.
 
@@ -163,7 +163,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/legal-statute-monitor.yml:30.github/workflows/legal-statute-monitor.yml:30]8;;
+  → .github/workflows/legal-statute-monitor.yml:30
 
   Security: Security Misconfiguration (CWE-829)
   Exploitability: Difficult
@@ -179,7 +179,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:162docs/WALKTHROUGH-v2.1.md:162]8;;
+  → docs/WALKTHROUGH-v2.1.md:162
 
   Use the Privacy Manifest data-collection key.
 
@@ -191,7 +191,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:167docs/WALKTHROUGH-v2.1.md:167-172]8;;
+  → docs/WALKTHROUGH-v2.1.md:167-172
 
   Do not embed fixed hashes for regenerated archives.
 
@@ -204,7 +204,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:182tests/bundle-invariants.test.ts:182-183]8;;
+  → tests/bundle-invariants.test.ts:182-183
 
   Check Safari imports throughout the script.
 
@@ -217,7 +217,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/LOCAL-ML-SETUP.md:32docs/LOCAL-ML-SETUP.md:32]8;;
+  → docs/LOCAL-ML-SETUP.md:32
 
   Load the Local Assist output directory.
 

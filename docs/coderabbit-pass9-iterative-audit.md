@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/amnesia-coordinator.test.ts:101tests/amnesia-coordinator.test.ts:101-117]8;;
+  → tests/amnesia-coordinator.test.ts:101-117
 
   Tests do not assert the new per-tab badge clear or the sessionStorage
   purge.
@@ -41,7 +41,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/telemetry/client.ts:103src/telemetry/client.ts:103-118]8;;
+  → src/telemetry/client.ts:103-118
 
   Badge clears and burn messages run concurrently without error isolation,
   and the step numbering duplicates.
@@ -56,7 +56,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SAFARI-SUBMISSION.md:22docs/SAFARI-SUBMISSION.md:22]8;;
+  → docs/SAFARI-SUBMISSION.md:22
 
   Fix markdownlint warnings.
 
@@ -73,7 +73,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/background/service-worker.ts:84src/background/service-worker.ts:84-90]8;;
+  → src/background/service-worker.ts:84-90
 
   Install handler writes a global badge color.
 
@@ -97,7 +97,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/package.json:13package.json:13-17]8;;
+  → package.json:13-17
 
   Remove the duplicate checksum step in package.
 
@@ -110,7 +110,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:143docs/WALKTHROUGH-v2.1.md:143]8;;
+  → docs/WALKTHROUGH-v2.1.md:143
 
   Remove the "permanent tombstone" claim.
 
@@ -121,7 +121,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:10tests/bundle-invariants.test.ts:10-15]8;;
+  → tests/bundle-invariants.test.ts:10-15
 
   Rebuild when a stale dist/ exists.
 
@@ -133,7 +133,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/claims-linter.test.ts:52tests/claims-linter.test.ts:52-53]8;;
+  → tests/claims-linter.test.ts:52-53
 
   Avoid hard-coded rule and pattern counts.
 
@@ -144,7 +144,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/vite.config.ts:53vite.config.ts:53-80]8;;
+  → vite.config.ts:53-80
 
   Isolate the scanner sub-build from the outer build state.
 
@@ -168,7 +168,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:13scripts/record-demo.js:13-32]8;;
+  → scripts/record-demo.js:13-32
 
   Resolve Playwright from the declared dependency only.
 
@@ -180,7 +180,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:35docs/BUILD.md:35]8;;
+  → docs/BUILD.md:35
 
   Verify the stated test counts.
 
@@ -190,7 +190,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/pdf-extractor.test.ts:144tests/pdf-extractor.test.ts:144-180]8;;
+  → tests/pdf-extractor.test.ts:144-180
 
   The wall-clock assertions can fail intermittently on slow CI runners.
 
@@ -201,7 +201,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:138src/options/pdf-extractor.ts:138-154]8;;
+  → src/options/pdf-extractor.ts:138-154
 
   The decompression limit does not stop inflation inside a single push.
 
@@ -233,7 +233,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:35src/options/pdf-extractor.ts:35]8;;
+  → src/options/pdf-extractor.ts:35
 
   Split bfrange lines on \r as well as \n.
 
@@ -245,19 +245,19 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/coderabbit-pass5-iterative-audit.md:1docs/coderabbit-pass5-iterative-audit.md:1-6]8;;
+  → docs/coderabbit-pass5-iterative-audit.md:1-6
 
   Remove raw tool output from the repository.
 
   These audit logs contain terminal banners, ASCII art, and a local path
-  (/Users/cl0rkster/... in the related passes). Keep them out of version
+  (/Users/<user>/... in the related passes). Keep them out of version
   control, or add them to .gitignore. The files add noise and leak a local
   username.
 
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/LOCAL-ML-SETUP.md:30docs/LOCAL-ML-SETUP.md:30-32]8;;
+  → docs/LOCAL-ML-SETUP.md:30-32
 
   Use a separate output directory for the Firefox Local Assist build.
 
@@ -270,7 +270,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx:770src/popup/App.tsx:770-777]8;;
+  → src/popup/App.tsx:770-777
 
   Prevent the default paste in the error-panel textarea.
 
@@ -299,7 +299,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/AuditReceiptCard.tsx:55src/popup/components/AuditReceiptCard.tsx:55-59]8;;
+  → src/popup/components/AuditReceiptCard.tsx:55-59
 
   Fix the jurisdiction filter so unknown values do not default to US.
 
@@ -325,7 +325,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:151src/core/handoff.ts:151-153]8;;
+  → src/core/handoff.ts:151-153
 
   ruleId skips sanitization. An empty title makes the payload fail its
   own validator.
@@ -348,7 +348,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:44src/popup/handoff-bridge.ts:44-51]8;;
+  → src/popup/handoff-bridge.ts:44-51
 
   On timeout, the code reports success without knowing whether the page
   loaded.
@@ -361,7 +361,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:21src/core/policy-packs/eu-crd.json:21]8;;
+  → src/core/policy-packs/eu-crd.json:21
 
   Fix the optional-group whitespace in EU-AR-001 so single-space phrasing
   matches.
@@ -384,7 +384,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/release.yml:56.github/workflows/release.yml:56-61]8;;
+  → .github/workflows/release.yml:56-61
 
   Security: Security Misconfiguration (CWE-693)
   Reachability: Internal · Exploitability: Difficult
@@ -427,7 +427,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/ROADMAP.md:89ROADMAP.md:89]8;;
+  → ROADMAP.md:89
 
   Name the v2.1.0 Safari archive.
 
@@ -439,7 +439,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx:9src/popup/components/TrapCard.tsx:9-14]8;;
+  → src/popup/components/TrapCard.tsx:9-14
 
   Abort every in-flight inference during a hard burn.
 
@@ -453,7 +453,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v1.6.md:14docs/WALKTHROUGH-v1.6.md:14]8;;
+  → docs/WALKTHROUGH-v1.6.md:14
 
   Scope the CSP statement to production builds.
 
@@ -464,7 +464,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/ARCHITECTURE.md:95docs/ARCHITECTURE.md:95]8;;
+  → docs/ARCHITECTURE.md:95
 
   Qualify the Hard Burn cleanup claims.
 
@@ -485,7 +485,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/amnesia-coordinator.test.ts:101tests/amnesia-coordinator.test.ts:101-117]8;;
+  → tests/amnesia-coordinator.test.ts:101-117
 
   Assert the per-tab badge clear.
 
@@ -503,7 +503,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/telemetry/client.ts:103src/telemetry/client.ts:103-118]8;;
+  → src/telemetry/client.ts:103-118
 
   Remove the unscoped badge clear.
 
@@ -522,7 +522,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/LOCAL-ML-SETUP.md:30docs/LOCAL-ML-SETUP.md:30-32]8;;
+  → docs/LOCAL-ML-SETUP.md:30-32
 
   Keep Firefox Local Assist output separate from the release output.
 
@@ -547,7 +547,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:21src/core/policy-packs/eu-crd.json:21]8;;
+  → src/core/policy-packs/eu-crd.json:21
 
   Allow omitted checkbox nouns without broadening EU-AR-001.
 
@@ -571,7 +571,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:10tests/bundle-invariants.test.ts:10-15]8;;
+  → tests/bundle-invariants.test.ts:10-15
 
   Rebuild the production bundle before running these assertions.
 
@@ -598,7 +598,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx:9src/popup/components/TrapCard.tsx:9-14]8;;
+  → src/popup/components/TrapCard.tsx:9-14
 
   Reset the shared prompt adapter from the popup hard-burn handler.
 
@@ -626,7 +626,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:13scripts/record-demo.js:13-32]8;;
+  → scripts/record-demo.js:13-32
 
   Preserve the portfolio-root fallback and expose Playwright load errors.
 
@@ -657,12 +657,12 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Security & Privacy]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/coderabbit-pass5-iterative-audit.md:1docs/coderabbit-pass5-iterative-audit.md:1-6]8;;
+  → docs/coderabbit-pass5-iterative-audit.md:1-6
 
   Redact local filesystem paths from the audit reports.
 
   The reports may remain as historical records, but absolute paths such as
-  /Users/cl0rkster/Dev/knowthankyew-extension expose a local account name
+  knowthankyew-extension expose a local account name
   and workstation layout. Replace these paths with repository-relative
   references. Adding .gitignore alone will not change files that are
   already tracked.
@@ -670,7 +670,7 @@ Directory : knowthankyew-extension
 
   Suggested redaction
 
-  -Review directory: /Users/cl0rkster/Dev/knowthankyew-extension
+  -Review directory: knowthankyew-extension
   +Review directory: <repository-root>
 
   Apply the same redaction to the embedded VS Code paths in the other audit
@@ -680,7 +680,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:138src/options/pdf-extractor.ts:138-154]8;;
+  → src/options/pdf-extractor.ts:138-154
 
   Use a bounded output buffer instead of treating CHUNK_SIZE as the cap.
 
@@ -739,7 +739,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/package.json:13package.json:13-17]8;;
+  → package.json:13-17
 
   Remove stale same-version ZIPs before package:all hashes the release.
 

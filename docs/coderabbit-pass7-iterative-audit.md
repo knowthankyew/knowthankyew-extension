@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:203src/options/OptionsApp.tsx:203-206]8;;
+  → src/options/OptionsApp.tsx:203-206
 
   Clear stale results when a new file import starts or fails.
 
@@ -45,7 +45,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:130src/core/handoff.ts:130-134]8;;
+  → src/core/handoff.ts:130-134
 
   Security: Sensitive Data Exposure (CWE-200)
   Reachability: External · Exploitability: Difficult
@@ -74,7 +74,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/us-federal.json:80src/core/policy-packs/us-federal.json:80]8;;
+  → src/core/policy-packs/us-federal.json:80
 
   Remove the second preposition from the agree alternative.
 
@@ -88,7 +88,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:48src/core/policy-packs/eu-crd.json:48-49]8;;
+  → src/core/policy-packs/eu-crd.json:48-49
 
   Do not classify every digital-content withdrawal acknowledgment as a
   violation.
@@ -107,7 +107,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:21src/core/policy-packs/eu-crd.json:21]8;;
+  → src/core/policy-packs/eu-crd.json:21
 
   Require an additional payment before classifying a default option under
   Article 22.
@@ -125,7 +125,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/uk-dmcc.json:21src/core/policy-packs/uk-dmcc.json:21]8;;
+  → src/core/policy-packs/uk-dmcc.json:21
 
   Limit the reminder warning to renewals covered by the statutory schedule.
 
@@ -144,7 +144,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/legal-statute-monitor.yml:4.github/workflows/legal-statute-monitor.yml:4-6]8;;
+  → .github/workflows/legal-statute-monitor.yml:4-6
 
   Serialize statutory-monitor runs. A scheduled run can overlap a manual
   run. Both runs can then update bot/statutory-update-review, leaving the
@@ -156,7 +156,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:336scripts/check-statutory-updates.mjs:336-337]8;;
+  → scripts/check-statutory-updates.mjs:336-337
 
   Show a no-change result only after successful checks. An empty findings
   array does not establish that a failed endpoint had no updates.
@@ -168,7 +168,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:374scripts/check-statutory-updates.mjs:374]8;;
+  → scripts/check-statutory-updates.mjs:374
 
   Include Federal Register failures in check_failed.
   checkFederalRegister returns [] after an HTTP or fetch failure. If
@@ -180,7 +180,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/service-worker-badge.test.ts:171tests/service-worker-badge.test.ts:171-172]8;;
+  → tests/service-worker-badge.test.ts:171-172
 
   Wait for the hard-burn response, not a fixed delay.
 
@@ -192,7 +192,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:122scripts/check-statutory-updates.mjs:122-123]8;;
+  → scripts/check-statutory-updates.mjs:122-123
 
   Check corrigenda separately from consolidated versions. This regex detects
   only dated consolidated ELI paths. EUR-Lex lists the GDPR’s corrigendum
@@ -204,7 +204,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/engine.ts:114src/core/engine.ts:114-120]8;;
+  → src/core/engine.ts:114-120
 
   Security: Sensitive Data Exposure (CWE-359)
   Reachability: External · Exploitability: Theoretical
@@ -225,7 +225,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:21docs/BUILD.md:21]8;;
+  → docs/BUILD.md:21
 
   Use the same frozen install as the release workflows.
 

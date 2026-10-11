@@ -15,7 +15,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:240src/core/handoff.ts:240]8;;
+  → src/core/handoff.ts:240
 
   Use an own-property check for targetTool.
 
@@ -37,7 +37,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx:20src/popup/components/TrapCard.tsx:20]8;;
+  → src/popup/components/TrapCard.tsx:20
 
   Each TrapCard creates its own Prompt API session.
 
@@ -50,7 +50,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts:68src/content/scanner.ts:68-72]8;;
+  → src/content/scanner.ts:68-72
 
   Indicator injection triggers a self-induced observer rescan cycle.
 
@@ -80,7 +80,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v1.6.md:27docs/WALKTHROUGH-v1.6.md:27-28]8;;
+  → docs/WALKTHROUGH-v1.6.md:27-28
 
   Remove the undocumented tombstone claim.
 
@@ -93,7 +93,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/CHROMEWEBSTORE.md:155docs/CHROMEWEBSTORE.md:155]8;;
+  → docs/CHROMEWEBSTORE.md:155
 
   Version history omits 2.1.0 while the listing packages 2.1.0.
 
@@ -104,7 +104,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/background/service-worker.ts:22src/background/service-worker.ts:22-33]8;;
+  → src/background/service-worker.ts:22-33
 
   Do not fall back to a global badge for scan results.
 
@@ -131,7 +131,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx:318src/popup/App.tsx:318-334]8;;
+  → src/popup/App.tsx:318-334
 
   Handle rejected handoff dispatches.
 
@@ -146,7 +146,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:96docs/WALKTHROUGH-v2.1.md:96-99]8;;
+  → docs/WALKTHROUGH-v2.1.md:96-99
 
   Align the documented severity labels with SeverityBadge. In code,
   CRITICAL maps to "This is a problem" and WARNING maps to "Watch out".
@@ -159,7 +159,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:208src/options/OptionsApp.tsx:208-221]8;;
+  → src/options/OptionsApp.tsx:208-221
 
   Run PDF extraction off the main thread.
 
@@ -174,7 +174,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:112src/options/pdf-extractor.ts:112-118]8;;
+  → src/options/pdf-extractor.ts:112-118
 
   Enforce the decompression limit during inflation.
 
@@ -188,7 +188,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/proof-of-work.test.tsx:319tests/proof-of-work.test.tsx:319-331]8;;
+  → tests/proof-of-work.test.tsx:319-331
 
   Move this boundary test to the real truncation offset.
 
@@ -201,7 +201,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:89docs/WALKTHROUGH-v2.1.md:89]8;;
+  → docs/WALKTHROUGH-v2.1.md:89
 
   Security: Other (CWE-345)
   Exploitability: Theoretical
@@ -216,7 +216,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:173src/options/pdf-extractor.ts:173-188]8;;
+  → src/options/pdf-extractor.ts:173-188
 
   Bound the object scan and CMap work.
 
@@ -230,7 +230,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:24src/popup/handoff-bridge.ts:24-44]8;;
+  → src/popup/handoff-bridge.ts:24-44
 
   Report failed handoff injection instead of reporting success.
 
@@ -262,7 +262,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:11docs/BUILD.md:11]8;;
+  → docs/BUILD.md:11
 
   Require WSL for the documented Windows build.
 
@@ -275,7 +275,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/statutory-update-report.md:65statutory-update-report.md:65]8;;
+  → statutory-update-report.md:65
 
   Regenerate the report with the jurisdiction-filtered monitor.
 
@@ -289,7 +289,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:14src/core/policy-packs/eu-crd.json:14-18]8;;
+  → src/core/policy-packs/eu-crd.json:14-18
 
   Limit the Article 22 claim to extra payments.
 
@@ -307,7 +307,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/us-federal.json:80src/core/policy-packs/us-federal.json:80]8;;
+  → src/core/policy-packs/us-federal.json:80
 
   Match “agree to binding arbitration” in the expanded party pattern.
 
@@ -320,7 +320,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:17README.md:17]8;;
+  → README.md:17
 
   Update the packaged-release notice to v2.1.0.
 
@@ -331,7 +331,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/state-arl.json:149src/core/policy-packs/state-arl.json:149]8;;
+  → src/core/policy-packs/state-arl.json:149
 
   Do not classify the absence of online cancellation alone as an Oregon
   violation.
@@ -349,7 +349,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:50src/popup/handoff-bridge.ts:50-61]8;;
+  → src/popup/handoff-bridge.ts:50-61
 
   Security: Sensitive Data Exposure (CWE-226)
   Reachability: Internal · Exploitability: Theoretical
@@ -392,7 +392,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/uk-dmcc.json:12src/core/policy-packs/uk-dmcc.json:12]8;;
+  → src/core/policy-packs/uk-dmcc.json:12
 
   Do not report prospective DMCC duties as current violations.
 
@@ -409,7 +409,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:84scripts/check-statutory-updates.mjs:84-85]8;;
+  → scripts/check-statutory-updates.mjs:84-85
 
   Advance the reviewed baseline after an update.
 
@@ -423,7 +423,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:14scripts/record-demo.js:14-21]8;;
+  → scripts/record-demo.js:14-21
 
   Declare the browser dependency used by the demo.
 
@@ -436,7 +436,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/LOCAL-ML-SETUP.md:18docs/LOCAL-ML-SETUP.md:18-20]8;;
+  → docs/LOCAL-ML-SETUP.md:18-20
 
   Specify a Local Assist build before the loopback setup.
 
@@ -448,7 +448,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts:255src/content/scanner.ts:255-273]8;;
+  → src/content/scanner.ts:255-273
 
   Block scans after hard burn instead of resetting the init sentinel.
 

@@ -15,7 +15,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/background/service-worker.ts:66src/background/service-worker.ts:66-72]8;;
+  → src/background/service-worker.ts:66-72
 
   Catch updateBadgeForScan failures so that sendResponse always runs.
 
@@ -42,7 +42,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/inline-indicators.ts:95src/content/inline-indicators.ts:95-96]8;;
+  → src/content/inline-indicators.ts:95-96
 
   Do not use role="alert" on static badges.
 
@@ -53,7 +53,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/AuditReceiptCard.tsx:84src/popup/components/AuditReceiptCard.tsx:84-104]8;;
+  → src/popup/components/AuditReceiptCard.tsx:84-104
 
   Do not show a "PASSED / verified clean" verdict.
 
@@ -68,7 +68,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/CHROMEWEBSTORE.md:108docs/CHROMEWEBSTORE.md:108-115]8;;
+  → docs/CHROMEWEBSTORE.md:108-115
 
   Use the same release version throughout the document.
 
@@ -79,7 +79,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts:345src/content/scanner.ts:345-355]8;;
+  → src/content/scanner.ts:345-355
 
   Re-create the BroadcastChannel after a hard burn.
 
@@ -93,7 +93,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:130src/options/OptionsApp.tsx:130-147]8;;
+  → src/options/OptionsApp.tsx:130-147
 
   Restore auditor state if the burn fails.
 
@@ -109,7 +109,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:111src/options/pdf-extractor.ts:111-117]8;;
+  → src/options/pdf-extractor.ts:111-117
 
   Security: Denial Of Service (CWE-409)
   Reachability: External · Exploitability: Moderate
@@ -127,7 +127,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx:61src/popup/components/TrapCard.tsx:61-65]8;;
+  → src/popup/components/TrapCard.tsx:61-65
 
   Security: Sensitive Data Exposure (CWE-359)
   Reachability: External · Exploitability: Difficult
@@ -145,7 +145,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/engine.ts:83src/core/engine.ts:83-100]8;;
+  → src/core/engine.ts:83-100
 
   Cap the input before the full-text sanitize pass for the preview.
 
@@ -166,7 +166,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:155src/options/pdf-extractor.ts:155-160]8;;
+  → src/options/pdf-extractor.ts:155-160
 
   Move PDF extraction off the main thread or bound the work.
 
@@ -180,7 +180,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/pdf-extractor.test.ts:29tests/pdf-extractor.test.ts:29-50]8;;
+  → tests/pdf-extractor.test.ts:29-50
 
   Remove the test that depends on a personal file under ~/Downloads.
 
@@ -193,7 +193,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/ARCHITECTURE.md:101docs/ARCHITECTURE.md:101]8;;
+  → docs/ARCHITECTURE.md:101
 
   Correct the production-dependency invariant.
 
@@ -204,7 +204,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v2.1.md:119docs/WALKTHROUGH-v2.1.md:119]8;;
+  → docs/WALKTHROUGH-v2.1.md:119
 
   Use the compiled-rule count in the auditor description.
 
@@ -215,7 +215,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/statutory-update-report.md:11statutory-update-report.md:11-15]8;;
+  → statutory-update-report.md:11-15
 
   Regenerate the report after correcting the monitor.
 
@@ -228,7 +228,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:97scripts/check-statutory-updates.mjs:97]8;;
+  → scripts/check-statutory-updates.mjs:97
 
   Detect a revision before recording an international update.
 
@@ -243,7 +243,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/legal-statute-monitor.yml:4.github/workflows/legal-statute-monitor.yml:4-6]8;;
+  → .github/workflows/legal-statute-monitor.yml:4-6
 
   Reuse one branch for the scheduled legal-review PR.
 
@@ -258,7 +258,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/uk-dmcc.json:12src/core/policy-packs/uk-dmcc.json:12]8;;
+  → src/core/policy-packs/uk-dmcc.json:12
 
   Do not report the DMCC subscription regime as an operative violation yet.
 
@@ -276,7 +276,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/eu-crd.json:45src/core/policy-packs/eu-crd.json:45]8;;
+  → src/core/policy-packs/eu-crd.json:45
 
   Account for lawful withdrawal exceptions.
 
@@ -294,7 +294,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:248scripts/check-statutory-updates.mjs:248]8;;
+  → scripts/check-statutory-updates.mjs:248
 
   Report failed international checks as failures, not as no changes.
 
@@ -307,7 +307,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/state-arl.json:145src/core/policy-packs/state-arl.json:145]8;;
+  → src/core/policy-packs/state-arl.json:145
 
   Correct the Oregon renewal-notice claim.
 
@@ -324,7 +324,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:128README.md:128]8;;
+  → README.md:128
 
   Use the documented Safari app-name option.
 
@@ -336,7 +336,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/BUILD.md:5docs/BUILD.md:5]8;;
+  → docs/BUILD.md:5
 
   Update both release-guide version labels. Both guides say 2.0.0, while
   their build commands produce manifests with version 2.1.0.
@@ -348,7 +348,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:158tests/bundle-invariants.test.ts:158]8;;
+  → tests/bundle-invariants.test.ts:158
 
   Extend the Safari zero-egress assertion.
 
@@ -365,7 +365,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/package.json:17package.json:17]8;;
+  → package.json:17
 
   Publish the Firefox and Safari archives in the release job.
 
@@ -381,7 +381,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/policy-packs/index.ts:15src/core/policy-packs/index.ts:15-16]8;;
+  → src/core/policy-packs/index.ts:15-16
 
   Filter policy rules by jurisdiction before scanning.
 

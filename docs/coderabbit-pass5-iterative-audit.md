@@ -22,7 +22,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:124src/options/pdf-extractor.ts:124-149]8;;
+  → src/options/pdf-extractor.ts:124-149
 
   The decompression cap applies per stream, not to the whole document.
 
@@ -36,7 +36,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/OptionsApp.tsx:304src/options/OptionsApp.tsx:304]8;;
+  → src/options/OptionsApp.tsx:304
 
   The version badge shows v2.0.0, but the release is 2.1.0.
 
@@ -46,7 +46,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Performance & Scalability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/options/pdf-extractor.ts:81src/options/pdf-extractor.ts:81-114]8;;
+  → src/options/pdf-extractor.ts:81-114
 
   getObjectStream repeats full-buffer scans for every content reference.
 
@@ -74,7 +74,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/package.json:13package.json:13-17]8;;
+  → package.json:13-17
 
   package writes a SHA256SUMS file that the later steps overwrite.
 
@@ -88,7 +88,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/components/TrapCard.tsx:33src/popup/components/TrapCard.tsx:33-60]8;;
+  → src/popup/components/TrapCard.tsx:33-60
 
   Concurrent cards cancel each other's summaries.
 
@@ -106,7 +106,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/App.tsx:187src/popup/App.tsx:187-195]8;;
+  → src/popup/App.tsx:187-195
 
   Remove the duplicate KTY_SCAN_COMPLETED dispatch, or make both senders
   consistent.
@@ -122,7 +122,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/content/scanner.ts:66src/content/scanner.ts:66-68]8;;
+  → src/content/scanner.ts:66-68
 
   Block executeScan after hard burn, not only in the message handler.
 
@@ -150,7 +150,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/vite.config.ts:114vite.config.ts:114-123]8;;
+  → vite.config.ts:114-123
 
   Safari manifest branch duplicates the generic non-ML CSP logic.
 
@@ -178,7 +178,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:58scripts/record-demo.js:58-66]8;;
+  → scripts/record-demo.js:58-66
 
   Playwright cache lookup is macOS-only.
 
@@ -190,7 +190,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/record-demo.js:13scripts/record-demo.js:13-32]8;;
+  → scripts/record-demo.js:13-32
 
   resolvePlaywright depends on a package the project does not declare.
 
@@ -203,7 +203,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:154tests/bundle-invariants.test.ts:154-191]8;;
+  → tests/bundle-invariants.test.ts:154-191
 
   Safari test uses a POSIX env assignment in execSync.
 
@@ -215,7 +215,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v1.6.md:27docs/WALKTHROUGH-v1.6.md:27-28]8;;
+  → docs/WALKTHROUGH-v1.6.md:27-28
 
   Tombstone claim is incorrect.
 
@@ -234,7 +234,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:10tests/bundle-invariants.test.ts:10-14]8;;
+  → tests/bundle-invariants.test.ts:10-14
 
   Setup no longer rebuilds when manifest.json is missing or stale.
 
@@ -246,7 +246,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SAFARI-SUBMISSION.md:82docs/SAFARI-SUBMISSION.md:82-83]8;;
+  → docs/SAFARI-SUBMISSION.md:82-83
 
   Doc claims tests/bundle-invariants.test.ts enforces the Privacy
   Manifest.
@@ -259,7 +259,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SECURITY.md:52docs/SECURITY.md:52]8;;
+  → docs/SECURITY.md:52
 
   Removing the email contact leaves a single reporting channel.
 
@@ -270,7 +270,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.coderabbit.yaml:14.coderabbit.yaml:14]8;;
+  → .coderabbit.yaml:14
 
   Confirm that reviewing every draft push is intended.
 
@@ -280,7 +280,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:10README.md:10-12]8;;
+  → README.md:10-12
 
   Status copy is inconsistent: v2.1.0 is called "Release Complete" while the
   Chrome and Firefox stores serve v1.6.0.
@@ -299,7 +299,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/WALKTHROUGH-v1.6.md:22docs/WALKTHROUGH-v1.6.md:22]8;;
+  → docs/WALKTHROUGH-v1.6.md:22
 
   Headings lack blank lines (MD022).
 
@@ -315,7 +315,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/.github/workflows/legal-statute-monitor.yml:58.github/workflows/legal-statute-monitor.yml:58-64]8;;
+  → .github/workflows/legal-statute-monitor.yml:58-64
 
   draft: false removes the human-review gate that the docs promise.
 
@@ -339,7 +339,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SAFARI-SUBMISSION.md:13docs/SAFARI-SUBMISSION.md:13]8;;
+  → docs/SAFARI-SUBMISSION.md:13
 
   Build command and Node range need correction.
 
@@ -358,7 +358,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Data Integrity & Integration]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/statutory-update-report.md:1statutory-update-report.md:1-220]8;;
+  → statutory-update-report.md:1-220
 
   Remove this generated report. It was not produced by the current script.
 
@@ -379,7 +379,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/docs/SECURITY.md:11docs/SECURITY.md:11-13]8;;
+  → docs/SECURITY.md:11-13
 
   Supported-versions table mislabels the distribution channel.
 
@@ -390,7 +390,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/tests/bundle-invariants.test.ts:76tests/bundle-invariants.test.ts:76-80]8;;
+  → tests/bundle-invariants.test.ts:76-80
 
   Import/export regex misses minified IIFE output and mid-line statements.
 
@@ -403,7 +403,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/scripts/check-statutory-updates.mjs:103scripts/check-statutory-updates.mjs:103-114]8;;
+  → scripts/check-statutory-updates.mjs:103-114
 
   Last-Modified reports a new amendment on every run.
 
@@ -429,7 +429,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Stability & Availability]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/vite.config.ts:53vite.config.ts:53-76]8;;
+  → vite.config.ts:53-76
 
   Scanner sub-build runs in closeBundle without error isolation and
   inherits no mode.
@@ -449,7 +449,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/ROADMAP.md:177ROADMAP.md:177-187]8;;
+  → ROADMAP.md:177-187
 
   Phase 3 is marked complete for a release that is not part of this change.
 
@@ -462,7 +462,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   trivial [Maintainability & Code Quality]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/README.md:108README.md:108-132]8;;
+  → README.md:108-132
 
   Add blank lines around the Safari heading and code fence.
 
@@ -498,7 +498,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   minor [Security & Privacy] | 🛡️ Analyzed with Security Review
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/core/handoff.ts:134src/core/handoff.ts:134-140]8;;
+  → src/core/handoff.ts:134-140
 
   Security: Sensitive Data Exposure (CWE-359)
   Reachability: External · Exploitability: Difficult
@@ -538,7 +538,7 @@ Directory : knowthankyew-extension
 
 ────────────────────────────────────────────────────────────────────────
   major [Functional Correctness]
-  → ]8;;vscode://file//Users/cl0rkster/Dev/knowthankyew-extension/src/popup/handoff-bridge.ts:29src/popup/handoff-bridge.ts:29-48]8;;
+  → src/popup/handoff-bridge.ts:29-48
 
   Do not report success when the payload was not written.
 
