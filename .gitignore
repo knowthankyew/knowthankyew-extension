@@ -32,3 +32,6 @@ SHA256SUMS
 bom.json
 store-submission-assets/
 statutory-update-report.md
+
+# Agent Steering & Local Specs
+.kiro/
