@@ -15,7 +15,7 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
     ) {
       execSync('npm run build', { cwd: resolve(__dirname, '..'), stdio: 'pipe' });
     }
-  });
+  }, 30000);
 
   function getJsFilesRecursively(dir: string): string[] {
     const entries = readdirSync(dir);

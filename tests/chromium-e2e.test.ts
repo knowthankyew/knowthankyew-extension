@@ -67,12 +67,12 @@ describe('Real-Chromium E2E Browser & Network Interception Test (chromium-e2e.te
         `--load-extension=${distPath}`,
       ],
     });
-  });
+  }, 30000);
 
   afterAll(async () => {
     if (browser) await browser.close();
     if (server) await new Promise<void>((resolve) => server.close(() => resolve()));
-  });
+  }, 30000);
 
   it('loads the unpacked extension, scans the checkout fixture page, and captures 100% of network traffic', async () => {
     const page: Page = await browser.newPage();
