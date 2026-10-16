@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import { ALL_POLICY_PACKS } from '../src/core/policy-packs';
+import {
+  auditZeroEgress,
+  auditVocabulary,
+  auditPortfolioMasterBrief,
+// @ts-expect-error - ESM audit script import without bundled d.ts
+} from '../scripts/audit-claims.mjs';
 
 describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)', () => {
   const root = resolve(__dirname, '..');
@@ -63,6 +69,26 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     } else {
       // In clean CI environments before packaging, verify package script targets current versioning convention
       expect(pkg.scripts?.package).toContain('knowthankyew-extension-v${VERSION}.zip');
+    }
+  });
+
+  it('prohibits unprovable marketing adjectives across documentation and UI via vocabulary guardrails', () => {
+    const errors: string[] = [];
+    auditVocabulary(errors);
+    expect(errors).toEqual([]);
+  });
+
+  it('scans source runtime to verify zero remote network egress outside local loopback ML client', () => {
+    const errors: string[] = [];
+    auditZeroEgress(errors);
+    expect(errors).toEqual([]);
+  });
+
+  it('verifies Portfolio Master Brief parity (test count and test file inventory) if brief is present', () => {
+    const errors: string[] = [];
+    const checked = auditPortfolioMasterBrief(errors);
+    if (checked) {
+      expect(errors).toEqual([]);
     }
   });
 });

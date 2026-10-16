@@ -1,5 +1,5 @@
 # CodeRabbit Configuration for KnowThankYew Reality Engine
-# Targeted Audit Scope: v1.6.0 Baseline -> v2.1.0 QA Release Candidate
+# Targeted Audit Scope: In-Browser Point-of-Sale Reality Engine, Manifest V3 Zero-Egress Privacy, Statutory ARL Compliance & Supply Chain Assurance
 
 language: "en-US"
 
@@ -11,9 +11,9 @@ reviews:
   sequence_diagrams: true
   auto_review:
     enabled: true
-    drafts: true
+    drafts: false
 
-  # Filter out binary assets, demo media, and compiled artifacts
+  # Filter out binary assets, demo media, compiled distributions, and lockfiles
   path_filters:
     - "!**/*.gif"
     - "!**/*.mp4"
@@ -23,33 +23,36 @@ reviews:
     - "!package-lock.json"
     - "!mlflow.db"
     - "!demo.*"
+    - "!SHA256SUMS"
+    - "!bom.json"
 
   path_instructions:
     - path: "**/*"
       instructions: |
-        You are performing a comprehensive QA and security audit for the v2.1.0 release candidate of the KnowThankYew browser extension, comparing against the v1.6.0 baseline.
-        The extension operates under strict zero-egress, client-side amnesiac constraints across Chromium (MV3), Firefox, and Safari.
+        You are performing an exhaustive architectural, security, mathematical, legal, and data privacy audit for the KnowThankYew browser reality engine (v2.1.0 release candidate vs v1.6.0 live baseline).
+        The extension operates under strict zero-egress, client-side amnesiac constraints across Chromium (MV3), Firefox AMO, and Safari Web Extensions.
 
-        Evaluate code against these non-negotiable architectural invariants:
+        Evaluate all code against these non-negotiable architectural invariants:
 
         1. ZERO-EGRESS & CSP INTEGRITY (CRITICAL):
-           - In production extension runtime code (`src/` excluding opt-in developer loopback assist in `src/ml/local-ml-client.ts`), prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches). Offline statutory monitoring scripts in `scripts/check-statutory-updates.mjs` run strictly in isolated CI environments.
+           - In production extension runtime code (`src/**` excluding opt-in developer loopback assist in `src/ml/local-ml-client.ts`), strictly prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches). Offline statutory monitoring scripts in `scripts/check-statutory-updates.mjs` run strictly in isolated CI environments.
+           - Enforce strict `connect-src 'none'` in extension page CSP (`manifest.json`), with loopback permission granted only in explicit local-assist builds (`VITE_LOCAL_ML_ENABLED=true`).
            - Ensure all telemetry routing through `src/telemetry/` conforms to `@knowthankyew/privacy-telemetry` without outbound transmissions.
 
         2. CLOSED SHADOW DOM DEFENSE (`src/content/`):
-           - Ensure inline indicator badges are strictly encapsulated with `attachShadow({ mode: 'closed' })`.
-           - Prohibit `innerHTML` or raw HTML interpolation; all nodes must be constructed via pure DOM primitives (`createElement`, `textContent`).
-           - Ensure overlays never mutate or intercept user form inputs, never cause reflow/layout shifts, and fail silently if target selectors are missing.
-           - Confirm badges and observers are destroyed atomically on Nuclear Hard Burn / page unload.
+           - Inline indicator badges must be strictly encapsulated with `attachShadow({ mode: 'closed' })` to prevent host CSS leakage or script tampering.
+           - Prohibit `innerHTML` or raw HTML interpolation; all nodes must be constructed via pure DOM primitives (`createElement`, `document.createTextNode`).
+           - Overlays must never mutate or intercept user form inputs, never cause reflow or layout shifts (`position: absolute; pointer-events: none`), and fail silently if target selectors are missing.
+           - Confirm badges and observers are destroyed atomically upon Nuclear Hard Burn (`kty_hard_burn` / page unload).
 
         3. CHROME EXTENSION MV3 LIFECYCLES (`src/background/service-worker.ts`):
            - Audit for service worker sleep/termination race conditions. Background state must not assume continuous in-memory persistence.
-           - Verify toolbar action badges are strictly scoped to specific `tabId`s and cleared on tab navigation.
-           - Verify all asynchronous message listeners (`chrome.runtime.onMessage`) return `true` properly where callbacks are awaited.
+           - Toolbar action badges must be strictly scoped to specific `tabId`s and cleared on tab navigation or replacement.
+           - All asynchronous message listeners (`chrome.runtime.onMessage`) must return `true` properly where callbacks are awaited.
 
         4. IN-BROWSER PDF & TEXT PARSING ROBUSTNESS (`src/options/pdf-extractor.ts`):
            - Audit `fflate` FlateDecode streams and CMap font extraction for out-of-memory risks, buffer overflows, or infinite loops on malformed PDFs.
-           - Ensure large documents do not hang or lock the main thread.
+           - Ensure large documents enforce byte budgeting, memory caps, and do not hang the main thread.
 
         5. STRUCTURED HANDOFF PROTOCOL (`src/core/handoff.ts`, `src/popup/handoff-bridge.ts`):
            - Verify data sanitization for handoff payloads exported to portfolio tools (bill-of-rights-bot, careCheck, lease-audit).
@@ -57,14 +60,30 @@ reviews:
 
         6. STATUTORY POLICY COMPLIANCE (`src/core/policy-packs/`):
            - Validate rule structures for UK DMCC 2024, EU CRD, US Federal, and State ARL to ensure regex expressions are ReDoS-free and rule weights are properly bounded.
+
     - path: "src/content/**"
       instructions: "Audit DOM isolation, style encapsulation, selector mutation safety, and zero host-script interference."
-    - path: "src/options/pdf-extractor.ts"
-      instructions: "Audit binary parsing safety, memory bounds, CMap decode edge cases, and graceful failure on encrypted or malformed PDF streams."
+
+    - path: "src/options/**"
+      instructions: "Audit binary PDF parsing safety, byte budgeting, memory bounds, proof-of-work coordinator safety, and options page nuclear amnesia."
+
     - path: "src/background/service-worker.ts"
       instructions: "Audit MV3 service worker dormancy, badge lifecycle state management, and tab message routing."
-    - path: "src/core/handoff.ts"
-      instructions: "Audit handoff schema validation, serialization amnesia, and input sanitization."
+
+    - path: "src/core/**"
+      instructions: "Audit core scanning engine, statutory policy packs, ReDoS immunity, and handoff schema sanitization."
+
+    - path: "src/ml/**"
+      instructions: "Audit local ML client for strict loopback-only communication (127.0.0.1:8420), fail-closed timeouts, and compile-time dead-code elimination in standard production builds."
+
+    - path: "src/popup/**"
+      instructions: "Audit popup UI for accessible controls (WCAG AA), screen reader announcements, zero unescaped rendering, and instant hard burn triggers."
+
+    - path: "docs/**"
+      instructions: "Audit Chrome Web Store metadata for zero implementation details in store copy, benefit-driven messaging, and 100% justification coverage for all declared manifest permissions."
+
+    - path: "tests/**"
+      instructions: "Audit test suites for network isolation, Puppeteer negative controls, ReDoS verification, and claims parity."
 
 knowledge_base:
   opt_out: false
@@ -72,6 +91,6 @@ knowledge_base:
     scope: "auto"
   linked_repositories:
     - repository: "knowthankyew/privacy-telemetry"
-      instructions: "Contains canonical privacy telemetry schemas, local differential privacy policies, and zero-egress invariants for the KnowThankYew suite. Verify extension telemetry strictly conforms."
+      instructions: "Contains canonical privacy telemetry schemas, local differential privacy policies, and zero-egress invariants for the KnowThankYew suite."
     - repository: "knowthankyew/portfolio-admin"
       instructions: "Contains portfolio integration standards, handoff schemas, and administrative compliance specifications."

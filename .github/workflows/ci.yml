@@ -35,6 +35,9 @@ jobs:
       - name: TypeScript Type Check
         run: npx tsc --noEmit
 
+      - name: Audit Documentation & Architectural Claims
+        run: npm run audit:claims
+
       - name: Build Production Extension
         run: npm run build
 

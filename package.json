@@ -21,6 +21,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "audit:claims": "node scripts/audit-claims.mjs",
     "record:demo": "node scripts/record-demo.js",
     "demo": "python3 -m http.server 3000 --directory tests"
   },
