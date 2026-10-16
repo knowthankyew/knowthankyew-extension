@@ -21,7 +21,7 @@
  */
 
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
-import { resolve, join, dirname } from 'node:path';
+import { resolve, join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,7 +40,7 @@ const PROHIBITED_WORDS = [
 /**
  * Audit 1: Zero-Egress & Air-Gapped Privacy Invariants
  */
-export function auditZeroEgress(errors = []) {
+export function auditZeroEgress(errors = [], { overrideCodeSnippets = null } = {}) {
   // Check manifest.json CSP
   const manifestPath = resolve(REPO_ROOT, 'manifest.json');
   if (!existsSync(manifestPath)) {
@@ -53,6 +53,17 @@ export function auditZeroEgress(errors = []) {
     }
   }
 
+  const networkPrimitiveRegex =
+    /(?:\b(?:fetch|\??\.\s*fetch)\s*\(|=\s*fetch\b|\b(?:XMLHttpRequest|axios)\b|\[\s*['"`](?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|axios)['"`]\s*\]|\bnavigator\s*(?:\??\.\s*sendBeacon|\[\s*['"`]sendBeacon['"`]\s*\])|\bnew\s+(?:WebSocket|EventSource)\b|\bimportScripts\s*\()/;
+
+  if (Array.isArray(overrideCodeSnippets)) {
+    overrideCodeSnippets.forEach((snippet, idx) => {
+      if (networkPrimitiveRegex.test(snippet)) {
+        errors.push(`Privacy violation in snippet ${idx + 1}: Unauthorized network primitive detected: ${snippet}`);
+      }
+    });
+  }
+
   // Scan src/ for unauthorized network primitives
   const srcDir = resolve(REPO_ROOT, 'src');
   function scanFiles(dir) {
@@ -62,21 +73,26 @@ export function auditZeroEgress(errors = []) {
       if (entry.isDirectory()) {
         scanFiles(fullPath);
       } else if (/\.(ts|tsx|js|mjs)$/.test(entry.name)) {
-        const relPath = fullPath.replace(REPO_ROOT + '/', '');
+        const relPath = relative(REPO_ROOT, fullPath).split(sep).join('/');
         // Allow opt-in developer loopback ML client file
         if (relPath === 'src/ml/local-ml-client.ts') {
           continue;
         }
 
-        const content = readFileSync(fullPath, 'utf-8');
-        const lines = content.split('\n');
+        const rawContent = readFileSync(fullPath, 'utf-8');
+        // Strip block comments while preserving newlines
+        const noBlockComments = rawContent.replace(/\/\*[\s\S]*?\*\//g, (match) => {
+          const newlines = match.match(/\n/g);
+          return newlines ? newlines.join('') : '';
+        });
+        const lines = noBlockComments.split('\n');
         lines.forEach((line, lineIdx) => {
-          const trimmed = line.trim();
-          if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) {
+          const trimmed = line.replace(/\/\/.*$/, '').trim();
+          if (!trimmed) {
             return;
           }
 
-          if (/\b(fetch\s*\(|XMLHttpRequest|navigator\.sendBeacon|new\s+WebSocket|new\s+EventSource)\b/.test(line)) {
+          if (networkPrimitiveRegex.test(trimmed)) {
             errors.push(`Privacy violation in ${relPath}:${lineIdx + 1}: Unauthorized network primitive detected: ${trimmed}`);
           }
         });
@@ -84,7 +100,7 @@ export function auditZeroEgress(errors = []) {
     }
   }
 
-  if (existsSync(srcDir)) {
+  if (overrideCodeSnippets === null && existsSync(srcDir)) {
     scanFiles(srcDir);
   }
 
@@ -219,7 +235,7 @@ export function auditVocabulary(errors = []) {
       for (const pattern of PROHIBITED_WORDS) {
         if (pattern.test(line)) {
           errors.push(
-            `Prohibited marketing word '${pattern.source}' found in ${docPath.replace(REPO_ROOT + '/', '')}:${idx + 1}: ${line.trim()}`
+            `Prohibited marketing word '${pattern.source}' found in ${relative(REPO_ROOT, docPath)}:${idx + 1}: ${line.trim()}`
           );
         }
       }
@@ -275,11 +291,16 @@ export function auditPolicyPacks(errors = []) {
 /**
  * Audit 5: Portfolio Master Brief Parity
  */
-export function auditPortfolioMasterBrief(errors = [], { requireBrief = false } = {}) {
-  const briefCandidates = [
-    resolve(DEV_ROOT, 'KNOWTHANKYEW_PORTFOLIO_MASTER_BRIEF.md'),
-    resolve(REPO_ROOT, 'KNOWTHANKYEW_PORTFOLIO_MASTER_BRIEF.md'),
-  ];
+export function auditPortfolioMasterBrief(
+  errors = [],
+  { requireBrief = false, overrideBriefPath = null } = {}
+) {
+  const briefCandidates = overrideBriefPath
+    ? [overrideBriefPath]
+    : [
+        resolve(DEV_ROOT, 'KNOWTHANKYEW_PORTFOLIO_MASTER_BRIEF.md'),
+        resolve(REPO_ROOT, 'KNOWTHANKYEW_PORTFOLIO_MASTER_BRIEF.md'),
+      ];
   const briefPath = briefCandidates.find((p) => existsSync(p));
 
   if (!briefPath) {

