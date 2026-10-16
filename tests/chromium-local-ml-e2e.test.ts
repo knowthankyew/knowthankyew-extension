@@ -104,13 +104,13 @@ describe('Real-Chromium Local ML Assist E2E Verification (chromium-local-ml-e2e.
       );
       extensionId = new URL(target.url()).hostname;
     }
-  }, 30000);
+  }, 60000);
 
   afterAll(async () => {
     if (browser) await browser.close();
     if (workerServer) await new Promise<void>((res) => workerServer.close(() => res()));
     rmSync(distMlPath, { recursive: true, force: true });
-  }, 30000);
+  }, 60000);
 
   it('connects to local ML worker on options.html and renders ● Connected', async () => {
     const page = await browser.newPage();

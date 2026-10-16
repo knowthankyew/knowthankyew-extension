@@ -38,22 +38,12 @@ const PROHIBITED_WORDS = [
   /\binfinitely scalable\b/i,
 ];
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Audit 1: Zero-Egress & Air-Gapped Privacy Invariants
  */
 export function auditZeroEgress(errors = [], { overrideCodeSnippets = null } = {}) {
-  // Check manifest.json CSP
-  const manifestPath = resolve(REPO_ROOT, 'manifest.json');
-  if (!existsSync(manifestPath)) {
-    errors.push('Missing manifest.json file');
-  } else {
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
-    const csp = manifest.content_security_policy?.extension_pages || '';
-    if (!csp.includes("connect-src 'none'")) {
-      errors.push(`manifest.json CSP violation: extension_pages CSP must contain "connect-src 'none'", received: "${csp}"`);
-    }
-  }
-
   const networkPrimitiveRegex =
     /(?:\b(?:fetch|\??\.\s*fetch)\s*\(|=\s*fetch\b|\b(?:XMLHttpRequest|axios)\b|\[\s*['"`](?:fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource|axios)['"`]\s*\]|\bnavigator\s*(?:\??\.\s*sendBeacon|\[\s*['"`]sendBeacon['"`]\s*\])|\bnew\s+(?:WebSocket|EventSource)\b|\bimportScripts\s*\()/;
 
@@ -63,6 +53,29 @@ export function auditZeroEgress(errors = [], { overrideCodeSnippets = null } = {
         errors.push(`Privacy violation in snippet ${idx + 1}: Unauthorized network primitive detected: ${snippet}`);
       }
     });
+    return;
+  }
+
+  // Check manifest.json CSP
+  const manifestPath = resolve(REPO_ROOT, 'manifest.json');
+  if (!existsSync(manifestPath)) {
+    errors.push('Missing manifest.json file');
+  } else {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
+    const csp = manifest.content_security_policy?.extension_pages || '';
+    const connectDirectiveMatch = csp
+      .split(';')
+      .map((d) => d.trim())
+      .find((d) => /^connect-src\b/i.test(d));
+
+    if (!connectDirectiveMatch) {
+      errors.push(`manifest.json CSP violation: extension_pages CSP must contain connect-src directive, received: "${csp}"`);
+    } else {
+      const tokens = connectDirectiveMatch.replace(/^connect-src\s+/i, '').split(/\s+/).filter(Boolean);
+      if (tokens.length !== 1 || tokens[0] !== "'none'") {
+        errors.push(`manifest.json CSP violation: connect-src directive must contain exactly 'none', received: "${connectDirectiveMatch}"`);
+      }
+    }
   }
 
   // Scan src/ for unauthorized network primitives
@@ -195,26 +208,36 @@ export function auditStoreMetadataParity(errors = []) {
   const justificationSection = justificationSectionMatch ? justificationSectionMatch[0] : '';
 
   for (const perm of permissions) {
-    const rowPattern = new RegExp(`^\\|\\s*\`?${perm}\`?\\s*\\|.*\\|.*\\|$`, 'm');
+    const rowPattern = new RegExp(`^\\|\\s*\`?${escapeRegex(perm)}\`?\\s*\\|.*\\|.*\\|$`, 'm');
     if (!rowPattern.test(justificationSection)) {
       errors.push(`Manifest permission '${perm}' lacks a matching plain-English justification row in docs/CHROMEWEBSTORE.md`);
     }
   }
 
   // Checksums alignment if artifacts exist
-  const mainZip = resolve(REPO_ROOT, `knowthankyew-extension-v${pkg.version}.zip`);
   const shaFile = resolve(REPO_ROOT, 'SHA256SUMS');
-  if (existsSync(mainZip) && existsSync(shaFile)) {
+  if (existsSync(shaFile)) {
     const shaContent = readFileSync(shaFile, 'utf-8');
-    const zipName = `knowthankyew-extension-v${pkg.version}.zip`;
-    const lineMatch = shaContent.split('\n').find((line) => line.includes(zipName));
-    if (!lineMatch) {
-      errors.push(`SHA256SUMS does not contain an entry for '${zipName}'`);
+    const lines = shaContent.split('\n').map((l) => l.trim()).filter(Boolean);
+    const versionedZipRegex = new RegExp(`knowthankyew-extension-v${escapeRegex(pkg.version)}.*\\.zip$`);
+
+    const zipLines = lines.filter((line) => {
+      const parts = line.split(/\s+/);
+      return parts.length >= 2 && versionedZipRegex.test(parts[1]);
+    });
+
+    if (zipLines.length === 0) {
+      errors.push(`SHA256SUMS does not contain any entries matching version v${pkg.version}`);
     } else {
-      const [expectedSha] = lineMatch.trim().split(/\s+/);
-      const actualSha = createHash('sha256').update(readFileSync(mainZip)).digest('hex');
-      if (expectedSha !== actualSha) {
-        errors.push(`SHA256 checksum mismatch for '${zipName}': expected ${expectedSha}, got ${actualSha}`);
+      for (const line of zipLines) {
+        const [expectedSha, zipFilename] = line.split(/\s+/);
+        const zipPath = resolve(REPO_ROOT, zipFilename);
+        if (existsSync(zipPath)) {
+          const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
+          if (expectedSha !== actualSha) {
+            errors.push(`SHA256 checksum mismatch for '${zipFilename}': expected ${expectedSha}, got ${actualSha}`);
+          }
+        }
       }
     }
   }

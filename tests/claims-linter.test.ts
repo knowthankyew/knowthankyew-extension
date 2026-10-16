@@ -32,12 +32,14 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     expect(readmeDoc).toContain(`knowthankyew-extension-v${liveVersion}.zip`);
   });
 
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   it('guarantees 100% of declared manifest permissions have reviewer justifications in CHROMEWEBSTORE.md', () => {
     const permissions: string[] = manifest.permissions || [];
     const secMatch = storeDoc.match(/##\s*2\.\s*Permissions Justification[\s\S]*?(?=##\s*3|$)/i);
     const sec = secMatch ? secMatch[0] : '';
     for (const perm of permissions) {
-      const rowPattern = new RegExp(`^\\|\\s*\`?${perm}\`?\\s*\\|.*\\|.*\\|$`, 'm');
+      const rowPattern = new RegExp(`^\\|\\s*\`?${escapeRegex(perm)}\`?\\s*\\|.*\\|.*\\|$`, 'm');
       expect(
         rowPattern.test(sec),
         `Manifest permission '${perm}' lacks a matching plain-English justification row in docs/CHROMEWEBSTORE.md`
@@ -64,19 +66,26 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
   });
 
   it('verifies release zip packages and SHA256SUMS alignment when packaging artifacts exist', () => {
-    const mainZip = resolve(root, `knowthankyew-extension-v${pkg.version}.zip`);
     const shaFile = resolve(root, 'SHA256SUMS');
 
-    if (existsSync(mainZip) && existsSync(shaFile)) {
+    if (existsSync(shaFile)) {
       const shaContent = readFileSync(shaFile, 'utf-8');
-      const zipName = `knowthankyew-extension-v${pkg.version}.zip`;
-      expect(shaContent).toContain(zipName);
-      const lineMatch = shaContent.split('\n').find((l) => l.includes(zipName));
-      expect(lineMatch).toBeDefined();
-      if (lineMatch) {
-        const [expectedSha] = lineMatch.trim().split(/\s+/);
-        const actualSha = createHash('sha256').update(readFileSync(mainZip)).digest('hex');
-        expect(actualSha).toBe(expectedSha);
+      const lines = shaContent.split('\n').map((l) => l.trim()).filter(Boolean);
+      const versionedZipRegex = new RegExp(`knowthankyew-extension-v${escapeRegex(pkg.version)}.*\\.zip$`);
+
+      const zipLines = lines.filter((line) => {
+        const parts = line.split(/\s+/);
+        return parts.length >= 2 && versionedZipRegex.test(parts[1]);
+      });
+
+      expect(zipLines.length).toBeGreaterThan(0);
+      for (const line of zipLines) {
+        const [expectedSha, zipFilename] = line.split(/\s+/);
+        const zipPath = resolve(root, zipFilename);
+        if (existsSync(zipPath)) {
+          const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
+          expect(actualSha).toBe(expectedSha);
+        }
       }
     } else {
       // In clean CI environments before packaging, verify package script targets current versioning convention

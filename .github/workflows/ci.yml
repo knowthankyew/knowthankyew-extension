@@ -78,7 +78,9 @@ jobs:
           cat SHA256SUMS
 
       - name: Verify Package & Checksum Alignment
-        run: npm run audit:claims
+        run: |
+          shasum -a 256 -c SHA256SUMS
+          npm run audit:claims
 
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
