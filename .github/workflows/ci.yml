@@ -77,6 +77,9 @@ jobs:
           echo "ZIP Checksums:"
           cat SHA256SUMS
 
+      - name: Verify Package & Checksum Alignment
+        run: npm run audit:claims
+
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
 

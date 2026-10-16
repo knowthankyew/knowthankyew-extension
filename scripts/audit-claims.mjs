@@ -23,6 +23,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, join, dirname, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -190,8 +191,12 @@ export function auditStoreMetadataParity(errors = []) {
 
   // Manifest permissions justification coverage
   const permissions = manifest.permissions || [];
+  const justificationSectionMatch = storeDoc.match(/##\s*2\.\s*Permissions Justification[\s\S]*?(?=##\s*3|$)/i);
+  const justificationSection = justificationSectionMatch ? justificationSectionMatch[0] : '';
+
   for (const perm of permissions) {
-    if (!storeDoc.includes(`\`${perm}\``)) {
+    const rowPattern = new RegExp(`^\\|\\s*\`?${perm}\`?\\s*\\|.*\\|.*\\|$`, 'm');
+    if (!rowPattern.test(justificationSection)) {
       errors.push(`Manifest permission '${perm}' lacks a matching plain-English justification row in docs/CHROMEWEBSTORE.md`);
     }
   }
@@ -201,8 +206,16 @@ export function auditStoreMetadataParity(errors = []) {
   const shaFile = resolve(REPO_ROOT, 'SHA256SUMS');
   if (existsSync(mainZip) && existsSync(shaFile)) {
     const shaContent = readFileSync(shaFile, 'utf-8');
-    if (!shaContent.includes(`knowthankyew-extension-v${pkg.version}.zip`)) {
-      errors.push(`SHA256SUMS does not contain an entry for 'knowthankyew-extension-v${pkg.version}.zip'`);
+    const zipName = `knowthankyew-extension-v${pkg.version}.zip`;
+    const lineMatch = shaContent.split('\n').find((line) => line.includes(zipName));
+    if (!lineMatch) {
+      errors.push(`SHA256SUMS does not contain an entry for '${zipName}'`);
+    } else {
+      const [expectedSha] = lineMatch.trim().split(/\s+/);
+      const actualSha = createHash('sha256').update(readFileSync(mainZip)).digest('hex');
+      if (expectedSha !== actualSha) {
+        errors.push(`SHA256 checksum mismatch for '${zipName}': expected ${expectedSha}, got ${actualSha}`);
+      }
     }
   }
 }

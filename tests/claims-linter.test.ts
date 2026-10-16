@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
+import { createHash } from 'crypto';
 import { ALL_POLICY_PACKS } from '../src/core/policy-packs';
 import {
   auditZeroEgress,
@@ -33,9 +34,12 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
 
   it('guarantees 100% of declared manifest permissions have reviewer justifications in CHROMEWEBSTORE.md', () => {
     const permissions: string[] = manifest.permissions || [];
+    const secMatch = storeDoc.match(/##\s*2\.\s*Permissions Justification[\s\S]*?(?=##\s*3|$)/i);
+    const sec = secMatch ? secMatch[0] : '';
     for (const perm of permissions) {
+      const rowPattern = new RegExp(`^\\|\\s*\`?${perm}\`?\\s*\\|.*\\|.*\\|$`, 'm');
       expect(
-        storeDoc.includes(`\`${perm}\``),
+        rowPattern.test(sec),
         `Manifest permission '${perm}' lacks a matching plain-English justification row in docs/CHROMEWEBSTORE.md`
       ).toBe(true);
     }
@@ -65,7 +69,15 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
 
     if (existsSync(mainZip) && existsSync(shaFile)) {
       const shaContent = readFileSync(shaFile, 'utf-8');
-      expect(shaContent).toContain(`knowthankyew-extension-v${pkg.version}.zip`);
+      const zipName = `knowthankyew-extension-v${pkg.version}.zip`;
+      expect(shaContent).toContain(zipName);
+      const lineMatch = shaContent.split('\n').find((l) => l.includes(zipName));
+      expect(lineMatch).toBeDefined();
+      if (lineMatch) {
+        const [expectedSha] = lineMatch.trim().split(/\s+/);
+        const actualSha = createHash('sha256').update(readFileSync(mainZip)).digest('hex');
+        expect(actualSha).toBe(expectedSha);
+      }
     } else {
       // In clean CI environments before packaging, verify package script targets current versioning convention
       expect(pkg.scripts?.package).toContain('knowthankyew-extension-v${VERSION}.zip');
