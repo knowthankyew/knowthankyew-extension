@@ -237,6 +237,8 @@ export function auditStoreMetadataParity(errors = []) {
           if (expectedSha !== actualSha) {
             errors.push(`SHA256 checksum mismatch for '${zipFilename}': expected ${expectedSha}, got ${actualSha}`);
           }
+        } else {
+          errors.push(`Referenced artifact '${zipFilename}' in SHA256SUMS is missing on disk`);
         }
       }
     }
@@ -263,13 +265,16 @@ export function auditVocabulary(errors = []) {
       if (
         lower.includes('prohibits unprovable') ||
         lower.includes('prohibited word') ||
-        lower.includes('prohibited marketing') ||
-        lower.includes('inconclusive') // allow indeterminate scan warning
+        lower.includes('prohibited marketing')
       ) {
         return;
       }
+
+      // Allow indeterminate scan warning vocabulary "inconclusive" without suppressing prohibited words on the same line
+      const cleanedLine = line.replace(/\binconclusive\b/gi, '');
+
       for (const pattern of PROHIBITED_WORDS) {
-        if (pattern.test(line)) {
+        if (pattern.test(cleanedLine)) {
           errors.push(
             `Prohibited marketing word '${pattern.source}' found in ${relative(REPO_ROOT, docPath)}:${idx + 1}: ${line.trim()}`
           );

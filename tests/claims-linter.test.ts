@@ -82,10 +82,9 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
       for (const line of zipLines) {
         const [expectedSha, zipFilename] = line.split(/\s+/);
         const zipPath = resolve(root, zipFilename);
-        if (existsSync(zipPath)) {
-          const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
-          expect(actualSha).toBe(expectedSha);
-        }
+        expect(existsSync(zipPath), `Referenced artifact '${zipFilename}' in SHA256SUMS is missing on disk`).toBe(true);
+        const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
+        expect(actualSha).toBe(expectedSha);
       }
     } else {
       // In clean CI environments before packaging, verify package script targets current versioning convention
