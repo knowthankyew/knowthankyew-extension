@@ -26,7 +26,7 @@
     "demo": "python3 -m http.server 3000 --directory tests"
   },
   "dependencies": {
-    "@knowthankyew/policy-packs": "file:../policy-packs",
+    "@knowthankyew/policy-packs": "^1.0.1",
     "@knowthankyew/privacy-telemetry": "^1.0.1",
     "fflate": "^0.8.3",
     "react": "^19.0.0",
