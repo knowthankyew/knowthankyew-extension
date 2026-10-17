@@ -26,6 +26,9 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      - name: Checkout Shared Policy Packs
+        run: git clone --depth 1 https://github.com/knowthankyew/policy-packs.git ../policy-packs
+
       - name: Install Dependencies
         run: npm ci
 
