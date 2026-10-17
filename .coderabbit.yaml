@@ -35,7 +35,7 @@ reviews:
         Evaluate all code against these non-negotiable architectural invariants:
 
         1. ZERO-EGRESS & CSP INTEGRITY (CRITICAL):
-           - In production extension runtime code (`src/**` excluding opt-in developer loopback assist in `src/ml/local-ml-client.ts`), strictly prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches). Offline statutory monitoring scripts in `scripts/check-statutory-updates.mjs` run strictly in isolated CI environments.
+           - In production extension runtime code (`src/**` excluding opt-in developer loopback assist in `src/ml/local-ml-client.ts`), strictly prohibit any network egress (`fetch`, `XMLHttpRequest`, `WebSocket`, `navigator.sendBeacon`, dynamic `<script>` loading, external image/font fetches). Offline statutory monitoring is centralized in @knowthankyew/policy-packs in isolated CI environments.
            - Enforce strict `connect-src 'none'` in extension page CSP (`manifest.json`), with loopback permission granted only in explicit local-assist builds (`VITE_LOCAL_ML_ENABLED=true`).
            - Ensure all telemetry routing through `src/telemetry/` conforms to `@knowthankyew/privacy-telemetry` without outbound transmissions.
 

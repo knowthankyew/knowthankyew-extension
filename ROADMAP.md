@@ -90,7 +90,7 @@ The core reality engine is fully built, statically verified, and audited:
 
 ### Regulatory Upkeep Infrastructure
 
-- [x] **Automated Regulatory Upkeep for International Packs**: Extended `scripts/check-statutory-updates.mjs` to monitor **EUR-Lex** (EU Official Journal API / ELI) and **UK legislation.gov.uk** for amendments to covered directives and statutory instruments. Produces multi-jurisdiction markdown reports for automated GitHub Actions PR dispatch. No autonomous rule mutations.
+- [x] **Automated Regulatory Upkeep for International Packs**: Centralized into `@knowthankyew/policy-packs` to monitor Federal Register, **EUR-Lex** (EU Official Journal API / ELI), and **UK legislation.gov.uk** for amendments to covered directives and statutory instruments. Produces multi-jurisdiction markdown reports for automated GitHub Actions PR dispatch. No autonomous rule mutations.
 
 ---
 

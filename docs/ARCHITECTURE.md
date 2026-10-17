@@ -57,11 +57,11 @@ When Local ML assistance is active, `hardBurnAllData()` additionally issues a fi
 
 Hard burn is best-effort rather than transactional: tabs may be closed, restricted, or lack an injected content script, and those failures do not prevent cleanup of the other tabs or the extension context that initiated the burn.
 
-### Upstream Regulatory Pipeline & Declarative Policy Packs
-Statutory rules are decoupled from TypeScript ASTs into declarative JSON policy packs (`src/core/policy-packs/us-federal.json` and `state-arl.json`).
-- **Declarative Structure:** Each rule contains standard classifications, plain explanations, regex pattern strings verified against ReDoS via `safe-regex`, and regulatory tracking metadata (`apiKeywords`, `statuteCode`, `lastVerifiedDate`).
-- **Federal Register Monitor:** A GitHub Action (`.github/workflows/legal-statute-monitor.yml`) calls `scripts/check-statutory-updates.mjs` against the public Federal Register API to detect published final rules and notices touching tracked citations (ROSCA, FTC Negative Option Rule, Click-to-Cancel, FAA Arbitration).
-- **Human-in-the-Loop Draft PR Gate:** The workflow generates a GitHub **Draft Pull Request** with official Federal Register links and abstracts rather than autonomously mutating rules or synthesizing patches, eliminating AI hallucination risks in statutory enforcement.
+### Upstream Regulatory Pipeline & Centralized Policy Packs
+Statutory subscription rules are centralized in the portfolio's version-controlled engine **`@knowthankyew/policy-packs/subscriptions`** and consumed as a compile-time air-gapped dependency.
+- **Declarative Structure:** Each rule contains standard classifications, plain explanations, regex pattern strings verified against ReDoS via `safe-regex`, and legal grounding (`statuteRef`, `jurisdiction`, `effectiveDate`, `lastAudited`, `officialSourceUrl`).
+- **Centralized Daily Regulatory Monitor:** A daily GitHub Action (`.github/workflows/legal-statute-monitor.yml` in `knowthankyew/policy-packs`) queries the Federal Register (FTC, CFPB, HHS, DOL), EUR-Lex, UK Legislation, and State statutory feeds at `06:00 UTC`.
+- **Human-in-the-Loop Draft PR Gate:** Detected changes generate automated markdown diff reports and open draft PRs labeled `needs-attorney-review` in `knowthankyew/policy-packs` rather than autonomously mutating rules or synthesizing patches, eliminating AI hallucination risks in statutory enforcement.
 
 ### 2-Stage Legal Link Discovery Cascade
 Finding governing consumer contracts on multi-sided platforms (e.g., DoorDash Consumer vs. Dasher vs. Merchant terms) utilizes a 2-stage cascade:
@@ -108,17 +108,17 @@ Every release and pull request must satisfy these 12 core invariants, verified b
 
 ```
 knowthankyew-extension/
-├── .github/workflows/       # CI, Release, and Weekly Statutory Monitor workflows
+├── .github/workflows/       # CI and Release workflows
 ├── manifest.json            # Manifest V3 configuration (activeTab, storage, scripting)
 ├── package.json             # React 19 + TypeScript + @knowthankyew/privacy-telemetry
 ├── vite.config.ts           # Multi-browser bundling (Chrome, Firefox, Safari) with air-gap shims
 ├── public/                  # Manifest and generated PNG icons (16, 48, 128)
-├── scripts/                 # Asset generators & check-statutory-updates.mjs
+├── scripts/                 # Store asset renderers, demo recording & claims linter
 ├── src/
 │   ├── background/          # Ephemeral MV3 service worker
 │   ├── content/             # Isolated DOM extractor, link discovery & inline indicators
 │   ├── core/
-│   │   ├── policy-packs/    # Declarative JSON statutory packs (us-federal, state-arl, uk-dmcc, eu-crd)
+│   │   ├── policy-packs/    # Re-exports from @knowthankyew/policy-packs/subscriptions
 │   │   ├── rules/           # Typed statutory rule definitions
 │   │   └── engine.ts        # Dynamic policy compiler & reality engine scanner
 │   ├── ml/                  # Local ML loopback client (127.0.0.1:8420) & /burn contract
