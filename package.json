@@ -29,8 +29,8 @@
     "@knowthankyew/policy-packs": "^1.0.1",
     "@knowthankyew/privacy-telemetry": "^1.0.1",
     "fflate": "^0.8.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.5",
@@ -40,11 +40,11 @@
     "@types/safe-regex": "^1.1.6",
     "@vitejs/plugin-react": "^6.1.2",
     "jsdom": "^29.1.1",
-    "playwright": "^1.64.0",
-    "puppeteer": "^25.13.0",
+    "playwright": "^1.64.1",
+    "puppeteer": "^25.14.0",
     "safe-regex": "^2.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   }
 }
