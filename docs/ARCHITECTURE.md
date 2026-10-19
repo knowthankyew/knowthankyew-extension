@@ -1,3 +1,9 @@
+<!-- diagram-meta
+  last-validated: 2026-10-19
+  covers: [src/**, manifest.json, vite.config.ts]
+  generated-by: manual
+-->
+
 # Architecture & Invariants Specification: KnowThankYew Reality Engine
 
 > Technical architecture, security boundaries, and portfolio alignment for `knowthankyew-extension`.
@@ -10,7 +16,82 @@
 
 ---
 
-## 2. The 5 Architectural Pillars
+## 2. System Architecture & Ecosystem Relationships
+
+### A. C4 Container Diagram: Extension & Portfolio Ecosystem
+
+```mermaid
+flowchart TD
+    subgraph UserContext["User Context"]
+        Consumer["👤 Consumer / Citizen"]
+    end
+
+    subgraph Browser["Client Browser Environment"]
+        subgraph HostTab["Host Page Tab (Isolated World)"]
+            DOM["🌐 Host Page DOM<br/><i>(Checkout Forms, Terms Modals)</i>"]
+            Scanner["🔍 Content Scanner<br/><code>content/scanner.ts</code>"]
+            ShadowUI["🛡️ Closed Shadow DOM Badges<br/><code>&lt;kty-inline-indicator&gt;</code>"]
+        end
+
+        subgraph ExtSandbox["knowthankyew-extension Sandbox (MV3)"]
+            Popup["💻 Popup UI (React 19)<br/><code>src/popup/App.tsx</code>"]
+            BG["⚙️ Background Worker<br/><code>src/background/service-worker.ts</code>"]
+            Engine["⚡ Core Scanner Engine<br/><code>src/core/engine.ts</code>"]
+        end
+    end
+
+    subgraph CompileTime["Portfolio Dependencies (Compile-Time Air-Gapped)"]
+        PP["📦 @knowthankyew/policy-packs/subscriptions<br/><i>Statutory rules, ReDoS-verified regex</i>"]
+        PT["📦 @knowthankyew/privacy-telemetry/react<br/><i>Volatile buffer, getPrivacyClaims(), burn</i>"]
+    end
+
+    subgraph LocalMachine["Local Machine (Optional Sidecar)"]
+        MLWorker["🧠 Local ML Inference (:8420)<br/><i>SmolLM2/Gemma reranker &amp; /burn</i>"]
+    end
+
+    subgraph DownstreamPortfolio["Downstream Reality Engines (Zero-Storage Handoff)"]
+        LeaseAudit["📄 lease-audit<br/><i>Tenancy Engine</i>"]
+        CareCheck["🏥 careCheck<br/><i>Medical Billing</i>"]
+        BillOfRights["📜 bill-of-rights-bot<br/><i>Dispute Engine</i>"]
+    end
+
+    %% Interactions
+    Consumer -->|"Navigates & Interacts"| DOM
+    Consumer -->|"Clicks Toolbar / Inspects"| Popup
+
+    Popup -->|"Injects on Demand (activeTab)"| Scanner
+    Scanner -->|"Extracts Text Segments"| Engine
+    PP -.->|"Compile-Time Rules Injected"| Engine
+    Engine -->|"Categorized Findings"| Popup
+
+    Scanner -->|"Renders Closed Mode"| ShadowUI
+    ShadowUI -.->|"Overlay Above"| DOM
+
+    Popup -->|"Logs Operational Spans"| PT
+    BG ---|"Syncs Badges"| Popup
+
+    %% Optional Local ML Loopback
+    Scanner -.->|"POST /classify-links (if active)"| MLWorker
+    Popup -.->|"POST /burn (on Nuclear Burn)"| MLWorker
+
+    %% Structured Handoff
+    Popup -->|"Deep-Link Handoff (Hash/State)"| LeaseAudit
+    Popup -->|"Deep-Link Handoff (Hash/State)"| CareCheck
+    Popup -->|"Deep-Link Handoff (Hash/State)"| BillOfRights
+
+    classDef core fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef browser fill:#0f172a,stroke:#64748b,stroke-width:1px,color:#f8fafc;
+    classDef pkg fill:#14532d,stroke:#22c55e,stroke-width:2px,color:#f8fafc;
+    classDef opt fill:#78350f,stroke:#f59e0b,stroke-width:1px,stroke-dasharray: 5 5,color:#f8fafc;
+    classDef ext fill:#312e81,stroke:#818cf8,stroke-width:1px,color:#f8fafc;
+
+    class Popup,Engine,Scanner,ShadowUI,BG core;
+    class PP,PT pkg;
+    class MLWorker opt;
+    class LeaseAudit,CareCheck,BillOfRights ext;
+```
+
+### B. Execution Sandbox & Data Flow
 
 ```mermaid
 flowchart LR
