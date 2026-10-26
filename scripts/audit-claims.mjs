@@ -255,6 +255,7 @@ export function auditVocabulary(errors = []) {
     resolve(REPO_ROOT, 'docs/CHROMEWEBSTORE.md'),
     resolve(REPO_ROOT, 'src/popup/App.tsx'),
     resolve(REPO_ROOT, 'src/options/OptionsApp.tsx'),
+    resolve(REPO_ROOT, 'docs/ARCHITECTURE.md'),
   ];
 
   for (const docPath of docsToCheck) {
