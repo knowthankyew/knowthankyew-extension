@@ -2,6 +2,13 @@
  * Shared Claims & Privacy Invariant Linter Core (@knowthankyew)
  * Provides string-aware comment stripping, network primitive detection,
  * and banned vocabulary scanning.
+ *
+ * DEFENSE-IN-DEPTH ARCHITECTURE NOTE:
+ * Static regex/AST scanning is a build-time guardrail against accidental developer regression.
+ * Static pattern matching cannot detect dynamic computed URLs (e.g. string concatenation
+ * `fetch(a + b)` or variable dynamic imports `import(u)`). The definitive runtime security
+ * boundaries across the knowthankyew portfolio are strict Content Security Policies (CSP),
+ * loopback socket isolation, and air-gapped container network policies.
  */
 
 /**
