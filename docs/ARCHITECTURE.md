@@ -1,6 +1,6 @@
 <!-- diagram-meta
   last-validated: 2026-10-27
-  validated-commit: 026f529
+  validated-commit: 0aa6d49
   covers: [src/**, manifest.json, vite.config.ts]
   generated-by: manual
 -->
