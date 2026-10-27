@@ -11,6 +11,7 @@ import {
   auditArchitectureDiagrams,
   auditPortfolioMasterBrief,
   scanDocumentationForVocabulary,
+  REMOTE_ASSET_URL_PATTERN,
 // @ts-expect-error - ESM audit script import without bundled d.ts
 } from '../scripts/audit-claims.mjs';
 
@@ -189,6 +190,68 @@ knowthankyew-extension/
       ],
     });
     expect(benignErrors).toEqual([]);
+
+    // Negative control: REMOTE_ASSET_URL_PATTERN detects remote srcset, image-set(), poster, and data attributes without matching local assets
+    const remoteSnippets = [
+      '<img srcset="https://evil.com/img.png 1x, https://evil.com/img2x.png 2x">',
+      '<img srcset="//cdn.evil.com/img.png 1x">',
+      '<img srcset=https://evil.com/img.png>',
+      '<img srcset=//evil.com/img.png>',
+      '<img srcset="author\'s-cut.png 1x, https://evil.com/img.png 2x">',
+      '<img srcset=\'author"s-cut.png 1x, https://evil.com/img.png 2x\'>',
+      'background-image: image-set("https://evil.com/img.png" 1x);',
+      "background-image: image-set(url('https://evil.com/img.png') 1x);",
+      'background-image: image-set(url("local.avif") type("image/avif"), "https://evil.com/img.png" type("image/png"));',
+      'background-image: image-set("local;semi.png" 1x, "https://evil.com/img.png" 2x);',
+      'background-image: image-set(\'local;semi.png\' 1x, \'https://evil.com/img.png\' 2x);',
+      '<script src="https://evil.com/app.js"></script>',
+      '<script src=https://evil.com/app.js></script>',
+      '<link rel="stylesheet" href="//evil.com/style.css">',
+      '<link rel=stylesheet href=https://evil.com/style.css>',
+      '<video poster="https://evil.com/poster.jpg"></video>',
+      '<video poster=https://evil.com/poster.jpg></video>',
+      '<object data="https://evil.com/plugin.swf"></object>',
+      '<object data=https://evil.com/plugin.swf></object>',
+      '<link rel="preload" as="image" imagesrcset="https://evil.com/img.png">',
+      '<img src="ht\ttps://evil.com/img.png">',
+      '<img src="https&#9;://evil.com/img.png">',
+      '<img src="  https://evil.com/img.png">',
+      '<img src="https&#x3a;//evil.com/img.png">',
+      '<img src="https&colon;//evil.com/img.png">',
+      '<img src="https&NewLine;://evil.com/img.png">',
+      '@import /**/ "https://evil.com/style.css";',
+      'background: url("https\\3a //evil.com/bg.png")',
+    ];
+    for (const snippet of remoteSnippets) {
+      expect(REMOTE_ASSET_URL_PATTERN.test(snippet)).toBe(true);
+    }
+
+    const localSnippets = [
+      '<img srcset="./icon-16.png 1x, ./icon-32.png 2x">',
+      '<img srcset=./icon-16.png>',
+      '<img srcset="author\'s-cut.png 1x, ./icon-32.png 2x">',
+      'background-image: image-set("./icon-16.png" 1x, "./icon-32.png" 2x);',
+      'background-image: image-set("local;semi.png" 1x, "./icon-32.png" 2x);',
+      'background-image: image-set(url("local.avif") type("image/avif"), "local.png" type("image/png"));',
+      '<link rel="stylesheet" href="./style.css">',
+      "background: url('./bg.png');",
+      '<img src="./assets/logo.png">',
+      '<img src=./assets/logo.png>',
+      '<img src="  ./local.png">',
+      '<div data-src="https://evil.com/img.png"></div>',
+      '<div data-href="https://evil.com"></div>',
+      '<img src="./local&#9;.png">',
+      '<img src="./local&Tab;.png">',
+      '<video poster="./poster.jpg"></video>',
+      '<video poster=./poster.jpg></video>',
+      '<object data="./local.swf"></object>',
+      '<object data=./local.swf></object>',
+      '<img src="./local.png" alt="Status&#x3a; OK">',
+      'body { font-family: "Custom\\20 Font", sans-serif; }',
+    ];
+    for (const snippet of localSnippets) {
+      expect(REMOTE_ASSET_URL_PATTERN.test(snippet)).toBe(false);
+    }
   });
 
   it('verifies Portfolio Master Brief parity (test count and test file inventory) if brief is present', () => {

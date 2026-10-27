@@ -181,6 +181,31 @@ function validateManifestCsp(manifestPath, label, errors) {
   }
 }
 
+function decodeMarkupForAudit(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/&colon;/gi, ':')
+    .replace(/&(?:Tab|NewLine);/gi, '')
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#([0-9]+);?/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/\\([0-9a-f]{1,6})\s?/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\([:/.])/g, '$1')
+    .replace(/[\t\r\n]+/g, '');
+}
+
+const RAW_REMOTE_ASSET_PATTERN =
+  /(?<![a-zA-Z0-9_-])(?:src|href|poster|data)\s*=\s*(?:['"]\s*(?:https?:|\/\/)|(?:https?:|\/\/))|(?<![a-zA-Z0-9_-])(?:imagesrcset|srcset)\s*=\s*(?:"[^"]*?(?:https?:|\/\/)|'[^']*?(?:https?:|\/\/)|(?:https?:|\/\/))|@import\s+(?:['"]\s*(?:https?:|\/\/)|url\s*\(\s*['"]?\s*(?:https?:|\/\/))|\burl\s*\(\s*['"]?\s*(?:https?:|\/\/)|\bimage-set\s*\((?:[^;{}<"']|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')*?(?:"(?:\\.|[^"\\])*?(?:https?:|\/\/)|'(?:\\.|[^'\\])*?(?:https?:|\/\/)|(?:https?:|\/\/))/i;
+
+class RemoteAssetPattern extends RegExp {
+  test(content) {
+    if (super.test(content)) return true;
+    return super.test(decodeMarkupForAudit(content));
+  }
+}
+
+export const REMOTE_ASSET_URL_PATTERN = new RemoteAssetPattern(RAW_REMOTE_ASSET_PATTERN.source, 'i');
+
 /**
  * Audit 1: Zero-Egress & Air-Gapped Privacy Invariants
  */
@@ -264,6 +289,8 @@ export function auditZeroEgress(errors = [], { overrideCodeSnippets = null, requ
     const distManifest = resolve(distDir, 'manifest.json');
     if (existsSync(distManifest)) {
       validateManifestCsp(distManifest, `${distFolderName}/manifest.json`, errors);
+    } else {
+      errors.push(`Missing required manifest in distribution directory: ${distFolderName}/manifest.json`);
     }
 
     const jsFiles = getAssetFiles(distDir, ['.js']);
@@ -283,11 +310,10 @@ export function auditZeroEgress(errors = [], { overrideCodeSnippets = null, requ
 
     // Inspect .html and .css files to verify zero external remote asset egress (e.g. http://, https://, or //)
     const markupFiles = getAssetFiles(distDir, ['.html', '.css']);
-    const remoteUrlPattern = /\b(?:src|href)\s*=\s*['"](?:https?:|\/\/)|@import\s+(?:['"](?:https?:|\/\/)|url\s*\(\s*['"]?(?:https?:|\/\/))|\burl\s*\(\s*['"]?(?:https?:|\/\/)/i;
     for (const markupFile of markupFiles) {
       const content = readFileSync(markupFile, 'utf-8');
       const relMarkupPath = relative(REPO_ROOT, markupFile).split(sep).join('/');
-      if (remoteUrlPattern.test(content)) {
+      if (REMOTE_ASSET_URL_PATTERN.test(content)) {
         errors.push(`Production bundle markup violation in ${relMarkupPath}: Remote asset reference detected`);
       }
     }
