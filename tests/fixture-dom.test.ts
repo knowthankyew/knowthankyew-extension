@@ -91,6 +91,19 @@ describe('DOM Fixture Unit & Redaction Assertion (fixture-dom.test.ts)', () => {
       expect(match.matchedSnippet).not.toContain('victim@example.com');
       expect(match.matchedSnippet).not.toContain('4111-2222-3333-4444');
     }
+
+    // Verify live demo fixtures (tests/demo.html, docs/demo.html, tests/fixture.html) stay in sync
+    // and contain predatory consent checkboxes that receive Closed Shadow DOM inline indicators
+    const demoHtml = readFileSync(resolve(__dirname, 'demo.html'), 'utf8');
+    const docsDemoHtml = readFileSync(resolve(__dirname, '../docs/demo.html'), 'utf8');
+    const fixtureHtml = readFileSync(resolve(__dirname, 'fixture.html'), 'utf8');
+    expect(docsDemoHtml).toBe(demoHtml);
+    expect(fixtureHtml).toBe(demoHtml);
+
+    document.body.innerHTML = demoHtml;
+    const demoScan = executeScan();
+    expect(demoScan.summary.critical).toBe(2);
+    expect(document.querySelectorAll('[data-kty-indicator-host]').length).toBe(2);
   });
 
   it('resists ReDoS attacks on hostile repetitive input with bounded execution time (<25ms)', () => {

@@ -75,6 +75,9 @@ jobs:
           echo "Generated SHA256 Checksums:"
           cat SHA256SUMS
 
+      - name: Audit Store Metadata, Claims & Zero-Egress Invariants
+        run: node scripts/audit-claims.mjs --require-artifacts
+
       - name: Generate CycloneDX SBOM
         run: npx --yes @cyclonedx/cdxgen -o bom.json
 

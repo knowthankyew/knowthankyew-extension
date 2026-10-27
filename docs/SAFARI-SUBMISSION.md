@@ -22,7 +22,7 @@ Safari uses the standard Manifest V3 specification with an Xcode native containe
 ### Prerequisites
 - macOS 14 (Sonoma) or macOS 15 (Sequoia)
 - Xcode 15 or 16 (`xcode-select --install`)
-- Node.js v20.19+ or v22.12+ (required for Vite 8)
+- Node.js v22.12+ (`node --version`, required for Vite 8 and Vitest 5)
 
 ### Step 1: Compile the Clean Safari Distribution
 ```bash
@@ -92,8 +92,8 @@ Apple requires all App Store submissions to include a `PrivacyInfo.xcprivacy` di
    - Check **"Allow Unsigned Extensions"**.
 4. In Xcode, select the `KnowThankYew (macOS)` scheme and click **Run** (⌘R).
 5. The container app will launch. In Safari Settings → **Extensions**, check the box next to **KnowThankYew Reality Engine**.
-6. Open `tests/fixtures/checkout-form.html` (or run `npm run demo`) and click the shield toolbar icon to verify inline indicators and legal analysis.
-7. Click **"Burn Local Data"** to verify multi-context Nuclear Amnesia teardown.
+6. Run `npm run demo` and open `http://localhost:3000/demo.html` (served from `tests/demo.html`), then click the shield toolbar icon to verify Closed Shadow DOM inline indicators and legal analysis.
+7. Click **"🔥 HARD BURN"** in the popup (or **"🔥 BURN ALL DATA ACROSS ALL DOMAINS"** in the Options dashboard) to verify multi-context Nuclear Amnesia teardown.
 
 ---
 

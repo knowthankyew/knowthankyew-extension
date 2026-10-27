@@ -33,7 +33,7 @@ If you are using Firefox, Safari, or an operating system where Chrome's built-in
 
 ### Why a Loopback Worker?
 - **Pillar 1 Invariant (Zero Cloud Egress)**: Data is transmitted strictly across your machine's loopback interface (`localhost` / `127.0.0.1`). Nothing leaves your device.
-- **Pillar 5 Invariant (Hard Burn Handshake)**: When you click "Burn Local Data", KnowThankYew sends a `/burn` command to the local worker to flush all in-memory cache and prompt buffers.
+- **Pillar 5 Invariant (Hard Burn Handshake)**: When you click **"🔥 HARD BURN"** (or **"🔥 BURN ALL DATA ACROSS ALL DOMAINS"** in the Options dashboard), KnowThankYew sends a `POST /burn` command to the local worker to flush all in-memory cache and prompt buffers.
 
 ### Quick Start Reference Worker
 The repository includes a reference local server implementation:
@@ -42,12 +42,13 @@ The repository includes a reference local server implementation:
 git clone https://github.com/knowthankyew/knowthankyew-extension.git
 cd knowthankyew-extension
 
-# Start the local loopback worker
+# Start the local loopback worker (or run: npm run ml:serve)
 node scripts/mock-local-ml-worker.mjs
 ```
 The worker will listen on `http://127.0.0.1:8420` and fulfill:
 - `GET /health` - Diagnostic and availability status
-- `POST /analyze` - Plain-language translation
+- `POST /analyze` / `POST /explain` - Plain-language clause translation
+- `POST /classify-links` - Stage 2 semantic reranking for discovered legal links
 - `POST /burn` - Memory purge protocol
 
 > **Security Note on CORS & Private Network Access (PNA)**:  

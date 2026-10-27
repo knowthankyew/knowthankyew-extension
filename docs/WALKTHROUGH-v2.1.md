@@ -16,7 +16,7 @@
 4. **Action Engine & Specialist Tool Handoff**: Connects on-page statutory findings directly to portfolio remedy tools (`bill-of-rights-bot`, `careCheck`, `lease-audit`) via an ephemeral, amnesiac JSON handoff protocol.
 5. **Universal Document Auditing & PDF Detection**: Adds context-aware detection for Chromium-isolated native PDF viewer tabs, an auto-focused zero-permission `Cmd+V` Quick-Paste scratchpad, and a full-page drag-and-drop Document Auditor dashboard.
 
-Throughout all of these capabilities, the engine strictly maintains its **Zero-Egress Invariant** (`connect-src 'none'`), zero external data collection, and atomic Nuclear Hard Burn amnesia.
+Throughout all of these capabilities, the engine strictly maintains its **Zero-Egress Invariant** (`connect-src 'none'`), zero external data collection, and multi-context Nuclear Hard Burn amnesia.
 
 ---
 
@@ -31,7 +31,7 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 │ • Closed Shadow DOM Indicators │ • US Federal (ROSCA, FAA, FTC §5) │ • Ephemeral Session Handoff       │
 │ • Context Checkbox Targeting   │ • State ARL (CA, NY, IL, CO, OR)  │ • Bill of Rights Bot Integration  │
 │ • Zero Host Style Leakage      │ • UK DMCC Act 2024                │ • CareCheck & Lease-Audit Routing │
-│ • Atomic Hard Burn Teardown    │ • EU Consumer Rights Directive    │ • 25-Day Calendar Reminders       │
+│ • Multi-Tab Hard Burn Teardown │ • EU Consumer Rights Directive    │ • 25-Day Calendar Reminders       │
 ├────────────────────────────────┴───────────────────────────────────┴───────────────────────────────────┤
 │                                      AUDIT & TRANSPARENCY LAYER                                        │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -52,7 +52,7 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - Uses `position: absolute` floating overlays to prevent layout shifts.
   - Form inputs are never modified or blocked; indicators fail silently if selectors do not match.
   - Zero `innerHTML`: All text and nodes are constructed via pure document text primitives to eliminate XSS surfaces.
-  - Destroyed atomically across all tabs upon Nuclear Hard Burn.
+  - Teardown is broadcast to every open tab upon Nuclear Hard Burn (best-effort cleanup across restricted or background tabs).
 
 ### B. International Jurisdiction Policy Packs
 - **UK Digital Markets, Competition and Consumers Act 2024 (`src/core/policy-packs/uk-dmcc.json`)**:
@@ -62,8 +62,8 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
   - Flags bundled consent profiling under GDPR and statutory withdrawal right waivers.
 - **Expanded State Automatic Renewal Laws (`src/core/policy-packs/state-arl.json`)**:
   - Ingests Colorado (C.R.S. § 6-1-732), Illinois (ACRA 815 ILCS 601), and Oregon (ORS § 646A.295) notification windows.
-- **Multi-Jurisdiction Statutory Upkeep (`scripts/check-statutory-updates.mjs`)**:
-  - Automated CI script extended to query **EUR-Lex** (EU Official Journal API / ELI) and **UK legislation.gov.uk** alongside the US Federal Register, producing consolidated markdown diff reports.
+- **Centralized Multi-Jurisdiction Statutory Upkeep (`@knowthankyew/policy-packs/subscriptions`)**:
+  - Statutory rules and daily regulatory monitoring across the **US Federal Register**, **EUR-Lex** (EU Official Journal API / ELI), and **UK legislation.gov.uk** are centralized in `knowthankyew/policy-packs` (`.github/workflows/legal-statute-monitor.yml`), producing consolidated markdown diff reports and `needs-attorney-review` draft PRs.
 
 ### C. Clean-State Proof of Work & Evaluation Transparency (Milestone 7 Phase 1.5)
 - **Resolving the "Clean vs. Uninspected" Dilemma**:
@@ -128,22 +128,22 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 
 ## 3. Test & Verification Matrix (v2.1.0)
 
-### Vitest Suite (189 / 189 Tests Passed Across 25 Test Suites)
+### Vitest Suite (196 / 196 Tests Passed Across 25 Test Suites)
 
 ```
 Test Files  25 passed (25)
-     Tests  189 passed (189)
+     Tests  196 passed (196)
 ```
 
 | Test Suite | File | Focus & Assertions Verified |
 | :--- | :--- | :--- |
 | **Handoff Bridge & Actions** | [tests/handoff-bridge.test.tsx](../tests/handoff-bridge.test.tsx) | Ephemeral `sessionStorage` dispatch, `?kty_handoff=1` flags, PDF quick-paste `Cmd+V` auto-scan, Hard Burn purge |
 | **Proof of Work & Scope** | [tests/proof-of-work.test.tsx](../tests/proof-of-work.test.tsx) | Telemetry extraction metrics, statutory checklist rendering, low-watermark sparse scan warnings (< 250 chars) |
-| **Closed Shadow DOM Defense** | [tests/inline-indicators.test.ts](../tests/inline-indicators.test.ts) | Encapsulation inside `mode: 'closed'`, pure text node safety, zero CSS host leakage, atomic DOM cleanup |
+| **Closed Shadow DOM Defense** | [tests/inline-indicators.test.ts](../tests/inline-indicators.test.ts) | Encapsulation inside `mode: 'closed'`, pure text node safety, zero CSS host leakage, clean DOM cleanup |
 | **Amnesia & Multi-Tab Sync** | [tests/amnesia-coordinator.test.ts](../tests/amnesia-coordinator.test.ts) | Dual-broadcast `BroadcastChannel` synchronization, OptionsApp state sync, permanent tombstone flags |
 | **Options Document Burn** | [tests/options-burn.test.ts](../tests/options-burn.test.ts) | Standalone document auditor memory incinerator, tab switching resilience, byte meter accuracy |
 | **International Policy Packs** | [tests/policy-packs.test.ts](../tests/policy-packs.test.ts) | Schema validation and regex compilation for US Federal, State ARL, UK DMCC, and EU CRD packs |
-| **Static ReDoS Elimination** | [tests/redos-static.test.ts](../tests/redos-static.test.ts) | Mathematical verification via `safe-regex` proving 0 exponential backtracking across all 66 patterns |
+| **Static ReDoS Screening** | [tests/redos-static.test.ts](../tests/redos-static.test.ts) | Static heuristic screening via `safe-regex` and bounded adversarial timing checks across all 66 patterns |
 | **Real Chromium E2E** | [tests/chromium-e2e.test.ts](../tests/chromium-e2e.test.ts) | Puppeteer Chromium browser test verifying 0 external network requests during checkout inspection |
 | **Bundle Egress Invariants** | [tests/bundle-invariants.test.ts](../tests/bundle-invariants.test.ts) | 100% absence of `fetch`/XHR primitives in `dist/`, CSP `connect-src 'none'`, Safari/Firefox manifest invariants |
 | **Local ML Loopback E2E** | [tests/chromium-local-ml-e2e.test.ts](../tests/chromium-local-ml-e2e.test.ts) | Loopback ML worker connection, options status indicators, popup tooltipped badge, `/burn` handshake |

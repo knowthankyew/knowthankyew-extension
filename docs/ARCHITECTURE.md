@@ -1,5 +1,5 @@
 <!-- diagram-meta
-  last-validated: 2026-10-26
+  last-validated: 2026-10-27
   validated-commit: 026f529
   covers: [src/**, manifest.json, vite.config.ts]
   generated-by: manual
@@ -30,14 +30,19 @@ flowchart TD
     subgraph Browser["Client Browser Environment"]
         subgraph HostTab["Host Page Tab (Isolated World)"]
             DOM["🌐 Host Page DOM<br/><i>(Checkout Forms, Terms Modals)</i>"]
-            Scanner["🔍 Content Scanner<br/><code>content/scanner.ts</code>"]
-            ShadowUI["🛡️ Closed Shadow DOM Badges<br/><code>&lt;kty-inline-indicator&gt;</code>"]
+            Scanner["🔍 Content Scanner<br/><code>src/content/scanner.ts</code>"]
+            ShadowUI["🛡️ Closed Shadow DOM Badges<br/><code>span[data-kty-indicator-host]</code><br/><code>src/content/inline-indicators.ts</code>"]
+        end
+
+        subgraph CoreEngine["Shared On-Device Core (Bundled per Context)"]
+            Engine["⚡ Core Scanner Engine<br/><code>src/core/engine.ts</code>"]
         end
 
         subgraph ExtSandbox["knowthankyew-extension Sandbox (MV3)"]
             Popup["💻 Popup UI (React 19)<br/><code>src/popup/App.tsx</code>"]
+            Options["📄 Options &amp; PDF Auditor<br/><code>src/options/OptionsApp.tsx</code><br/><code>src/options/pdf-extractor.ts</code>"]
             BG["⚙️ Background Worker<br/><code>src/background/service-worker.ts</code>"]
-            Engine["⚡ Core Scanner Engine<br/><code>src/core/engine.ts</code>"]
+            Nano["🧬 Chrome Built-in AI Adapter<br/><code>src/ml/chrome-ai-adapter.ts</code>"]
         end
     end
 
@@ -47,38 +52,45 @@ flowchart TD
     end
 
     subgraph LocalMachine["Local Machine (Optional Sidecar)"]
-        MLWorker["🧠 Local ML Inference (:8420)<br/><i>SmolLM2/Gemma reranker &amp; /burn</i>"]
+        MLWorker["🧠 Local ML Inference (:8420)<br/><code>src/ml/local-ml-client.ts</code><br/><i>SmolLM2/Gemma reranker &amp; /burn</i>"]
     end
 
     subgraph DownstreamPortfolio["Downstream Reality Engines (Zero-Storage Handoff)"]
         LeaseAudit["📄 lease-audit<br/><i>Tenancy Engine</i>"]
         CareCheck["🏥 careCheck<br/><i>Medical Billing</i>"]
         BillOfRights["📜 bill-of-rights-bot<br/><i>Dispute Engine</i>"]
+        WarrantyWatch["🛡️ warranty-watch<br/><i>Warranty Engine</i>"]
     end
 
     %% Interactions
     Consumer -->|"Navigates & Interacts"| DOM
     Consumer -->|"Clicks Toolbar / Inspects"| Popup
+    Consumer -->|"Uploads PDF / Audits Text"| Options
 
     Popup -->|"Injects on Demand (activeTab)"| Scanner
-    Scanner -->|"Extracts Text Segments"| Engine
+    Scanner -->|"Extracts Visible Legal Text"| Engine
+    Options -->|"Local Pasted / PDF Text"| Engine
     PP -.->|"Compile-Time Rules Injected"| Engine
-    Engine -->|"Categorized Findings"| Popup
+    Engine -->|"PageScanResult (findings & sanitized snippets)"| Popup
 
     Scanner -->|"Renders Closed Mode"| ShadowUI
     ShadowUI -.->|"Overlay Above"| DOM
 
     Popup -->|"Logs Operational Spans"| PT
+    Options -->|"Logs Operational Spans"| PT
+    Popup -.->|"On-Device Explain (if available)"| Nano
     BG ---|"Syncs Badges"| Popup
 
     %% Optional Local ML Loopback
-    Scanner -.->|"POST /classify-links (if active)"| MLWorker
-    Popup -.->|"POST /burn (on Nuclear Burn)"| MLWorker
+    Popup -.->|"POST /classify-links & /explain (if active)"| MLWorker
+    Popup -.->|"POST /burn (on Hard Burn)"| MLWorker
+    Options -.->|"POST /burn (on Hard Burn)"| MLWorker
 
     %% Structured Handoff
-    Popup -->|"Deep-Link Handoff (Hash/State)"| LeaseAudit
-    Popup -->|"Deep-Link Handoff (Hash/State)"| CareCheck
-    Popup -->|"Deep-Link Handoff (Hash/State)"| BillOfRights
+    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| LeaseAudit
+    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| CareCheck
+    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| BillOfRights
+    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| WarrantyWatch
 
     classDef core fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
     classDef browser fill:#0f172a,stroke:#64748b,stroke-width:1px,color:#f8fafc;
@@ -86,10 +98,10 @@ flowchart TD
     classDef opt fill:#78350f,stroke:#f59e0b,stroke-width:1px,stroke-dasharray: 5 5,color:#f8fafc;
     classDef ext fill:#312e81,stroke:#818cf8,stroke-width:1px,color:#f8fafc;
 
-    class Popup,Engine,Scanner,ShadowUI,BG core;
+    class Popup,Options,Engine,Scanner,ShadowUI,BG core;
     class PP,PT pkg;
-    class MLWorker opt;
-    class LeaseAudit,CareCheck,BillOfRights ext;
+    class MLWorker,Nano opt;
+    class LeaseAudit,CareCheck,BillOfRights,WarrantyWatch ext;
 ```
 
 ### B. Execution Sandbox & Data Flow
@@ -98,14 +110,14 @@ flowchart TD
 flowchart LR
     subgraph Execution["Local Tab Sandbox"]
         DOM["Target Page DOM"]
-        Ext["dom-extractor.ts"]
-        RE["Core Rule Engine<br/>(FTC/FAA/ARL)"]
+        Ext["src/content/dom-extractor.ts"]
+        RE["Core Rule Engine<br/>(src/core/engine.ts)"]
     end
 
     subgraph MV3Runtime["Extension Context"]
-        SW["Background Worker<br/>(Ephemeral)"]
-        Pop["Popup React 19 UI"]
-        TM["TelemetryManager<br/>(Volatile Buffer)"]
+        SW["Background Worker<br/>(src/background/service-worker.ts)"]
+        Pop["Popup &amp; Options UI<br/>(src/popup/App.tsx, src/options/OptionsApp.tsx)"]
+        TM["TelemetryManager<br/>(src/telemetry/client.ts)"]
     end
 
     DOM -->|"Batched Extract"| Ext
@@ -118,7 +130,7 @@ flowchart LR
 ### Pillar 1: Volatile Memory State & Local-Only Processing
 The extension never writes document excerpts, page URLs, or audit traces to disk. Operational telemetry is configured as `memory_only`, and scan results are held in the popup and injected content-script contexts. The current implementation does not use `chrome.storage.local` as the telemetry or scan-result store, and it never uses `chrome.storage.sync`.
 
-The `storage` permission is retained so the hard-burn routine can clear the extension's local storage namespace and so future local-only settings can be added without changing the privacy boundary. In the current release, `chrome.storage.local` is a cleanup target rather than the source of truth for runtime telemetry or findings.
+The `storage` permission is retained so the Nuclear Hard Burn routine can purge the extension's local storage namespace and the Options dashboard can report local storage byte usage (`getBytesInUse()`). In the current release, `chrome.storage.local` is a defensive cleanup and storage-meter inspection target rather than the source of truth for runtime telemetry or findings.
 
 ### Pillar 2: Compile-Time Dead-Code Shims & CSP Boundaries
 - **Manifest CSP:** `extension_pages` specifies `connect-src 'none'`, physically forbidding popup and background worker environments from initiating outbound network traffic.
@@ -180,7 +192,7 @@ Every release and pull request must satisfy these 12 core invariants, verified b
 | 7 | **Zero `innerHTML` Execution** | All UI components and inline indicators use React sanitized rendering or native `document.createTextNode()` / DOM text nodes. |
 | 8 | **Dynamic UI Claims Grounding** | Privacy meters and policy claims are derived dynamically from verified runtime configuration via `getPrivacyClaims()`. |
 | 9 | **Compile-Time ML Dead-Code Elimination** | Consumer builds completely excise loopback networking code (`http://127.0.0.1:8420`) at compile time. |
-| 10 | **Minimal Production Dependencies** | Exactly 4 production dependencies (`react`, `react-dom`, `@knowthankyew/privacy-telemetry`, `fflate`) to prevent supply-chain attack surface. |
+| 10 | **Minimal Production Dependencies** | Exactly 5 production dependencies (`@knowthankyew/policy-packs`, `@knowthankyew/privacy-telemetry`, `fflate`, `react`, `react-dom`) to prevent supply-chain attack surface. |
 | 11 | **Shadow DOM Closed Mode** | All inline visual indicators injected into the host page DOM must use `attachShadow({ mode: 'closed' })`. Host page styles cannot pierce or distort badges, and host scripts cannot inspect or access internal badge nodes. |
 | 12 | **Indicator Content No Raw Text** | Injected indicator labels and accessible tooltips are constructed strictly from deterministic rule metadata (`rule.title`, `rule.explanation`), never from raw page-extracted text, form values, or PII. |
 
@@ -201,9 +213,11 @@ knowthankyew-extension/
 │   ├── content/             # Isolated DOM extractor, link discovery & inline indicators
 │   ├── core/
 │   │   ├── policy-packs/    # Re-exports from @knowthankyew/policy-packs/subscriptions
-│   │   ├── rules/           # Typed statutory rule definitions
+│   │   ├── handoff.ts       # Ecosystem routing & sessionStorage handoff builder
+│   │   ├── types.ts         # Core TypeScript domain & handoff interfaces
 │   │   └── engine.ts        # Dynamic policy compiler & reality engine scanner
-│   ├── ml/                  # Local ML loopback client (127.0.0.1:8420) & /burn contract
+│   ├── ml/                  # Local ML loopback client (127.0.0.1:8420), Chrome AI adapter & /burn contract
+│   ├── options/             # Full-page PDF/Contract Auditor & 5-Pillar Diagnostics UI
 │   ├── telemetry/           # Privacy telemetry singleton & Hard Burn controller
 │   └── popup/               # React 19 popup UI & PrivacyAuditModal
 ├── tests/                   # Vitest suite (policy packs, ML, ReDoS, indicators, handoff, Chromium E2E)
@@ -213,7 +227,10 @@ knowthankyew-extension/
     ├── CHROMEWEBSTORE.md    # Chrome Web Store submission specification
     ├── HOW-TO-USE.md        # Plain-English user guide & onboarding
     ├── LOCAL-ML-SETUP.md    # Local ML inference sidecar setup guide
+    ├── QA_CHECKLIST.md      # Pre-release & multi-browser QA verification checklist
     ├── SAFARI-SUBMISSION.md # Safari Web Extension packaging & Xcode conversion guide
     ├── SECURITY.md          # Threat model & vulnerability disclosure
+    ├── WALKTHROUGH-v1.6.md  # v1.6.0 live baseline release walkthrough
+    ├── WALKTHROUGH-v2.1.md  # v2.1.0 release candidate walkthrough
     └── senior-review.md     # Production readiness audit & verification log
 ```

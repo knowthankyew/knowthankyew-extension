@@ -425,6 +425,57 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', minHeight: '480px' }}>
+      {/* Persistent live region for scan summary and error announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        {scanning
+          ? 'Analyzing page clauses locally. Evaluating against ROSCA, FAA, State ARL, UK DMCC & EU CRD rule packs.'
+          : clipboardError
+          ? clipboardError
+          : errorMessage
+          ? errorMessage
+          : isPdfDetected
+          ? 'PDF Agreement Detected. Paste agreement text into the scratchpad to audit terms locally.'
+          : scanResult
+          ? scanResult.matches.length === 0 && scanResult.scannedLength < 250
+            ? 'Sparse Content / Indeterminate Scan'
+            : scanResult.matches.length === 0
+            ? 'Clean / Low Risk: 0 findings detected'
+            : `${scanResult.matches.length} ${scanResult.matches.length === 1 ? 'finding' : 'findings'} detected: ${scanResult.summary.critical} Problem, ${scanResult.summary.warning} Watch out.`
+          : ''}
+      </div>
+
+      {/* Persistent live region for transient handoff status announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        {handoffStatus || ''}
+      </div>
       {/* Header */}
       <header
         style={{
@@ -567,6 +618,7 @@ export const App: React.FC = () => {
             }}
           >
             <div
+              aria-hidden="true"
               style={{
                 width: '28px',
                 height: '28px',
@@ -579,7 +631,7 @@ export const App: React.FC = () => {
             />
             <div style={{ fontSize: '12px', fontWeight: 600 }}>Analyzing page clauses locally...</div>
             <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
-              Evaluating against ROSCA, FAA & State ARL rule packs
+              Evaluating against ROSCA, FAA, State ARL, UK DMCC &amp; EU CRD rule packs
             </div>
           </div>
         ) : isPdfDetected ? (
@@ -1102,7 +1154,7 @@ export const App: React.FC = () => {
                             textAlign: 'center',
                           }}
                         >
-                          ✓ {handoffStatus}
+                          {handoffStatus.startsWith('Launched') ? `✓ ${handoffStatus}` : handoffStatus}
                         </div>
                       )}
 

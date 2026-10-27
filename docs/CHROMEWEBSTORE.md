@@ -54,7 +54,7 @@ In accordance with our brutalist transparency principles:
 | Permission | Technical Requirement | Plain-English Reviewer Justification |
 | :--- | :--- | :--- |
 | `activeTab` | Temporary access to current tab DOM | Required solely when the user clicks the extension icon to inspect the text of the active checkout or terms page for deceptive clauses. No background browsing is tracked. |
-| `storage` | `chrome.storage.local` API | Required strictly to persist user-selected display preferences (such as risk badge thresholds) locally on the device. Never stores document text, personal data, or URLs. |
+| `storage` | Local storage management & cleanup | Required so the Nuclear Hard Burn routine can purge the extension's local storage namespace and the Options dashboard can verify zero-byte storage usage. Never stores document text, personal data, telemetry, or URLs. |
 | `scripting` | `chrome.scripting.executeScript` API | Required to inject the local text analyzer into the active tab when explicitly requested by the user. |
 
 *Note: The extension explicitly does NOT declare `<all_urls>` or any broad host permissions.*
@@ -148,11 +148,11 @@ Click **"Submit for Review"**. First submission typically takes 1–3 business d
 
 ---
 
-## 6. Version History
+## 6. Version History (Internal — not store copy)
 
 | Version | Date | Key Highlights |
 |:---|:---|:---|
-| **2.1.0** | October 8, 2026 | Milestone 7 release packaged for multi-browser distribution (`knowthankyew-extension-v2.1.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Gemini Nano conversational explanations, BS Translator with human-centric severity tiers ("This is a problem" / "Watch out" / "FYI"), structured cross-portfolio remediation handoff bridge to advocate tools (Bill of Rights Bot, CareCheck, Lease-Audit), clean-state Proof of Work & Audit Receipt transparency drawer, PDF agreement detection with zero-permission quick-paste scratchpad and air-gapped document auditor tab, stream-bounded PDF decompression bomb protection, strict tab-scoped badge amnesia, and comprehensive 24-suite test coverage. |
+| **2.1.0** | October 8, 2026 | Milestone 7 release packaged for multi-browser distribution (`knowthankyew-extension-v2.1.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Gemini Nano conversational explanations, BS Translator with human-centric severity tiers ("This is a problem" / "Watch out" / "FYI"), structured cross-portfolio remediation handoff bridge to advocate tools (Bill of Rights Bot, CareCheck, Lease-Audit, Warranty Watch), clean-state Proof of Work & Audit Receipt transparency drawer, PDF agreement detection with zero-permission quick-paste scratchpad and air-gapped document auditor tab, stream-bounded PDF decompression bomb protection, strict tab-scoped badge amnesia, and comprehensive 25-suite test coverage (196 automated tests). |
 | **2.0.0** | October 1, 2026 | Milestone 6 release packaged for multi-browser distribution (`knowthankyew-extension-v2.0.0.zip`, `firefox.zip`, `safari.zip`, `local-assist.zip`). Implemented ambient frontline visual layer via Closed Shadow DOM inline indicators next to deceptive consent checkboxes; added international policy packs (UK DMCC Act 2024, EU CRD Directive 2011/83/EU, expanded State ARLs for CO, IL, OR); automated EUR-Lex and UK legislation regulatory upkeep monitoring; added Apple Safari packaging pipeline; and expanded test suite to 125/125 passing tests. |
 | **1.6.0 (LIVE)** | October 1, 2026 | **Live & Approved on Chrome Web Store & Firefox AMO**. Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.6.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.6.0-firefox.zip`). Implemented Multi-Tab Session Amnesia dual-broadcast transport (`BroadcastChannel` + `chrome.tabs.sendMessage`), token-bucket MutationObserver throttling (15 capacity / 1 refill per 4s) to eliminate SPA scan starvation, senior code audit hardening, and 100+ verified passing tests. |
 | **1.5.0** | September 29, 2026 | Full release packaged for Chrome Web Store upload (`knowthankyew-extension-v1.5.0.zip`) and Firefox Gecko AMO (`knowthankyew-extension-v1.5.0-firefox.zip`). Integrated declarative JSON policy packs, zero-setup Chrome Built-in Prompt API adapter (Gemini Nano / `ai.languageModel`), 50k character DOM extraction ceiling, OTLP enterprise badge preservation, senior code audit hardening, and 98/98 verified passing tests. |

@@ -27,7 +27,7 @@ When you buy software, stream a movie, or sign up for a free trial, teams of cor
 1. **User-Initiated Audits & Contract Discovery**: The extension is not injected into every tab. When you reach a checkout, sign-up, or landing page, click the shield icon in your toolbar to inject the local scanner and analyze visible fine print. It automatically scans footers and domain structures to discover hidden governing agreements (Terms of Service, Binding Arbitration, Billing Policies), providing 1-click audit navigation. After activation, that tab may be monitored for dynamically inserted terms until the scanner is stopped or the tab is closed.
 2. **Plain English Explanations**: Click any detected finding. It shows you the exact sentence they buried in the terms, what law or doctrine it touches, and what it actually means for your wallet.
 3. **Zero Data Leaves Your Machine**: We don't have servers. We don't have accounts. We don't have analytics. Pages are analyzed strictly in your browser's local sandbox and nowhere else.
-4. **The "Hard Burn" Red Button**: Finished buying? Click **"Burn Local Data"**. The extension clears its in-memory telemetry, popup/content-script scan state, local extension storage, and toolbar badges, then asks every open tab to stop its injected scanner. Cleanup is best-effort for tabs that are unavailable or do not contain the scanner.
+4. **The "Hard Burn" Red Button**: Finished buying? Click **"🔥 HARD BURN"**. The extension clears its in-memory telemetry, popup/content-script scan state, local extension storage, and toolbar badges, then asks every open tab to stop its injected scanner and remove any Closed Shadow DOM badges. Cleanup is best-effort for tabs that are unavailable or do not contain the scanner.
 
 ---
 
@@ -72,7 +72,7 @@ The extension's network layer is physically incapable of transmitting page data 
 1. **Manifest-Level CSP for Extension Pages**: We declare `connect-src 'none'` in the extension manifest. The Chromium browser engine physically blocks extension pages (popup, background worker) from initiating outbound network connections.
 2. **Content Script Isolation & Auditing**: Scans run purely in the active tab's local context via `chrome.scripting.executeScript`. Content scripts run in an isolated execution world and contain zero network primitives (`fetch`, `XMLHttpRequest`, `WebSocket`), enforced by compile-time exclusion and CI negative-control network interception tests.
 3. **Memory-Only Runtime State**: Operational telemetry runs strictly in `memory_only` mode; scan results are held in volatile memory. The extension does not persist telemetry, document excerpts, URLs, or scan results to `chrome.storage.local`.
-4. **Local Storage Namespace**: The extension requests the `storage` permission solely so the Hard Burn routine can purge extension storage and to support local user preferences. It is not used as a telemetry database.
+4. **Local Storage Namespace**: The extension requests the `storage` permission solely so the Hard Burn routine can purge extension storage and the Options dashboard can inspect local byte usage. It is not used as a telemetry database.
 5. **Zero Cloud Infrastructure**: There is no remote backend, no user accounts, and no telemetry collection servers.
 
 Read our complete, plain-language **[Privacy Policy](https://knowthankyew.github.io/knowthankyew-extension/)**.
@@ -86,7 +86,7 @@ Want to test how it works right now?
 2. Click the KnowThankYew shield icon in your toolbar to scan the page.
 3. Review the plain-English breakdown of all detected trap clauses.
 4. Click the blue button on the test page to dynamically inject a surprise clause. The activated tab's local `MutationObserver` may detect the change automatically; you can also hit **"↻ Rescan Tab"**.
-5. Click **"Burn Local Data"** to clear memory and request scanner teardown across open tabs.
+5. Click **"🔥 HARD BURN"** to clear memory and request scanner teardown across open tabs.
 
 ---
 

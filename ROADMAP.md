@@ -112,7 +112,7 @@ The `xcrun safari-web-extension-converter` output is an Xcode project wrapping t
 - `BroadcastChannel` support: Verify Safari 16+ support for the `kty_hard_burn` channel added in v1.6.0.
 - `browser_specific_settings` in manifest: Extend the existing Firefox `closeBundle()` hook in `vite.config.ts` to also emit a Safari-compatible manifest variant.
 - App Sandbox entitlements: The Xcode wrapper requires explicit entitlements for `com.apple.security.network.client` if Local Assist loopback is ever enabled in a Safari build. Consumer builds with `connect-src 'none'` require no network entitlements — document this explicitly.
-- `NSPrivacyTrackedDataTypes`: Apple's required privacy manifest must declare zero tracked data types for the consumer build. This is provably accurate and should be documented with a reference to the `bundle-invariants.test.ts` zero-egress verification.
+- `NSPrivacyCollectedDataTypes`: Apple's required privacy manifest must declare zero collected data types (`NSPrivacyCollectedDataTypes: []`) and `NSPrivacyTracking: false` for the consumer build, verified for the web extension bundle via `bundle-invariants.test.ts`; note that the native Xcode wrapper target requires separate review.
 
 ### Clean-State Proof of Work: Resolving the "Silent Failure vs. Clean Bill of Health" Dilemma
 

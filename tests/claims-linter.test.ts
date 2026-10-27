@@ -5,8 +5,12 @@ import { createHash } from 'crypto';
 import { ALL_POLICY_PACKS } from '../src/core/policy-packs';
 import {
   auditZeroEgress,
+  auditStoreMetadataParity,
   auditVocabulary,
+  auditPolicyPacks,
+  auditArchitectureDiagrams,
   auditPortfolioMasterBrief,
+  scanDocumentationForVocabulary,
 // @ts-expect-error - ESM audit script import without bundled d.ts
 } from '../scripts/audit-claims.mjs';
 
@@ -14,13 +18,19 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
   const root = resolve(__dirname, '..');
   const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf-8'));
   const manifest = JSON.parse(readFileSync(resolve(root, 'manifest.json'), 'utf-8'));
+  const publicManifest = JSON.parse(readFileSync(resolve(root, 'public/manifest.json'), 'utf-8'));
   const storeDoc = readFileSync(resolve(root, 'docs/CHROMEWEBSTORE.md'), 'utf-8');
   const roadmapDoc = readFileSync(resolve(root, 'ROADMAP.md'), 'utf-8');
 
-  it('enforces version parity across package.json, manifest.json, and store documentation', () => {
+  it('enforces version and manifest parity across package.json, manifest.json, public/manifest.json, and store documentation', () => {
     expect(manifest.version).toBe(pkg.version);
+    expect(publicManifest).toEqual(manifest);
     expect(storeDoc).toContain(`knowthankyew-extension-v${pkg.version}.zip`);
     expect(roadmapDoc).toContain(`v${pkg.version}`);
+
+    const parityErrors: string[] = [];
+    auditStoreMetadataParity(parityErrors);
+    expect(parityErrors).toEqual([]);
   });
 
   it('enforces live store baseline version alignment across CHROMEWEBSTORE.md, ROADMAP.md, and README.md', () => {
@@ -53,7 +63,7 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     expect(storeDoc).toContain("connect-src 'none'");
   });
 
-  it('verifies policy pack count and rule compilation integrity', () => {
+  it('verifies policy pack count, safe-regex safety, and @knowthankyew/policy-packs parity', () => {
     expect(ALL_POLICY_PACKS.length).toBe(4); // us-federal, state-arl, uk-dmcc, eu-crd
     const totalRules = ALL_POLICY_PACKS.reduce((sum, p) => sum + p.rules.length, 0);
     const totalPatterns = ALL_POLICY_PACKS.reduce(
@@ -63,6 +73,10 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
 
     expect(totalRules).toBeGreaterThanOrEqual(19);
     expect(totalPatterns).toBeGreaterThanOrEqual(66);
+
+    const packErrors: string[] = [];
+    auditPolicyPacks(packErrors, { runTimingChecks: false });
+    expect(packErrors).toEqual([]);
   });
 
   it('verifies release zip packages and SHA256SUMS alignment when packaging artifacts exist', () => {
@@ -79,13 +93,21 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
       });
 
       expect(zipLines.length).toBeGreaterThan(0);
+      const requireArtifacts = process.env.KTY_REQUIRE_ARTIFACTS === 'true';
       for (const line of zipLines) {
         const [expectedSha, zipFilename] = line.split(/\s+/);
         const zipPath = resolve(root, zipFilename);
-        expect(existsSync(zipPath), `Referenced artifact '${zipFilename}' in SHA256SUMS is missing on disk`).toBe(true);
-        const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
-        expect(actualSha).toBe(expectedSha);
+        if (requireArtifacts) {
+          expect(existsSync(zipPath), `Referenced artifact '${zipFilename}' in SHA256SUMS is missing on disk`).toBe(true);
+        }
+        if (existsSync(zipPath)) {
+          const actualSha = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
+          expect(actualSha).toBe(expectedSha);
+        }
       }
+      const artifactParityErrors: string[] = [];
+      auditStoreMetadataParity(artifactParityErrors, { requireArtifacts });
+      expect(artifactParityErrors).toEqual([]);
     } else {
       // In clean CI environments before packaging, verify package script targets current versioning convention
       expect(pkg.scripts?.package).toContain('knowthankyew-extension-v${VERSION}.zip');
@@ -96,6 +118,42 @@ describe('Store Metadata & Documentation Claims Linter (claims-linter.test.ts)',
     const errors: string[] = [];
     auditVocabulary(errors);
     expect(errors).toEqual([]);
+
+    // Allows "inconclusive" while still catching banned adjectives on the same line
+    expect(scanDocumentationForVocabulary('Sparse scan is inconclusive.', 'docs/test.md')).toEqual([]);
+    const mixedErrors = scanDocumentationForVocabulary('Sparse scan is inconclusive but bulletproof.', 'docs/test.md');
+    expect(mixedErrors.length).toBe(1);
+    expect(mixedErrors[0]).toContain("Prohibited marketing term 'bulletproof'");
+  });
+
+  it('validates architecture diagrams, diagram-meta frontmatter, referenced file paths, and dependency count in docs/ARCHITECTURE.md', () => {
+    const errors: string[] = [];
+    auditArchitectureDiagrams(errors);
+    expect(errors).toEqual([]);
+
+    // Negative test: missing diagram-meta, air-gap violation (Scanner -> MLWorker), non-existent file, and wrong dependency count
+    const invalidErrors: string[] = [];
+    auditArchitectureDiagrams(invalidErrors, {
+      overrideArchitectureContent: `
+# Broken Architecture
+\`\`\`mermaid
+flowchart TD
+  Scanner["src/content/non-existent.ts"] -.->|"POST /classify-links"| MLWorker
+\`\`\`
+| 10 | **Minimal Production Dependencies** | Exactly 99 production dependencies |
+## 4. Directory Structure
+\`\`\`
+knowthankyew-extension/
+└── src/
+    └── missing-folder/
+\`\`\`
+`,
+    });
+    expect(invalidErrors.some((e) => e.includes('missing required <!-- diagram-meta'))).toBe(true);
+    expect(invalidErrors.some((e) => e.includes('Content Scanner (src/content/scanner.ts) is air-gapped'))).toBe(true);
+    expect(invalidErrors.some((e) => e.includes("non-existent file 'src/content/non-existent.ts'"))).toBe(true);
+    expect(invalidErrors.some((e) => e.includes("non-existent path 'src/missing-folder'"))).toBe(true);
+    expect(invalidErrors.some((e) => e.includes('Invariant #10 drift'))).toBe(true);
   });
 
   it('scans source runtime to verify zero remote network egress outside local loopback ML client', () => {
