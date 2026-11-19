@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { hardBurnAllData, telemetry } from '../telemetry/client';
+import { advanceHardBurnEpoch, hardBurnAllData, telemetry } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 import { scanDocumentText } from '../core/engine';
 import { PageScanResult } from '../core/types';
@@ -95,6 +95,7 @@ export const OptionsApp: React.FC = () => {
         channel = new BroadcastChannel('kty_hard_burn');
         channel.onmessage = (event) => {
           if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+            advanceHardBurnEpoch();
             burnGenerationRef.current += 1;
             setBurned(true);
             setDocText('');

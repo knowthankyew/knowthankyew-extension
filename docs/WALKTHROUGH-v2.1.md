@@ -128,11 +128,11 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 
 ## 3. Test & Verification Matrix (v2.1.0)
 
-### Vitest Suite (196 / 196 Tests Passed Across 25 Test Suites)
+### Vitest Suite (217 / 217 Tests Passed Across 25 Test Suites)
 
 ```
 Test Files  25 passed (25)
-     Tests  196 passed (196)
+     Tests  217 passed (217)
 ```
 
 | Test Suite | File | Focus & Assertions Verified |

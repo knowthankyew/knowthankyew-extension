@@ -56,9 +56,181 @@ export function recordScanMetrics(summary: { critical: number; warning: number; 
  * scanner state. Cleanup is intentionally best-effort across tabs because
  * tabs may be restricted, closed, or missing the content script.
  */
-export async function hardBurnAllData(): Promise<void> {
-  // 1. Burn in-memory telemetry and session audit log for this extension context.
+let hardBurnEpoch = 0;
+
+interface PendingHandoffCommit {
+  epoch: number;
+  payload: string;
+  tabId?: number;
+}
+
+const pendingHandoffCommits = new Map<string, PendingHandoffCommit>();
+
+function buildHandoffCommitKey(payload: string, tabId?: number): string {
+  return `${typeof tabId === 'number' ? tabId : 'any'}:${payload}`;
+}
+
+/**
+ * Monotonic counter incremented synchronously at the start of every hard burn so
+ * in-flight async UI/handoff operations can abort before writing storage or posting messages.
+ */
+export function getHardBurnEpoch(): number {
+  return hardBurnEpoch;
+}
+
+/**
+ * Advances the local hard-burn epoch, tombstones in-memory telemetry, revokes all
+ * pending destination handoff commits, and clears local session handoff storage.
+ * Safe to call idempotently when receiving remote KTY_HARD_BURN_DOM broadcasts.
+ */
+export function advanceHardBurnEpoch(): number {
+  hardBurnEpoch += 1;
+  pendingHandoffCommits.clear();
   telemetry.burn();
+  if (typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem('kty_handoff');
+    } catch {
+      // Non-fatal if sessionStorage is restricted
+    }
+  }
+  return hardBurnEpoch;
+}
+
+/**
+ * Registers a single-use destination commit authorization bound to the current burn epoch.
+ */
+export function registerPendingHandoffCommit(
+  payload: string,
+  tabId?: number,
+  expectedEpoch: number = hardBurnEpoch
+): boolean {
+  if (expectedEpoch !== hardBurnEpoch) {
+    return false;
+  }
+  const key = buildHandoffCommitKey(payload, tabId);
+  pendingHandoffCommits.set(key, { epoch: expectedEpoch, payload, tabId });
+  return true;
+}
+
+/**
+ * Authorizes a destination script commit only if an unconsumed grant exists for the
+ * current burn epoch (and matching tabId when provided). Consumes the grant atomically.
+ */
+export function confirmPendingHandoffCommit(payload: string, tabId?: number): boolean {
+  if (typeof payload !== 'string' || payload.length === 0) {
+    return false;
+  }
+
+  if (typeof tabId === 'number') {
+    const exactKey = buildHandoffCommitKey(payload, tabId);
+    const exactEntry = pendingHandoffCommits.get(exactKey);
+    if (exactEntry) {
+      pendingHandoffCommits.delete(exactKey);
+      return exactEntry.epoch === hardBurnEpoch;
+    }
+    const wildcardKey = buildHandoffCommitKey(payload, undefined);
+    const wildcardEntry = pendingHandoffCommits.get(wildcardKey);
+    if (wildcardEntry) {
+      pendingHandoffCommits.delete(wildcardKey);
+      return wildcardEntry.epoch === hardBurnEpoch;
+    }
+    return false;
+  }
+
+  for (const [key, entry] of pendingHandoffCommits.entries()) {
+    if (entry.payload === payload) {
+      pendingHandoffCommits.delete(key);
+      return entry.epoch === hardBurnEpoch;
+    }
+  }
+  return false;
+}
+
+/**
+ * Revokes an unconsumed handoff commit grant during cleanup.
+ */
+export function revokePendingHandoffCommit(payload: string, tabId?: number): void {
+  if (typeof tabId === 'number') {
+    pendingHandoffCommits.delete(buildHandoffCommitKey(payload, tabId));
+  }
+  pendingHandoffCommits.delete(buildHandoffCommitKey(payload, undefined));
+}
+
+/**
+ * Subscribes to BroadcastChannel('kty_hard_burn') so remote context burns
+ * advance this context's hardBurnEpoch synchronously.
+ */
+export function subscribeHardBurnBroadcast(onBurn?: () => void): () => void {
+  let channel: BroadcastChannel | null = null;
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      channel = new BroadcastChannel('kty_hard_burn');
+      channel.onmessage = (event) => {
+        if (event?.data?.type === 'KTY_HARD_BURN_DOM') {
+          advanceHardBurnEpoch();
+          onBurn?.();
+        }
+      };
+    } catch {
+      // Non-fatal if BroadcastChannel is restricted in current context
+    }
+  }
+  return () => {
+    if (channel) {
+      try {
+        channel.close();
+      } catch {
+        // Non-fatal
+      }
+      channel = null;
+    }
+  };
+}
+
+/**
+ * Subscribes to both BroadcastChannel('kty_hard_burn') and chrome.runtime.onMessage
+ * so remote KTY_HARD_BURN_DOM dispatches invalidate this context's epoch before
+ * any pending handoff can continue.
+ */
+export function subscribeHardBurnEpoch(onBurn?: () => void): () => void {
+  const stopBroadcast = subscribeHardBurnBroadcast(onBurn);
+  let runtimeListener: ((message: any) => void) | null = null;
+
+  if (typeof chrome !== 'undefined' && chrome.runtime?.onMessage?.addListener) {
+    try {
+      runtimeListener = (message: any) => {
+        if (message?.type === 'KTY_HARD_BURN_DOM') {
+          advanceHardBurnEpoch();
+          onBurn?.();
+        }
+      };
+      chrome.runtime.onMessage.addListener(runtimeListener);
+    } catch {
+      runtimeListener = null;
+    }
+  }
+
+  return () => {
+    stopBroadcast();
+    if (
+      runtimeListener &&
+      typeof chrome !== 'undefined' &&
+      chrome.runtime?.onMessage?.removeListener
+    ) {
+      try {
+        chrome.runtime.onMessage.removeListener(runtimeListener);
+      } catch {
+        // Non-fatal
+      }
+      runtimeListener = null;
+    }
+  };
+}
+
+export async function hardBurnAllData(): Promise<void> {
+  advanceHardBurnEpoch();
+  // 1. Burn in-memory telemetry and session audit log for this extension context.
 
   // 2. Clear the extension's local storage namespace.
   if (typeof chrome !== 'undefined' && chrome.storage?.local) {
@@ -70,18 +242,9 @@ export async function hardBurnAllData(): Promise<void> {
     await chrome.action.setBadgeText({ text: '' });
   }
 
-  // 4. Clear ephemeral handoff payload from sessionStorage.
-  if (typeof sessionStorage !== 'undefined') {
-    try {
-      sessionStorage.removeItem('kty_handoff');
-    } catch {
-      // Non-fatal if sessionStorage is restricted
-    }
-  }
-
-  // 4. Command every open tab to dereference DOM state and stop observation.
+  // 4. Command every open tab and sibling extension context to tear down state.
   // Dual-transport amnesia:
-  // Primary transport: chrome.tabs.sendMessage across all queryable tabs.
+  // Primary transport: chrome.tabs.sendMessage + chrome.runtime.sendMessage.
   // Secondary transport: BroadcastChannel('kty_hard_burn') to guarantee simultaneous
   // cross-context sanitization across detached frames, cross-origin child documents,
   // and partitioned worker environments (e.g. Safari).
@@ -94,6 +257,14 @@ export async function hardBurnAllData(): Promise<void> {
       channel.close();
     } catch {
       // BroadcastChannel may throw if restricted or suspended; non-fatal fallback.
+    }
+  }
+
+  if (typeof chrome !== 'undefined' && typeof chrome.runtime?.sendMessage === 'function') {
+    try {
+      await Promise.resolve(chrome.runtime.sendMessage(burnMessage)).catch(() => {});
+    } catch {
+      // No active extension listener or runtime unavailable; non-fatal.
     }
   }
 

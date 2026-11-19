@@ -1,4 +1,11 @@
-import { hardBurnAllData } from '../telemetry/client';
+import {
+  advanceHardBurnEpoch,
+  confirmPendingHandoffCommit,
+  hardBurnAllData,
+  registerPendingHandoffCommit,
+  revokePendingHandoffCommit,
+  subscribeHardBurnBroadcast,
+} from '../telemetry/client';
 
 export async function updateBadgeForScan(
   summary: { critical?: number; warning?: number } | undefined,
@@ -79,7 +86,39 @@ export function handleRuntimeMessage(
     })();
     return true; // Keep channel open
   }
+
+  if (message?.type === 'KTY_HARD_BURN_DOM') {
+    advanceHardBurnEpoch();
+    return;
+  }
+
+  if (message?.type === 'KTY_REGISTER_HANDOFF_COMMIT') {
+    const registered = registerPendingHandoffCommit(
+      message.payload,
+      message.tabId,
+      message.epoch
+    );
+    sendResponse({ registered });
+    return true;
+  }
+
+  if (message?.type === 'KTY_REVOKE_HANDOFF_COMMIT') {
+    revokePendingHandoffCommit(message.payload, message.tabId);
+    return;
+  }
+
+  if (message?.type === 'KTY_CONFIRM_HANDOFF_COMMIT') {
+    const approved = confirmPendingHandoffCommit(
+      message.payload,
+      sender?.tab?.id ?? message.tabId
+    );
+    sendResponse({ approved });
+    return true;
+  }
 }
+
+// Keep background epoch synced with cross-context BroadcastChannel hard-burn signals
+subscribeHardBurnBroadcast();
 
 // Set initial default badges on install
 if (typeof chrome !== 'undefined' && chrome.runtime?.onInstalled) {

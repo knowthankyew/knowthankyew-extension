@@ -56,7 +56,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     tagline: 'Wage theft & independent contractor misclassification auditor',
     productionUrl: 'https://github.com/knowthankyew/paystub-check',
     localDevUrl: 'http://localhost:3004',
-    supportedCategories: [],
+    supportedCategories: ['ARBITRATION', 'UNILATERAL_CHANGE'],
   },
 };
 
@@ -72,13 +72,64 @@ export function resolveDestinationTool(
     return CANONICAL_DESTINATION_TOOLS['bill-of-rights-bot'];
   }
 
-  const isLeaseContext =
-    /\b(lease|rent|tenant|landlord|apartment|rental|realty)\b/i.test(domain) ||
-    findings.some(f =>
-      /\b(lease|rent|tenant|landlord|apartment|rental|premises)\b/i.test(
-        `${f.title} ${f.matchedSnippet}`
+  const leaseDomainPattern =
+    /(?:^|[.-])(?:apartments?|tenants?|landlords?|leaseholds?|habitations?|habitability|evictions?|subleases?|residential[\s-]?leases?|leases?)(?:[.-]|$)/i;
+  const leaseStrongPattern =
+    /\b((?:residential|apartment|housing|month[\s-]to[\s-]month|fixed[\s-]term|rental|dwelling|room|unit)[\s-]+leases?|leases?[\s-]+(?:premises|property|unit|apartment|term|renewal)|leased\s+(?:premises|property|unit|apartment|dwelling|residence|home)|leasehold|tenant|landlord|apartment|residential\s+rental|habitation|habitability|eviction|security\s+deposit|sublease)\b/i;
+  const leaseWeakPattern = /\b(rent|rental|premises|realty)\b/i;
+  const isStrongLeaseContext =
+    (leaseDomainPattern.test(domain) &&
+      !/\b(?:equipment|vehicle|auto|car|truck|fleet|tool|machinery|software|hardware)\b/i.test(
+        domain
+      )) ||
+    findings.some(f => leaseStrongPattern.test(`${f.title} ${f.matchedSnippet}`));
+  const isWeakLeaseContext =
+    leaseWeakPattern.test(domain) ||
+    findings.some(f => leaseWeakPattern.test(`${f.title} ${f.matchedSnippet}`));
+
+  // Strip boilerplate consumer disclaimers before scanning for employment evidence so
+  // B2C clauses like "nothing in these terms creates an employment / employer-employee
+  // relationship" or "our payment processor is an independent contractor" do not hijack B2C routing.
+  const employmentRelationPhrase =
+    '(?:employment|employer(?:[\\s/-]+|\\s+(?:or|and)\\s+)employee)(?:\\s+(?:or\\s+agency\\s+)?(?:relationship|status|agreements?|contracts?))?';
+  const relationPrefix =
+    '(?:an?\\s+|any\\s+)?(?:(?:partnership|agency|joint\\s+venture|fiduciary|franchise)(?:,?\\s+(?:or|nor)|,)?\\s+){0,3}';
+  const disclaimerPattern = new RegExp(
+    `\\b(?:(?:nothing|no\\s+provision)(?:\\s+(?:in\\s+(?:these|this)\\s+(?:terms|agreement|policy)|herein))?\\s+(?:creates?|shall\\s+be\\s+construed\\s+to\\s+create|establishes?|constitutes?|implies?|forms?)\\s+${relationPrefix}${employmentRelationPhrase}|(?:(?:do|does|did|will|shall|would|can)\\s+not|don't|doesn't|won't|shan't)\\s+(?:create|establish|constitute|imply|form)\\s+${relationPrefix}${employmentRelationPhrase}|(?:no|not\\s+an?|neither\\s+an?)\\s+${relationPrefix}${employmentRelationPhrase}|neither\\s+(?:party|side)\\s+(?:is|are|shall\\s+be(?:\\s+deemed)?)\\s+(?:an?\\s+)?(?:employees?|workers?|agents?)(?:\\s+of\\s+(?:the\\s+)?other)?|not\\s+(?:(?:an?|their)\\s+)?(?:employees?|workers?)\\s+of\\s+(?:each\\s+other|the\\s+other(?:\\s+party)?)|(?:our|any|each|their|third[\\s-]party)\\s+(?:payment\\s+processors?|processors?|vendors?|suppliers?|subcontractors?|service\\s+providers?|partners?|affiliates?)\\s+(?:is|are|acts?\\s+as)\\s+(?:an?\\s+)?independent\\s+contractors?(?:\\s+(?:(?:that|which|who|when|while|and)\\s+)?(?:(?:they|it)\\s+)?perform(?:ing|ed|s)?\\s+(?:work|services)\\s+for\\s+(?:us|the\\s+company))?)\\b`,
+    'gi'
+  );
+
+  const hasEmploymentEvidence = (text: string): boolean => {
+    const cleaned = text.replace(disclaimerPattern, ' ');
+    if (
+      /\b(pay[\s-]?stub|wage(?:s|\s+theft|\s+dispute)?|overtime|hourly\s+(?:wage|pay|rate\s+of\s+pay|employee)|hours\s+worked|minimum\s+wage|unpaid\s+wages|paycheck|payroll|flsa|worker\s+misclassification|employee\s+misclassification|offer\s+letter|non-compete|employment|employer|workplace)\b/i.test(
+        cleaned
+      ) ||
+      /\b(?:(?:base|annual)\s+salary|salary\s+(?:and\s+(?:benefits|bonus(?:es)?|wages)|or\s+(?:bonus(?:es)?|wages|compensation)|structure|reduction|deductions?|withholding|agreement|terms)|(?:alter|reduce|adjust|deduct|withhold|pay(?:ment)?\s+of|regarding)\s+(?:your\s+)?salary|salaried\s+(?:exempt|non-exempt|employees?|workers?|staff)|as\s+(?:an?|our)\s+employees?|you\s+are\s+(?:an?\s+|our\s+)employees?|for\s+(?:all\s+)?employees|employees\s+agree\s+to|employee\s+(?:handbook|arbitration|agreements?|claims?|disputes?|classification|onboarding))\b/i.test(
+        cleaned
       )
+    ) {
+      return true;
+    }
+    const hasContractorMarker = /\b(?:independent\s+contractor|1099)\b/i.test(cleaned);
+    if (!hasContractorMarker) {
+      return false;
+    }
+    if (
+      /\b(?:worker|employee|misclassif\w*|gig\s+work(?:er)?|your\s+(?:work|services|compensation|pay)|tax\s+(?:withholding|form)|w-?2|wage|payroll|overtime)\b/i.test(
+        cleaned
+      )
+    ) {
+      return true;
+    }
+    return (
+      /\byou(?:r|'re|'ve|'ll)?\b/i.test(cleaned) &&
+      /\bperform(?:ing|ed)?\s+(?:work|services)\s+for\b/i.test(cleaned)
     );
+  };
+
+  const isEmploymentContext =
+    findings.some(f => hasEmploymentEvidence(`${f.title} ${f.matchedSnippet}`));
 
   // Prioritize findings by severity: CRITICAL, then WARNING, then INFO
   const severityWeight: Record<string, number> = { CRITICAL: 3, WARNING: 2, INFO: 1 };
@@ -97,8 +148,11 @@ export function resolveDestinationTool(
       return CANONICAL_DESTINATION_TOOLS['warranty-watch'];
     }
     if (finding.category === 'ARBITRATION' || finding.category === 'UNILATERAL_CHANGE') {
-      if (isLeaseContext) {
+      if (isStrongLeaseContext || (isWeakLeaseContext && !isEmploymentContext)) {
         return CANONICAL_DESTINATION_TOOLS['lease-audit'];
+      }
+      if (isEmploymentContext) {
+        return CANONICAL_DESTINATION_TOOLS['paystub-check'];
       }
       return CANONICAL_DESTINATION_TOOLS['bill-of-rights-bot'];
     }

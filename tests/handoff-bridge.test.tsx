@@ -316,3 +316,462 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
     expect(container!.textContent).toContain('Take Action: Dispute or Cancel');
   });
 });
+
+describe('Handoff Bridge Injection Contract — CodeRabbit R9', () => {
+  let originalChrome: any;
+
+  beforeEach(() => {
+    originalChrome = (globalThis as any).chrome;
+  });
+
+  afterEach(() => {
+    (globalThis as any).chrome = originalChrome;
+    vi.restoreAllMocks();
+  });
+
+  it('injects sessionStorage handoff state AND dispatches KTY_HANDOFF_PAYLOAD postMessage for ARBITRATION and UNILATERAL_CHANGE paystub payloads', async () => {
+    const { validateHandoffPayload } = await import('@knowthankyew/privacy-telemetry');
+    const { resolveDestinationTool, buildHandoffPayload } = await import('../src/core/handoff');
+
+    const runtimeListeners = new Set<
+      (msg: any, sender: any, sendResponse: (res: any) => void) => boolean | void
+    >();
+    let capturedExec: any = null;
+    let capturedInjectedResult: any = null;
+
+    (globalThis as any).chrome = {
+      tabs: {
+        create: vi.fn().mockResolvedValue({ id: 77 }),
+        get: vi.fn().mockResolvedValue({ id: 77, status: 'complete' }),
+        onUpdated: {
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+        },
+        onRemoved: {
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+        },
+      },
+      scripting: {
+        executeScript: vi.fn().mockImplementation(async (spec: any) => {
+          capturedExec = spec;
+          capturedInjectedResult = await spec.func(...spec.args);
+          return [{ result: capturedInjectedResult }];
+        }),
+      },
+      runtime: {
+        lastError: undefined,
+        onMessage: {
+          addListener: vi.fn((cb) => {
+            runtimeListeners.add(cb);
+          }),
+          removeListener: vi.fn((cb) => {
+            runtimeListeners.delete(cb);
+          }),
+        },
+        sendMessage: vi.fn((msg: any, cb?: (res: any) => void) => {
+          let resolved: any = undefined;
+          for (const listener of [...runtimeListeners]) {
+            listener(msg, { tab: { id: 77 } }, (res: any) => {
+              resolved = res;
+            });
+          }
+          if (cb) {
+            cb(resolved);
+            return;
+          }
+          return Promise.resolve(resolved);
+        }),
+      },
+    };
+
+    const categories: Array<'ARBITRATION' | 'UNILATERAL_CHANGE'> = [
+      'ARBITRATION',
+      'UNILATERAL_CHANGE',
+    ];
+
+    for (const category of categories) {
+      capturedExec = null;
+      capturedInjectedResult = null;
+      const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+      const postMessageSpy = vi.spyOn(window, 'postMessage');
+
+      const finding = {
+        ruleId: `KTY-${category}-01`,
+        title: category === 'ARBITRATION' ? 'Mandatory Arbitration' : 'Unilateral Salary Change',
+        category,
+        classification:
+          category === 'ARBITRATION' ? ('RIGHTS_WAIVER' as const) : ('ONE_SIDED_DISCRETION' as const),
+        severity: 'CRITICAL' as const,
+        statute: {
+          code: '29 U.S.C. § 206',
+          title: 'FLSA',
+          jurisdiction: 'US-Federal',
+          plainExplanation: 'Federal wage and hour protection.',
+        },
+        matchedSnippet: 'Any dispute arising out of your employment requires arbitration and wage deduction.',
+        explanation: 'Employment rights risk.',
+        recommendation: 'Review with Paystub Check.',
+      };
+      const scanResult = {
+        timestamp: new Date().toISOString(),
+        urlDomain: 'employer-portal.example.com',
+        scannedLength: 250,
+        matches: [finding],
+        riskScore: 85,
+        summary: { critical: 1, warning: 0, info: 0 },
+        limitationsNotice: 'Static scan only.',
+      };
+      const tool = resolveDestinationTool([finding], 'employer-portal.example.com');
+      expect(tool.id).toBe('paystub-check');
+
+      const payload = buildHandoffPayload(scanResult, tool.id, finding);
+      expect(validateHandoffPayload(payload)).toBe(true);
+
+      const dispatchResult = await dispatchHandoffToDestination(payload, true);
+      expect(dispatchResult.success).toBe(true);
+      expect(capturedExec).not.toBeNull();
+      expect(typeof capturedExec.func).toBe('function');
+      expect(capturedInjectedResult).toBe(true);
+      expect(setItemSpy).toHaveBeenCalledWith(capturedExec.args[0], capturedExec.args[1]);
+      expect(postMessageSpy).toHaveBeenCalledTimes(1);
+
+      const [postedEnvelope, postedOrigin] = postMessageSpy.mock.calls[0];
+      expect(postedOrigin).toBe(window.location.origin);
+      expect(postedOrigin).not.toBe('*');
+      expect((postedEnvelope as any).type).toBe('KTY_HANDOFF_PAYLOAD');
+      expect(validateHandoffPayload((postedEnvelope as any).payload)).toBe(true);
+      expect((postedEnvelope as any).payload.findings[0].category).toBe(category);
+
+      vi.restoreAllMocks();
+    }
+  });
+
+  it('aborts in-flight handoff injection when hardBurnAllData fires before executeScript', async () => {
+    const { buildHandoffPayload } = await import('../src/core/handoff');
+
+    const onUpdatedHolder: { cb: ((tabId: number, info: { status?: string }) => void) | null } = { cb: null };
+    const mockRemove = vi.fn().mockResolvedValue(undefined);
+    const mockExecuteScript = vi.fn().mockResolvedValue([{ result: true }]);
+
+    (globalThis as any).chrome = {
+      tabs: {
+        create: vi.fn().mockResolvedValue({ id: 99, status: 'loading' }),
+        remove: mockRemove,
+        onUpdated: {
+          addListener: vi.fn((cb: (tabId: number, info: { status?: string }) => void) => {
+            onUpdatedHolder.cb = cb;
+          }),
+          removeListener: vi.fn(),
+        },
+      },
+      scripting: {
+        executeScript: mockExecuteScript,
+      },
+    };
+
+    const finding = {
+      ruleId: 'KTY-WAGE-01',
+      title: 'Unilateral Wage Deduction',
+      category: 'UNILATERAL_CHANGE' as const,
+      classification: 'ONE_SIDED_DISCRETION' as const,
+      severity: 'CRITICAL' as const,
+      statute: {
+        code: '29 U.S.C. § 206',
+        title: 'FLSA',
+        jurisdiction: 'US-Federal',
+        plainExplanation: 'Federal wage protection.',
+      },
+      matchedSnippet: 'Employer may deduct fees from wages.',
+      explanation: 'Wage deduction risk.',
+      recommendation: 'Review with Paystub Check.',
+    };
+    const scanResult = {
+      timestamp: new Date().toISOString(),
+      urlDomain: 'employer-portal.example.com',
+      scannedLength: 200,
+      matches: [finding],
+      riskScore: 80,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Static scan only.',
+    };
+    const payload = buildHandoffPayload(scanResult, 'paystub-check', finding);
+    const pendingDispatch = dispatchHandoffToDestination(payload, true);
+
+    // Yield one microtask so chrome.tabs.create resolves and attaches onUpdated listener
+    await Promise.resolve();
+    await hardBurnAllData();
+    onUpdatedHolder.cb?.(99, { status: 'complete' });
+
+    const result = await pendingDispatch;
+    expect(result.success).toBe(false);
+    expect(mockExecuteScript).not.toHaveBeenCalled();
+    expect(mockRemove).toHaveBeenCalledWith(99);
+  });
+
+  it('prevents delayed injected function from writing sessionStorage or posting payload after hardBurnAllData (CodeRabbit R11)', async () => {
+    const { buildHandoffPayload } = await import('../src/core/handoff');
+    const finding = {
+      ruleId: 'KTY-R11-DELAY-01',
+      title: 'Delayed Injection Test Trap',
+      category: 'AUTO_RENEWAL' as const,
+      classification: 'STATUTORY_VIOLATION' as const,
+      severity: 'CRITICAL' as const,
+      statute: {
+        code: '16 CFR Part 425',
+        title: 'Click-to-Cancel',
+        jurisdiction: 'US-Federal',
+        plainExplanation: 'Cancellation parity required.',
+      },
+      matchedSnippet: 'Subscription auto-renews monthly unless canceled.',
+      explanation: 'Recurring billing risk.',
+      recommendation: 'Review with Bill of Rights Bot.',
+    };
+    const scanResult: PageScanResult = {
+      timestamp: new Date().toISOString(),
+      urlDomain: 'subscription.example.com',
+      scannedLength: 180,
+      matches: [finding],
+      riskScore: 75,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Static scan only.',
+    };
+
+    const runtimeListeners = new Set<
+      (msg: any, sender: any, sendResponse: (res: any) => void) => boolean | void
+    >();
+    const mockRemove = vi.fn().mockResolvedValue(undefined);
+    let releaseInjectedScript!: () => void;
+    const executeScriptStarted = new Promise<void>((resolveStarted) => {
+      releaseInjectedScript = resolveStarted;
+    });
+    let signalExecSubmitted!: () => void;
+    const execSubmitted = new Promise<void>((res) => {
+      signalExecSubmitted = res;
+    });
+
+    let delayedInjectedResult: any = null;
+
+    (globalThis as any).chrome = {
+      tabs: {
+        create: vi.fn().mockResolvedValue({ id: 109, status: 'complete' }),
+        remove: mockRemove,
+        query: vi.fn().mockResolvedValue([]),
+      },
+      scripting: {
+        executeScript: vi.fn().mockImplementation(async (spec: any) => {
+          signalExecSubmitted();
+          await executeScriptStarted;
+          delayedInjectedResult = await spec.func(...spec.args);
+          return [{ result: delayedInjectedResult }];
+        }),
+      },
+      runtime: {
+        lastError: undefined,
+        onMessage: {
+          addListener: vi.fn((cb) => {
+            runtimeListeners.add(cb);
+          }),
+          removeListener: vi.fn((cb) => {
+            runtimeListeners.delete(cb);
+          }),
+        },
+        sendMessage: vi.fn((msg: any, cb?: (res: any) => void) => {
+          let resolved: any = undefined;
+          for (const listener of [...runtimeListeners]) {
+            listener(msg, { tab: { id: 109 } }, (res: any) => {
+              resolved = res;
+            });
+          }
+          if (cb) {
+            cb(resolved);
+            return;
+          }
+          return Promise.resolve(resolved);
+        }),
+      },
+    };
+
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');
+    const postMessageSpy = vi.spyOn(window, 'postMessage');
+
+    const payload = buildHandoffPayload(scanResult);
+    const pendingDispatch = dispatchHandoffToDestination(payload, true);
+
+    // Wait until executeScript has been submitted, then trigger hard burn BEFORE func runs
+    await execSubmitted;
+    await hardBurnAllData();
+    releaseInjectedScript();
+
+    const dispatchResult = await pendingDispatch;
+    expect(delayedInjectedResult).toBe(false);
+    expect(dispatchResult.success).toBe(false);
+    expect(dispatchResult.url).toBe('');
+    expect(setItemSpy).not.toHaveBeenCalled();
+    expect(postMessageSpy).not.toHaveBeenCalled();
+    expect(mockRemove).toHaveBeenCalledWith(109);
+  });
+
+  it('invalidates hardBurnEpoch and aborts pending handoff on remote KTY_HARD_BURN_DOM over BroadcastChannel or runtime.onMessage (CodeRabbit R11)', async () => {
+    const { buildHandoffPayload } = await import('../src/core/handoff');
+    const { getHardBurnEpoch, recordScanMetrics, telemetry } = await import('../src/telemetry/client');
+    const finding = {
+      ruleId: 'KTY-R11-REMOTE-01',
+      title: 'Remote Burn Epoch Test Trap',
+      category: 'AUTO_RENEWAL' as const,
+      classification: 'STATUTORY_VIOLATION' as const,
+      severity: 'CRITICAL' as const,
+      statute: {
+        code: '16 CFR Part 425',
+        title: 'Click-to-Cancel',
+        jurisdiction: 'US-Federal',
+        plainExplanation: 'Cancellation parity required.',
+      },
+      matchedSnippet: 'Subscription auto-renews monthly unless canceled.',
+      explanation: 'Recurring billing risk.',
+      recommendation: 'Review with Bill of Rights Bot.',
+    };
+    const scanResult: PageScanResult = {
+      timestamp: new Date().toISOString(),
+      urlDomain: 'subscription.example.com',
+      scannedLength: 180,
+      matches: [finding],
+      riskScore: 75,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Static scan only.',
+    };
+
+    // Scenario A: remote Options burn via BroadcastChannel('kty_hard_burn')
+    const channels: MockBC[] = [];
+    class MockBC {
+      name: string;
+      onmessage: ((e: MessageEvent) => void) | null = null;
+      constructor(name: string) {
+        this.name = name;
+        channels.push(this);
+      }
+      postMessage(data: any) {
+        for (const ch of [...channels]) {
+          if (ch !== this && ch.name === this.name) {
+            ch.onmessage?.({ data } as MessageEvent);
+          }
+        }
+      }
+      close() {
+        const idx = channels.indexOf(this);
+        if (idx !== -1) channels.splice(idx, 1);
+      }
+    }
+
+    const origBC = (globalThis as any).BroadcastChannel;
+    (globalThis as any).BroadcastChannel = MockBC;
+    try {
+      const runtimeListeners = new Set<
+        (msg: any, sender: any, sendResponse: (res: any) => void) => boolean | void
+      >();
+      const onUpdatedHolder: { cb: ((tabId: number, info: { status?: string }) => void) | null } = {
+        cb: null,
+      };
+      const mockRemove = vi.fn().mockResolvedValue(undefined);
+      const mockExecuteScript = vi.fn().mockResolvedValue([{ result: true }]);
+
+      (globalThis as any).chrome = {
+        tabs: {
+          create: vi.fn().mockResolvedValue({ id: 201, status: 'loading' }),
+          remove: mockRemove,
+          onUpdated: {
+            addListener: vi.fn((cb) => {
+              onUpdatedHolder.cb = cb;
+            }),
+            removeListener: vi.fn(),
+          },
+        },
+        scripting: {
+          executeScript: mockExecuteScript,
+        },
+        runtime: {
+          onMessage: {
+            addListener: vi.fn((cb) => runtimeListeners.add(cb)),
+            removeListener: vi.fn((cb) => runtimeListeners.delete(cb)),
+          },
+        },
+      };
+
+      recordScanMetrics({ critical: 1, warning: 0, info: 0 }, 50);
+      const epochBeforeBroadcastBurn = getHardBurnEpoch();
+      const pendingA = dispatchHandoffToDestination(buildHandoffPayload(scanResult), true);
+      await Promise.resolve();
+
+      // Remote Options context posts KTY_HARD_BURN_DOM over BroadcastChannel
+      const remoteSender = new MockBC('kty_hard_burn');
+      remoteSender.postMessage({ type: 'KTY_HARD_BURN_DOM' });
+      remoteSender.close();
+
+      expect(getHardBurnEpoch()).toBeGreaterThan(epochBeforeBroadcastBurn);
+      expect(telemetry.getBufferedSpans().length).toBe(0);
+
+      onUpdatedHolder.cb?.(201, { status: 'complete' });
+      const resA = await pendingA;
+      expect(resA.success).toBe(false);
+      expect(mockExecuteScript).not.toHaveBeenCalled();
+      expect(mockRemove).toHaveBeenCalledWith(201);
+
+      // Scenario B: remote runtime KTY_HARD_BURN_DOM via chrome.runtime.onMessage while executeScript waits
+      telemetry.reset();
+      recordScanMetrics({ critical: 1, warning: 0, info: 0 }, 50);
+      const epochBeforeRuntimeBurn = getHardBurnEpoch();
+
+      let releaseExec!: () => void;
+      const execGate = new Promise<void>((r) => {
+        releaseExec = r;
+      });
+      let signalStarted!: () => void;
+      const startedGate = new Promise<void>((r) => {
+        signalStarted = r;
+      });
+      let delayedResult: any = null;
+
+      (globalThis as any).chrome.tabs = {
+        create: vi.fn().mockResolvedValue({ id: 202, status: 'complete' }),
+        remove: mockRemove,
+      };
+      (globalThis as any).chrome.scripting = {
+        executeScript: vi.fn().mockImplementation(async (spec: any) => {
+          signalStarted();
+          await execGate;
+          delayedResult = await spec.func(...spec.args);
+          return [{ result: delayedResult }];
+        }),
+      };
+      (globalThis as any).chrome.runtime.sendMessage = vi.fn((msg: any, cb?: (r: any) => void) => {
+        let out: any;
+        for (const cbListener of [...runtimeListeners]) {
+          cbListener(msg, { tab: { id: 202 } }, (r: any) => {
+            out = r;
+          });
+        }
+        if (cb) {
+          cb(out);
+          return;
+        }
+        return Promise.resolve(out);
+      });
+
+      const pendingB = dispatchHandoffToDestination(buildHandoffPayload(scanResult), true);
+      await startedGate;
+
+      for (const listener of [...runtimeListeners]) {
+        listener({ type: 'KTY_HARD_BURN_DOM' }, {}, () => {});
+      }
+      expect(getHardBurnEpoch()).toBeGreaterThan(epochBeforeRuntimeBurn);
+
+      releaseExec();
+      const resB = await pendingB;
+      expect(delayedResult).toBe(false);
+      expect(resB.success).toBe(false);
+      expect(mockRemove).toHaveBeenCalledWith(202);
+    } finally {
+      (globalThis as any).BroadcastChannel = origBC;
+    }
+  });
+});

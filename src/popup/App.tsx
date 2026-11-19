@@ -6,7 +6,7 @@ import { BurnButton } from './components/BurnButton';
 import { DiscoveredLinksCard } from './components/DiscoveredLinksCard';
 import { AuditReceiptCard } from './components/AuditReceiptCard';
 import { SparseScanWarning } from './components/SparseScanWarning';
-import { telemetry, recordScanMetrics } from '../telemetry/client';
+import { subscribeHardBurnEpoch, telemetry, recordScanMetrics } from '../telemetry/client';
 import { PrivacyAuditModal } from '@knowthankyew/privacy-telemetry/react';
 
 import { ChromePromptAPIAdapter } from '../ml/chrome-ai-adapter';
@@ -262,6 +262,10 @@ export const App: React.FC = () => {
       setErrorMessage(msg);
       setScanning(false);
     }
+  }, []);
+
+  useEffect(() => {
+    return subscribeHardBurnEpoch();
   }, []);
 
   useEffect(() => {

@@ -336,6 +336,20 @@ export function handleHardBurnDOM(): void {
     }
   }
 
+  // Relay authenticated same-window KTY_HARD_BURN_DOM to the page realm (useKTYHandoff)
+  // so custom storageKeys, React state, and active TelemetryManager buffers are synchronously wiped
+  // even when BroadcastChannel is restricted across extension/page partitions.
+  if (typeof window !== 'undefined' && typeof window.postMessage === 'function') {
+    const origin = window.location?.origin;
+    if (typeof origin === 'string' && origin.length > 0 && origin !== 'null') {
+      try {
+        window.postMessage({ type: 'KTY_HARD_BURN_DOM' }, origin);
+      } catch {
+        // Non-fatal if postMessage is restricted
+      }
+    }
+  }
+
   // Close BroadcastChannel to release event handlers and isolate frame.
   if (burnBroadcastChannel) {
     try {
