@@ -82,11 +82,11 @@ Throughout all of these capabilities, the engine strictly maintains its **Zero-E
 - **1-Click Advocate Launch**:
   - Surfaces a prominent **"Take Action: Dispute or Cancel"** banner in the popup when critical or warning terms are discovered.
   - Automatically routes users to specialist portfolio tools:
-    - `AUTO_RENEWAL` / `ROSCA` violations $\rightarrow$ **Bill of Rights Bot** ([github.com/knowthankyew/bill-of-rights-bot](https://github.com/knowthankyew/bill-of-rights-bot))
-    - `SURVEILLANCE` violations $\rightarrow$ **CareCheck** ([github.com/knowthankyew/care-check](https://github.com/knowthankyew/care-check))
-    - `ARBITRATION` / `UNILATERAL_CHANGE` $\rightarrow$ **Lease-Audit** ([github.com/knowthankyew/lease-audit](https://github.com/knowthankyew/lease-audit)) or **Bill of Rights Bot**
+    - `AUTO_RENEWAL` / `ROSCA` violations $\rightarrow$ **Bill of Rights Bot** ([knowthankyew.github.io/bill-of-rights-bot/](https://knowthankyew.github.io/bill-of-rights-bot/))
+    - `SURVEILLANCE` violations $\rightarrow$ **CareCheck** ([knowthankyew.github.io/care-check/](https://knowthankyew.github.io/care-check/))
+    - `ARBITRATION` / `UNILATERAL_CHANGE` $\rightarrow$ **Lease-Audit** ([knowthankyew.github.io/lease-audit/](https://knowthankyew.github.io/lease-audit/)) or **Bill of Rights Bot**
 - **Ephemeral Session Security**:
-  - Transferred via `sessionStorage` with typed schema validation and target URL flag (`?kty_handoff=1`). Zero cloud persistence, zero cookies, zero external telemetry.
+  - Transferred via zero-egress URL fragment (`#kty_handoff=...`, immediately scrubbed via `history.replaceState` on mount) and `sessionStorage` with typed schema validation and target URL flag (`?kty_handoff=1`). Zero cloud persistence, zero cookies, zero external telemetry.
   - Purged automatically on tab close or Nuclear Hard Burn.
 
 ### E. Plain-Language BS Translator & Severity Tiers (Milestone 7 Phase 1)

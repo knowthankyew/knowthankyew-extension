@@ -22,7 +22,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'bill-of-rights-bot',
     name: 'Bill of Rights Bot',
     tagline: 'AI consumer rights advocate & dispute generator',
-    productionUrl: 'https://github.com/knowthankyew/bill-of-rights-bot',
+    productionUrl: 'https://knowthankyew.github.io/bill-of-rights-bot/',
     localDevUrl: 'http://localhost:3000',
     supportedCategories: ['AUTO_RENEWAL', 'ARBITRATION', 'UNILATERAL_CHANGE'],
   },
@@ -30,7 +30,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'care-check',
     name: 'CareCheck',
     tagline: 'Medical billing & patient surveillance compliance',
-    productionUrl: 'https://github.com/knowthankyew/care-check',
+    productionUrl: 'https://knowthankyew.github.io/care-check/',
     localDevUrl: 'http://localhost:3001',
     supportedCategories: ['SURVEILLANCE'],
   },
@@ -38,7 +38,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'lease-audit',
     name: 'Lease Audit',
     tagline: 'Tenant rights & residential lease agreement scanner',
-    productionUrl: 'https://github.com/knowthankyew/lease-audit',
+    productionUrl: 'https://knowthankyew.github.io/lease-audit/',
     localDevUrl: 'http://localhost:3002',
     supportedCategories: ['ARBITRATION', 'UNILATERAL_CHANGE'],
   },
@@ -46,7 +46,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'warranty-watch',
     name: 'Warranty Watch',
     tagline: 'Magnuson-Moss warranty and tie-in clause auditor',
-    productionUrl: 'https://github.com/knowthankyew/warranty-watch',
+    productionUrl: 'https://knowthankyew.github.io/warranty-watch/',
     localDevUrl: 'http://localhost:3003',
     supportedCategories: ['WARRANTY_DISCLAIMER'],
   },
@@ -54,7 +54,7 @@ export const CANONICAL_DESTINATION_TOOLS: Record<DestinationToolId, DestinationT
     id: 'paystub-check',
     name: 'Paystub Check',
     tagline: 'Wage theft & independent contractor misclassification auditor',
-    productionUrl: 'https://github.com/knowthankyew/paystub-check',
+    productionUrl: 'https://knowthankyew.github.io/paystub-check/',
     localDevUrl: 'http://localhost:3004',
     supportedCategories: ['ARBITRATION', 'UNILATERAL_CHANGE'],
   },
@@ -161,17 +161,40 @@ export function resolveDestinationTool(
   return CANONICAL_DESTINATION_TOOLS['bill-of-rights-bot'];
 }
 
+export function encodeHandoffFragmentValue(payload: KtyHandoffPayload): string | null {
+  if (!validateHandoffPayload(payload)) return null;
+  try {
+    const bytes = new TextEncoder().encode(JSON.stringify(payload));
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Builds the URL to invoke the destination tool or navigate to its repository.
+ * Builds the URL to invoke the destination tool, optionally attaching a zero-egress
+ * #kty_handoff=<base64url> fragment (never transmitted in HTTP requests).
  */
-export function buildDestinationUrl(toolId: DestinationToolId, isDev = false): string {
+export function buildDestinationUrl(
+  toolId: DestinationToolId,
+  isDev = false,
+  payload?: KtyHandoffPayload
+): string {
   const tool = CANONICAL_DESTINATION_TOOLS[toolId] || CANONICAL_DESTINATION_TOOLS['bill-of-rights-bot'];
   const baseUrl = isDev ? tool.localDevUrl : tool.productionUrl;
-  if (!isDev && baseUrl.startsWith('https://github.com/')) {
-    return baseUrl;
-  }
   const separator = baseUrl.includes('?') ? '&' : '?';
-  return `${baseUrl}${separator}kty_handoff=1`;
+  const urlWithFlag = `${baseUrl}${separator}kty_handoff=1`;
+  if (payload) {
+    const token = encodeHandoffFragmentValue(payload);
+    if (token) {
+      return `${urlWithFlag}#${KTY_HANDOFF_SESSION_KEY}=${token}`;
+    }
+  }
+  return urlWithFlag;
 }
 
 function sanitizeLegalLink(link: DiscoveredLegalLink): DiscoveredLegalLink | null {

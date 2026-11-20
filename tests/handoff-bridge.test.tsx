@@ -10,7 +10,7 @@ import {
   readAndClearHandoffPayload,
   KTY_HANDOFF_SESSION_KEY,
 } from '../src/popup/handoff-bridge';
-import { buildHandoffPayload } from '../src/core/handoff';
+import { buildHandoffPayload, encodeHandoffFragmentValue } from '../src/core/handoff';
 import { PageScanResult, EvaluationMatch } from '../src/core/types';
 import { TrapCard } from '../src/popup/components/TrapCard';
 import { handleHardBurnDOM } from '../src/content/scanner';
@@ -75,8 +75,10 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
   // -------------------------------------------------------------
   // Test 1: dispatchHandoffToDestination with Chrome Extension APIs
   // -------------------------------------------------------------
-  it('dispatches handoff via chrome.tabs.create and navigates to target repository', async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'https://github.com/knowthankyew/bill-of-rights-bot' });
+  it('dispatches handoff via chrome.tabs.create and navigates to target GitHub Pages app with fragment handoff', async () => {
+    const payload = buildHandoffPayload(sampleScan);
+    const expectedUrl = `https://knowthankyew.github.io/bill-of-rights-bot/?kty_handoff=1#kty_handoff=${encodeHandoffFragmentValue(payload)}`;
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: expectedUrl });
     const mockExecuteScript = vi.fn().mockResolvedValue([{ result: undefined }]);
 
     (globalThis as any).chrome = {
@@ -84,15 +86,15 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       scripting: { executeScript: mockExecuteScript },
     };
 
-    const payload = buildHandoffPayload(sampleScan);
     const result = await dispatchHandoffToDestination(payload);
 
     expect(result.success).toBe(true);
-    expect(result.url).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
+    expect(result.url).toBe(expectedUrl);
     expect(mockCreate).toHaveBeenCalledWith({
-      url: 'https://github.com/knowthankyew/bill-of-rights-bot',
+      url: expectedUrl,
       active: true,
     });
+    expect(mockExecuteScript).not.toHaveBeenCalled();
   });
 
   // -------------------------------------------------------------
@@ -103,18 +105,25 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
     const windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
 
     const payload = buildHandoffPayload(sampleScan);
+    const expectedUrl = `https://knowthankyew.github.io/bill-of-rights-bot/?kty_handoff=1#kty_handoff=${encodeHandoffFragmentValue(payload)}`;
     const result = await dispatchHandoffToDestination(payload);
 
     expect(result.success).toBe(true);
-    expect(result.url).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank', 'noopener,noreferrer');
+    expect(result.url).toBe(expectedUrl);
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^https:\/\/knowthankyew\.github\.io\/bill-of-rights-bot\/\?kty_handoff=1#kty_handoff=[A-Za-z0-9_-]+$/),
+      '_blank',
+      'noopener,noreferrer'
+    );
 
     // Ephemeral sessionStorage was cleared to prevent residual leakage
     expect(sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY)).toBeNull();
   });
 
   it('injects payload via chrome.scripting.executeScript in dev mode', async () => {
-    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: 'http://localhost:3000?kty_handoff=1' });
+    const payload = buildHandoffPayload(sampleScan);
+    const expectedUrl = `http://localhost:3000?kty_handoff=1#kty_handoff=${encodeHandoffFragmentValue(payload)}`;
+    const mockCreate = vi.fn().mockResolvedValue({ id: 101, url: expectedUrl });
     const mockExecuteScript = vi.fn().mockResolvedValue([{ result: true }]);
 
     (globalThis as any).chrome = {
@@ -122,11 +131,10 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       scripting: { executeScript: mockExecuteScript },
     };
 
-    const payload = buildHandoffPayload(sampleScan);
     const result = await dispatchHandoffToDestination(payload, true);
 
     expect(result.success).toBe(true);
-    expect(result.url).toBe('http://localhost:3000?kty_handoff=1');
+    expect(result.url).toBe(expectedUrl);
     expect(mockExecuteScript).toHaveBeenCalledTimes(1);
     expect(mockExecuteScript).toHaveBeenCalledWith(expect.objectContaining({
       target: { tabId: 101 },
@@ -253,7 +261,11 @@ describe('Milestone 7 Phase 2 — Handoff Bridge, UI Actions & Amnesia Purge (te
       launchButton!.click();
     });
 
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://github.com/knowthankyew/bill-of-rights-bot', '_blank', 'noopener,noreferrer');
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/^https:\/\/knowthankyew\.github\.io\/bill-of-rights-bot\/\?kty_handoff=1#kty_handoff=[A-Za-z0-9_-]+$/),
+      '_blank',
+      'noopener,noreferrer'
+    );
     // Ephemeral payload is cleared post-dispatch to prevent residual storage leakage
     expect(sessionStorage.getItem(KTY_HANDOFF_SESSION_KEY)).toBeNull();
   });

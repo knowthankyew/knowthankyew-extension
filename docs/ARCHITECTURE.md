@@ -87,10 +87,10 @@ flowchart TD
     Options -.->|"POST /burn (on Hard Burn)"| MLWorker
 
     %% Structured Handoff
-    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| LeaseAudit
-    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| CareCheck
-    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| BillOfRights
-    Popup -->|"Advocate Handoff (Tab Open / ?kty_handoff=1)"| WarrantyWatch
+    Popup -->|"Advocate Handoff (Tab Open / #kty_handoff=)"| LeaseAudit
+    Popup -->|"Advocate Handoff (Tab Open / #kty_handoff=)"| CareCheck
+    Popup -->|"Advocate Handoff (Tab Open / #kty_handoff=)"| BillOfRights
+    Popup -->|"Advocate Handoff (Tab Open / #kty_handoff=)"| WarrantyWatch
 
     classDef core fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
     classDef browser fill:#0f172a,stroke:#64748b,stroke-width:1px,color:#f8fafc;

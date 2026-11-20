@@ -4,6 +4,7 @@ import {
   resolveDestinationTool,
   buildDestinationUrl,
   buildHandoffPayload,
+  encodeHandoffFragmentValue,
   validateHandoffPayload,
 } from '../src/core/handoff';
 import { PageScanResult, EvaluationMatch } from '../src/core/types';
@@ -27,7 +28,7 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
       expect(tool.id).toBe(id);
       expect(tool.name).toBeTruthy();
       expect(tool.tagline).toBeTruthy();
-      expect(tool.productionUrl).toMatch(/^https:\/\/github\.com\/knowthankyew\/[a-z0-9-]+$/);
+      expect(tool.productionUrl).toMatch(/^https:\/\/knowthankyew\.github\.io\/[a-z0-9-]+\/$/);
       expect(tool.localDevUrl).toMatch(/^http:\/\/localhost:\d+$/);
     }
   });
@@ -161,12 +162,27 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
   // -------------------------------------------------------------
   // Test 3: buildDestinationUrl
   // -------------------------------------------------------------
-  it('builds destination URL with repository link in prod and ?kty_handoff=1 query flag in dev mode', () => {
+  it('builds destination URL with live GitHub Pages URL in prod, localhost in dev, and #kty_handoff fragment when payload provided', () => {
     const prodUrl = buildDestinationUrl('bill-of-rights-bot', false);
-    expect(prodUrl).toBe('https://github.com/knowthankyew/bill-of-rights-bot');
+    expect(prodUrl).toBe('https://knowthankyew.github.io/bill-of-rights-bot/?kty_handoff=1');
 
     const devUrl = buildDestinationUrl('care-check', true);
     expect(devUrl).toBe('http://localhost:3001?kty_handoff=1');
+
+    const payload = buildHandoffPayload({
+      timestamp: '2026-10-04T12:00:00.000Z',
+      urlDomain: 'example.com',
+      scannedLength: 500,
+      riskScore: 70,
+      summary: { critical: 1, warning: 0, info: 0 },
+      limitationsNotice: 'Visible text only',
+      matches: [],
+    });
+    const token = encodeHandoffFragmentValue(payload);
+    expect(token).toBeTruthy();
+    expect(buildDestinationUrl('bill-of-rights-bot', false, payload)).toBe(
+      `https://knowthankyew.github.io/bill-of-rights-bot/?kty_handoff=1#kty_handoff=${token}`
+    );
   });
 
   // -------------------------------------------------------------

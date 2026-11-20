@@ -169,8 +169,8 @@ Give users verifiable evidence of what the engine actually inspected when a page
 Define the intent/findings/summary JSON schema and wire the extension popup to open portfolio destination tools with pre-loaded context. No new backend. No new infrastructure.
 
 - [x] **Define `KTY_HANDOFF_PAYLOAD` schema**: structured JSON envelope containing `{ domain, scanTimestamp, findings: EvaluationMatch[], primaryLegalLink: DiscoveredLegalLink | null, summary: PageScanResult['summary'] }`
-- [x] **Direct `sessionStorage` injection bridge**: Extension popup creates a tab for the destination tool and injects the payload directly into the destination tab's ephemeral `sessionStorage` via `chrome.scripting.executeScript`; destination tool reads `sessionStorage` on mount
-- [x] **Zero persistent storage for handoff**: Payload lives in `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
+- [x] **Zero-egress URL-fragment & dev fallback bridge**: Extension popup opens the deployed GitHub Pages destination app with `#kty_handoff=<base64url>` (scrubbed immediately from URL/history via `history.replaceState`; no `host_permissions` needed) and retains `chrome.scripting.executeScript` commit-verified `sessionStorage` injection only for local `isDev` mode; destination tool reads and burns handoff state on mount
+- [x] **Zero persistent storage for handoff**: Payload lives in volatile React state / ephemeral `sessionStorage` for the duration of the destination tab session only; cleared on Hard Burn broadcast
 - [x] **Canonical destination tool registry**: Map `TrapCategory` → best-fit destination tool (`AUTO_RENEWAL` → `bill-of-rights-bot`, `SURVEILLANCE` → `careCheck`, `ARBITRATION` → `lease-audit` or `bill-of-rights-bot`)
 - [x] **New extension UI surface**: "Get Help" / "Take Action" button in the scan results panel, visible only when ≥ 1 CRITICAL or WARNING finding exists
 
@@ -178,7 +178,7 @@ Define the intent/findings/summary JSON schema and wire the extension popup to o
 
 `bill-of-rights-bot`, `careCheck`, and `lease-audit` detect the handoff payload and skip their intake flow, jumping directly to findings display (delivered in respective destination tool repositories):
 
-- [x] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `sessionStorage` on mount; returns typed payload or `null`
+- [x] **`useKTYHandoff()` hook** in `@knowthankyew/privacy-telemetry/react`: reads and validates `KTY_HANDOFF_PAYLOAD` from `#kty_handoff=` URL fragment (scrubbed immediately via `history.replaceState`) or ephemeral `sessionStorage` on mount; returns typed payload or `null`
 - [x] **Intake bypass in `bill-of-rights-bot`**: When hook returns a payload, render findings panel directly with `findings[]` pre-populated; intake dropzone is replaced by the domain banner + "Back to scan" affordance
 - [x] **Intake bypass in `careCheck`**: Same pattern — payload maps to itemized line items where applicable; graceful fallback if category mismatch
 - [x] **Intake bypass in `lease-audit`**: Arbitration and unilateral-change findings map to lease clause categories; tenant tool renders matched clauses inline

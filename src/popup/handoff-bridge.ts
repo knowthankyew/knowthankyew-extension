@@ -32,7 +32,7 @@ export async function dispatchHandoffToDestination(
   try {
     const burnEpochAtStart = getHardBurnEpoch();
     const isDev = typeof options === 'boolean' ? options : Boolean(options?.isDev);
-    const targetUrl = buildDestinationUrl(payload.targetTool, isDev);
+    const targetUrl = buildDestinationUrl(payload.targetTool, isDev, payload);
     const serialized = JSON.stringify(payload);
 
     if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
@@ -48,8 +48,8 @@ export async function dispatchHandoffToDestination(
           }
           return { success: false, url: '' };
         }
-        if (!targetUrl.startsWith('https://github.com/')) {
-          if (!newTab.id || !chrome.scripting?.executeScript) {
+        if (isDev && chrome.scripting?.executeScript) {
+          if (!newTab.id) {
             return { success: false, url: targetUrl };
           }
           const targetTabId = newTab.id;
@@ -300,8 +300,7 @@ export async function dispatchHandoffToDestination(
       }
     }
 
-    // Without chrome.scripting, dev destinations cannot receive the injected sessionStorage payload
-    return { success: canOpen && !isDev, url: targetUrl };
+    return { success: canOpen, url: targetUrl };
   } finally {
     unsubscribeBurn();
   }
