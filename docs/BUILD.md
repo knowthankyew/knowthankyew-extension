@@ -32,7 +32,7 @@
    ```bash
    npm test
    ```
-   Verifies all 217 invariant, ReDoS, and DOM parsing tests across 25 suites pass with 0 errors.
+   Verifies all 218 invariant, ReDoS, and DOM parsing tests across 25 suites pass with 0 errors.
 
 4. **Package the Release Archive**:
    ```bash

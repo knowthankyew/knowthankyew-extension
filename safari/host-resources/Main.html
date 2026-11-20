@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;" />
+  <title>KnowThankYew Reality Engine — Safari Companion</title>
+  <link rel="stylesheet" href="../Style.css" />
+  <script src="../Script.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <div class="badge" id="status-badge">Zero-Egress Extension Container · v2.1.0</div>
+      <h1>KnowThankYew Reality Engine for Safari</h1>
+      <p class="subtitle">
+        Local consumer contract analysis for checkout flows, subscription renewals, and arbitration clauses.
+        Runs on your device with no network client entitlement and no external servers.
+      </p>
+      <div class="actions">
+        <button type="button" class="primary-btn open-preferences" id="open-safari-settings">
+          Open Safari Extension Settings…
+        </button>
+      </div>
+    </header>
+
+    <section class="card" aria-labelledby="setup-heading">
+      <h2 id="setup-heading">1. Enable in Safari</h2>
+      <ol class="steps" id="enable-steps">
+        <li>Click <strong>Open Safari Extension Settings…</strong> (or open <strong>Safari → Settings → Extensions</strong> on macOS / <strong>Settings → Apps → Safari → Extensions</strong> on iOS).</li>
+        <li>Enable <strong>KnowThankYew Reality Engine</strong>.</li>
+        <li>Allow website access when clicking the toolbar icon on checkout pages or grant site access in Safari extension settings.</li>
+        <li>Open any checkout or Terms of Service page and click the KnowThankYew toolbar button to inspect visible clauses locally.</li>
+      </ol>
+    </section>
+
+    <section class="card" aria-labelledby="privacy-heading">
+      <h2 id="privacy-heading">2. Verified Privacy &amp; Permission Scope</h2>
+      <div class="grid" id="privacy-matrix"></div>
+    </section>
+
+    <section class="card" aria-labelledby="sandbox-heading">
+      <h2 id="sandbox-heading">3. Offline Clause Self-Check</h2>
+      <p class="hint">
+        Test clause detection right here inside the container app with zero network connectivity.
+      </p>
+      <label class="sr-only" for="clause-input">Paste agreement text to test locally</label>
+      <textarea
+        id="clause-input"
+        rows="4"
+        placeholder="Paste an auto-renewal, cancellation, or arbitration clause here…"
+      ></textarea>
+      <div class="toolbar">
+        <button type="button" class="secondary-btn" id="load-sample-btn">Load Sample Checkout Clause</button>
+        <button type="button" class="primary-btn" id="check-clause-btn">Check Clause Locally</button>
+        <button type="button" class="secondary-btn" id="burn-clause-btn">Clear Memory</button>
+      </div>
+      <div id="clause-results" class="results" aria-live="polite"></div>
+    </section>
+  </main>
+</body>
+</html>

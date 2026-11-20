@@ -33,19 +33,36 @@ npm run build:safari
 ls -la dist-safari/
 ```
 
-### Step 2: Convert to Native Xcode Project
-Run Apple's official `safari-web-extension-converter` CLI tool:
+### Step 2: Convert & Configure the Native Xcode Project
+Run the automated Safari Xcode preparation script (which runs `npm run build:safari`, invokes Apple's `xcrun safari-web-extension-converter`, installs the checked-in `safari/host-resources/` offline container UI, injects `safari/PrivacyInfo.xcprivacy` across both targets, and verifies zero `com.apple.security.network.client` entitlements):
+```bash
+# Generate ./safari-xcode/KnowThankYew/KnowThankYew.xcodeproj cleanly
+npm run prepare:safari
+
+# Or generate + compile an unsigned Release build (.app + .appex) locally:
+bash scripts/prepare-safari-xcode.sh --build
+```
+
+Under the hood, the script invokes Apple's official converter:
 ```bash
 xcrun safari-web-extension-converter dist-safari/ \
   --project-location ./safari-xcode \
   --app-name "KnowThankYew" \
   --bundle-identifier "org.knowthankyew.reality-engine" \
-  --swift
+  --swift \
+  --copy-resources \
+  --no-open \
+  --no-prompt \
+  --force
 ```
 
-This generates an Xcode project (`./safari-xcode/KnowThankYew.xcodeproj`) containing:
-1. **Host App (macOS & iOS)**: A lightweight native Swift wrapper that presents installation and enablement instructions.
-2. **Safari Web Extension Target**: The sandboxed extension bundle wrapping `dist-safari/`.
+This generates `./safari-xcode/KnowThankYew/KnowThankYew.xcodeproj` containing:
+1. **Host App (macOS & iOS)** (`safari/host-resources/*`): A zero-egress container UI presenting Safari enablement walkthroughs, declared permission summaries, and an offline clause self-check sandbox for App Store Guideline 4.2 readiness.
+2. **Safari Web Extension Target**: The sandboxed `.appex` bundle wrapping `dist-safari/` (cleanly stripped of Chromium-only manifest fields such as `version_name`).
+
+### Continuous Pre-Submission Verification (No Paid Fee Required)
+- **`npm run test:webkit`**: Launches Playwright WebKit to verify `dist-safari/` under `connect-src 'none'` CSP, `content/scanner.js` Closed Shadow DOM injection (`shadowRoot === null`) + `BroadcastChannel` Hard Burn, `#kty_handoff=` fragment encoding + `history.replaceState` URL scrubbing, and the native host UI.
+- **`safari-xcode` CI job (`macos-latest`)**: Runs `bash scripts/prepare-safari-xcode.sh --build` in GitHub Actions to validate conversion, unsigned `xcodebuild` compilation, embedded `PrivacyInfo.xcprivacy`, sandbox entitlements, and zero-egress bundle invariants on macOS runners.
 
 ---
 

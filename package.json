@@ -20,13 +20,15 @@
     "build:assets": "node scripts/render-store-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:webkit": "node scripts/test-webkit-e2e.mjs",
     "test:watch": "vitest",
+    "prepare:safari": "bash scripts/prepare-safari-xcode.sh",
     "audit:claims": "node scripts/audit-claims.mjs",
     "record:demo": "node scripts/record-demo.js",
     "demo": "python3 -m http.server 3000 --directory tests"
   },
   "dependencies": {
-    "@knowthankyew/policy-packs": "^1.0.1",
+    "@knowthankyew/policy-packs": "^1.0.2",
     "@knowthankyew/privacy-telemetry": "^1.0.1",
     "fflate": "^0.8.3",
     "react": "^19.3.1",
