@@ -44,10 +44,10 @@ describe('Milestone 7 Phase 2 — Handoff Schema, Tools Registry & Payload Sanit
       classification: 'STATUTORY_VIOLATION',
       severity: 'CRITICAL',
       statute: {
-        code: '16 CFR Part 425',
-        title: 'Click-to-Cancel',
+        code: '15 U.S.C. § 8403 (ROSCA)',
+        title: 'Restore Online Shoppers Confidence Act',
         jurisdiction: 'US Federal',
-        plainExplanation: 'Cancellation must be as easy as signup.',
+        plainExplanation: 'Clear recurring disclosure and simple cancellation required.',
       },
       explanation: 'Recurring subscription fee without easy opt-out.',
       recommendation: 'Cancel subscription immediately.',

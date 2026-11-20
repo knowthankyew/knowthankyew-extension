@@ -207,7 +207,8 @@ knowthankyew-extension/
 ├── package.json             # React 19 + TypeScript + @knowthankyew/privacy-telemetry
 ├── vite.config.ts           # Multi-browser bundling (Chrome, Firefox, Safari) with air-gap shims
 ├── public/                  # Manifest and generated PNG icons (16, 48, 128)
-├── scripts/                 # Store asset renderers, demo recording & claims linter
+├── safari/                  # Apple PrivacyInfo.xcprivacy & container app host resources
+├── scripts/                 # Store asset renderers, Safari Xcode prep, WebKit E2E & claims linter
 ├── src/
 │   ├── background/          # Ephemeral MV3 service worker
 │   ├── content/             # Isolated DOM extractor, link discovery & inline indicators

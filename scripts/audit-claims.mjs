@@ -179,6 +179,10 @@ function validateManifestCsp(manifestPath, label, errors) {
       errors.push(`${label} manifest violation: Wildcard or URL pattern '${perm}' is forbidden in permissions`);
     }
   }
+
+  if (label === 'dist-safari/manifest.json' && manifest.version_name !== undefined) {
+    errors.push(`${label} Safari manifest violation: Chromium-only 'version_name' field must be omitted`);
+  }
 }
 
 function decodeMarkupForAudit(str) {
@@ -553,6 +557,29 @@ function normalizePolicyRule(rule) {
   return clone;
 }
 
+const VACATED_CFR_PATTERN = /\b16\s*CFR\s*(?:Part|§)\s*425\b/i;
+
+export function assertNoVacatedCitationsInPolicyPack(data, packLabel, errors) {
+  const fieldsToInspect = [{ label: `${packLabel}:description`, value: data?.description }];
+  for (const rule of data?.rules || []) {
+    const rid = rule.id || 'unnamed';
+    fieldsToInspect.push(
+      { label: `${packLabel}:${rid}:statute.code`, value: rule.statute?.code },
+      { label: `${packLabel}:${rid}:statute.title`, value: rule.statute?.title },
+      { label: `${packLabel}:${rid}:statute.plainExplanation`, value: rule.statute?.plainExplanation },
+      { label: `${packLabel}:${rid}:explanation`, value: rule.explanation },
+      { label: `${packLabel}:${rid}:recommendation`, value: rule.recommendation },
+      { label: `${packLabel}:${rid}:tracking.statuteCode`, value: rule.tracking?.statuteCode },
+      { label: `${packLabel}:${rid}:tracking.cfr`, value: rule.tracking?.cfr }
+    );
+  }
+  for (const { label, value } of fieldsToInspect) {
+    if (typeof value === 'string' && VACATED_CFR_PATTERN.test(value)) {
+      errors.push(`Vacated federal rule citation (16 CFR Part 425) forbidden in active policy pack field '${label}'`);
+    }
+  }
+}
+
 /**
  * Audit 4: Statutory Policy Pack Conformance & Upstream Parity
  */
@@ -579,6 +606,7 @@ export function auditPolicyPacks(errors = [], { runTimingChecks = true } = {}) {
       if ((!data.packId && !data.id) || !data.name || !Array.isArray(data.rules)) {
         errors.push(`Policy pack ${pack} missing packId/id, name, or rules array`);
       } else {
+        assertNoVacatedCitationsInPolicyPack(data, pack, errors);
         if (data.rules.length === 0) {
           errors.push(`Policy pack ${pack} has empty rules array`);
         }
@@ -812,7 +840,57 @@ export function auditArchitectureDiagrams(errors = [], { overrideArchitectureCon
 }
 
 /**
- * Audit 6: Portfolio Master Brief Parity
+ * Audit 6: Safari Container Packaging, Privacy Manifest & Native UI Invariants
+ */
+export function auditSafariPackaging(errors = []) {
+  const requiredFiles = [
+    'safari/PrivacyInfo.xcprivacy',
+    'safari/host-resources/Main.html',
+    'safari/host-resources/Style.css',
+    'safari/host-resources/Script.js',
+    'scripts/prepare-safari-xcode.sh',
+    'scripts/test-webkit-e2e.mjs',
+  ];
+
+  for (const rel of requiredFiles) {
+    if (!existsSync(resolve(REPO_ROOT, rel))) {
+      errors.push(`Missing Safari readiness asset: ${rel}`);
+    }
+  }
+
+  const privacyPath = resolve(REPO_ROOT, 'safari/PrivacyInfo.xcprivacy');
+  if (existsSync(privacyPath)) {
+    const plist = readFileSync(privacyPath, 'utf-8');
+    if (!/<key>NSPrivacyTracking<\/key>\s*<false\s*\/>/i.test(plist)) {
+      errors.push('safari/PrivacyInfo.xcprivacy must declare <key>NSPrivacyTracking</key> <false/>');
+    }
+    if (!/<key>NSPrivacyCollectedDataTypes<\/key>\s*<array\s*\/>/i.test(plist)) {
+      errors.push('safari/PrivacyInfo.xcprivacy must declare empty <key>NSPrivacyCollectedDataTypes</key> <array/>');
+    }
+  }
+
+  const hostJsPath = resolve(REPO_ROOT, 'safari/host-resources/Script.js');
+  if (existsSync(hostJsPath)) {
+    const jsCode = readFileSync(hostJsPath, 'utf-8');
+    errors.push(...scanSourceForNetworkPrimitives(jsCode, 'safari/host-resources/Script.js'));
+  }
+
+  for (const relHtml of ['safari/host-resources/Main.html', 'safari/host-resources/Style.css']) {
+    const full = resolve(REPO_ROOT, relHtml);
+    if (existsSync(full)) {
+      const content = readFileSync(full, 'utf-8');
+      if (REMOTE_ASSET_URL_PATTERN.test(content)) {
+        errors.push(`Safari host asset violation in ${relHtml}: remote asset reference detected`);
+      }
+      if (relHtml.endsWith('.html') && !content.includes("connect-src 'none'")) {
+        errors.push(`${relHtml} must enforce connect-src 'none' CSP`);
+      }
+    }
+  }
+}
+
+/**
+ * Audit 7: Portfolio Master Brief Parity
  */
 export function auditPortfolioMasterBrief(
   errors = [],
@@ -869,6 +947,7 @@ export function runAllAudits(options = {}) {
   auditVocabulary(errors);
   auditPolicyPacks(errors);
   auditArchitectureDiagrams(errors);
+  auditSafariPackaging(errors);
   const briefChecked = auditPortfolioMasterBrief(errors, options);
 
   return { errors, briefChecked };

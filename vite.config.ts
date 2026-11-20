@@ -118,7 +118,7 @@ export default defineConfig(({ mode }) => {
               };
             }
             if (targetBrowser === 'safari') {
-              manifest.version_name = manifest.version;
+              delete manifest.version_name;
               delete manifest.browser_specific_settings;
             }
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));

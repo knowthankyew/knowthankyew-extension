@@ -171,6 +171,9 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       });
       const manifest = JSON.parse(readFileSync(resolve(testDistSafari, 'manifest.json'), 'utf-8'));
       expect(manifest.browser_specific_settings).toBeUndefined();
+      expect(manifest.version_name).toBeUndefined();
+      expect(manifest.host_permissions).toBeUndefined();
+      expect(manifest.permissions).toEqual(['activeTab', 'storage', 'scripting']);
       expect(manifest.background?.service_worker).toBe('background/service-worker.js');
       expect(manifest.content_security_policy.extension_pages).toContain("connect-src 'none'");
 
