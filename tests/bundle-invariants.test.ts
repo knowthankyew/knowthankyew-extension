@@ -175,7 +175,15 @@ describe('Production Bundle Egress & Manifest Invariants (bundle-invariants.test
       expect(manifest.host_permissions).toBeUndefined();
       expect(manifest.permissions).toEqual(['activeTab', 'storage', 'scripting']);
       expect(manifest.background?.service_worker).toBe('background/service-worker.js');
+      expect(manifest.background?.type).toBeUndefined();
+      expect(manifest.options_ui?.open_in_tab).toBeUndefined();
       expect(manifest.content_security_policy.extension_pages).toContain("connect-src 'none'");
+
+      const swSafari = resolve(testDistSafari, 'background/service-worker.js');
+      expect(existsSync(swSafari)).toBe(true);
+      const swSafariContent = readFileSync(swSafari, 'utf-8');
+      expect(/(?:^|[;\s])import(?:\s|[(]|\*)/.test(swSafariContent)).toBe(false);
+      expect(/(?:^|[;\s])export(?:\s|[{*]|\bdefault\b)/.test(swSafariContent)).toBe(false);
 
       const jsFiles = getJsFilesRecursively(testDistSafari);
       expect(jsFiles.length).toBeGreaterThan(0);

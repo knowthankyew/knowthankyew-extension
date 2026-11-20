@@ -81,7 +81,37 @@ export default defineConfig(({ mode }) => {
             throw err;
           }
 
-          // 2. Adjust manifest.json per target browser / features
+          // 2. Compile background/service-worker.ts as a standalone IIFE classic script for Safari
+          // so Safari doesn't warn on unsupported manifest background.type = "module".
+          if (targetBrowser === 'safari') {
+            try {
+              await build({
+                configFile: false,
+                publicDir: false,
+                mode,
+                plugins: [airGapTransformPlugin],
+                build: {
+                  outDir,
+                  emptyOutDir: false,
+                  lib: {
+                    entry: resolve('src/background/service-worker.ts'),
+                    name: 'KtyBackgroundWorker',
+                    formats: ['iife'],
+                    fileName: () => 'background/service-worker.js',
+                  },
+                },
+                define: {
+                  __OTEL_EXPORTER_ENDPOINT__: JSON.stringify(process.env.VITE_OTEL_EXPORTER_OTLP_ENDPOINT || ''),
+                  __LOCAL_ML_ENABLED__: JSON.stringify(process.env.VITE_LOCAL_ML_ENABLED === 'true'),
+                },
+              });
+            } catch (err) {
+              console.error('Failed to compile Safari background/service-worker.js as an isolated IIFE script:', err);
+              throw err;
+            }
+          }
+
+          // 3. Adjust manifest.json per target browser / features
           const manifestPath = resolve(outDir, 'manifest.json');
           if (existsSync(manifestPath)) {
             const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8'));
@@ -120,6 +150,12 @@ export default defineConfig(({ mode }) => {
             if (targetBrowser === 'safari') {
               delete manifest.version_name;
               delete manifest.browser_specific_settings;
+              if (manifest.background) {
+                delete manifest.background.type;
+              }
+              if (manifest.options_ui) {
+                delete manifest.options_ui.open_in_tab;
+              }
             }
             writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
           }

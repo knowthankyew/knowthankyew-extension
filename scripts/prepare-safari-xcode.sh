@@ -183,26 +183,29 @@ with open(pbxproj_path, "w", encoding="utf-8") as fh:
     fh.write(content)
 PY
 
-echo "5. Auditing generated Xcode entitlements & privacy plist..."
-ENT_COUNT=0
+echo "5. Auditing generated Xcode sandbox settings, entitlements & privacy plist..."
+if grep -q "com.apple.security.network.client" "$XCODEPROJ/project.pbxproj" || \
+   grep -qE "ENABLE_OUTGOING_NETWORK_CONNECTIONS\s*=\s*YES" "$XCODEPROJ/project.pbxproj"; then
+  echo "ERROR: Forbidden outgoing network entitlement or build setting detected in $XCODEPROJ/project.pbxproj" >&2
+  exit 1
+fi
+
+if ! grep -qE "ENABLE_APP_SANDBOX\s*=\s*YES" "$XCODEPROJ/project.pbxproj" && \
+   [ -z "$(find "$PROJECT_DIR" -name "*.entitlements" -print -quit)" ]; then
+  echo "ERROR: Neither ENABLE_APP_SANDBOX = YES nor .entitlements files found in generated Xcode project" >&2
+  exit 1
+fi
+
 while IFS= read -r ent; do
-  ENT_COUNT=$((ENT_COUNT + 1))
   plutil -lint "$ent" >/dev/null
   if grep -q "com.apple.security.network.client" "$ent"; then
     echo "ERROR: Forbidden network client entitlement detected in $ent" >&2
     exit 1
   fi
-  if [[ "$ent" == *"macOS"* ]] && ! grep -q "com.apple.security.app-sandbox" "$ent"; then
-    echo "ERROR: macOS target missing App Sandbox entitlement in $ent" >&2
-    exit 1
-  fi
   echo "   Verified clean entitlements: ${ent#$XCODE_OUT/}"
 done < <(find "$PROJECT_DIR" -name "*.entitlements" | sort)
 
-if [ "$ENT_COUNT" -eq 0 ]; then
-  echo "ERROR: No .entitlements files found in generated Xcode project" >&2
-  exit 1
-fi
+echo "   Verified sandbox & zero outgoing network settings in project.pbxproj"
 
 plutil -lint "$APP_PRIVACY_DEST" >/dev/null
 plutil -lint "$EXT_PRIVACY_DEST" >/dev/null
