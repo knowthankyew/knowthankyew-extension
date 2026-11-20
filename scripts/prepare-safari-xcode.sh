@@ -165,23 +165,31 @@ for group_name, rel_file in targets_to_add:
             content = content[:m.start(1)] + replacement + content[m.end(2):]
             attached_to_group = True
 
-    # Attach PBXBuildFile to matching PBXResourcesBuildPhase (App has Main.html/Style.css; Extension has manifest.json)
+    # Attach PBXBuildFile to every matching PBXResourcesBuildPhase (macOS & iOS targets)
     phase_anchor = "Main.html" if "App" in group_name else "manifest.json"
     phase_regex = re.compile(
         rf'(isa\s*=\s*PBXResourcesBuildPhase;[\s\S]*?files\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(phase_anchor)}[\s\S]*?)(\n\s*\);)',
         re.MULTILINE,
     )
-    attached_to_phase = False
-    for m in phase_regex.finditer(content):
-        content = content[:m.start(1)] + f"{m.group(1)}\n\t\t\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */," + content[m.end(2):]
-        attached_to_phase = True
-        break
+    phase_count = 0
+    def _inject_phase(match):
+        nonlocal phase_count
+        body, close = match.group(1), match.group(2)
+        if build_file_id in body:
+            return match.group(0)
+        phase_count += 1
+        return f"{body}\n\t\t\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */,{close}"
 
-    print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phase={attached_to_phase})")
+    content = phase_regex.sub(_inject_phase, content)
+    attached_to_phase = phase_count > 0
+
+    print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phases={phase_count})")
 
 with open(pbxproj_path, "w", encoding="utf-8") as fh:
     fh.write(content)
 PY
+
+plutil -lint "$XCODEPROJ/project.pbxproj" >/dev/null
 
 echo "5. Enforcing zero-network sandbox settings & auditing generated Xcode entitlements..."
 python3 - "$XCODEPROJ/project.pbxproj" <<'PY'
