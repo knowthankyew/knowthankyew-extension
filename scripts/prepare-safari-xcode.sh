@@ -75,9 +75,13 @@ while IFS= read -r main_html; do
 done < <(find "$PROJECT_DIR" -path "*App*/Resources/*/Main.html" -o -path "*App*/Resources/Base.lproj/Main.html" | sort -u)
 
 echo "4. Installing & registering Apple PrivacyInfo.xcprivacy across App and Extension targets..."
+APP_PRIVACY_ROOT="$PROJECT_DIR/Shared (App)/PrivacyInfo.xcprivacy"
+EXT_PRIVACY_ROOT="$PROJECT_DIR/Shared (Extension)/PrivacyInfo.xcprivacy"
 APP_PRIVACY_DEST="$PROJECT_DIR/Shared (App)/Resources/PrivacyInfo.xcprivacy"
 EXT_PRIVACY_DEST="$PROJECT_DIR/Shared (Extension)/Resources/PrivacyInfo.xcprivacy"
-mkdir -p "$(dirname "$APP_PRIVACY_DEST")" "$(dirname "$EXT_PRIVACY_DEST")"
+mkdir -p "$(dirname "$APP_PRIVACY_ROOT")" "$(dirname "$EXT_PRIVACY_ROOT")" "$(dirname "$APP_PRIVACY_DEST")" "$(dirname "$EXT_PRIVACY_DEST")"
+cp "$PRIVACY_MANIFEST" "$APP_PRIVACY_ROOT"
+cp "$PRIVACY_MANIFEST" "$EXT_PRIVACY_ROOT"
 cp "$PRIVACY_MANIFEST" "$APP_PRIVACY_DEST"
 cp "$PRIVACY_MANIFEST" "$EXT_PRIVACY_DEST"
 
