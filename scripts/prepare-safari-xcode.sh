@@ -171,19 +171,18 @@ for group_name, rel_file in targets_to_add:
         rf'(isa\s*=\s*PBXResourcesBuildPhase;[\s\S]*?files\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(phase_anchor)}[\s\S]*?)(\n\s*\);)',
         re.MULTILINE,
     )
-    phase_count = 0
+    phase_count = [0]
     def _inject_phase(match):
-        nonlocal phase_count
         body, close = match.group(1), match.group(2)
         if build_file_id in body:
             return match.group(0)
-        phase_count += 1
+        phase_count[0] += 1
         return f"{body}\n\t\t\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */,{close}"
 
     content = phase_regex.sub(_inject_phase, content)
-    attached_to_phase = phase_count > 0
+    attached_to_phase = phase_count[0] > 0
 
-    print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phases={phase_count})")
+    print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phases={phase_count[0]})")
 
 with open(pbxproj_path, "w", encoding="utf-8") as fh:
     fh.write(content)
