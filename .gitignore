@@ -15,6 +15,7 @@ dist-local-assist
 dist-ml-e2e
 dist-test-*
 dist-ssr
+safari-xcode/
 *.local
 
 # Editor directories and files

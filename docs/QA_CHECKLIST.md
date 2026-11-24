@@ -8,11 +8,11 @@
 
 Run these automated checks first to confirm the build environment, zero-egress invariants, architecture diagrams, and statutory policy packs are 100% green before interactive browser testing:
 
-- [ ] **1.1 Complete Vitest Test Suite (25 Suites / 217 Tests)**
+- [ ] **1.1 Complete Vitest Test Suite (25 Suites / 218 Tests)**
   ```bash
   npm test
   ```
-  *Verify*: All 25 test files pass with `0` failures across all 217 unit, ReDoS, bundle invariant, claims linter, adversarial DOM, and Chromium E2E tests.
+  *Verify*: All 25 test files pass with `0` failures across all 218 unit, ReDoS, bundle invariant, claims linter, adversarial DOM, and Chromium E2E tests.
 
 - [ ] **1.2 Automated Claims, Architecture Diagram & Portfolio Parity Audit**
   ```bash
@@ -25,7 +25,7 @@ Run these automated checks first to confirm the build environment, zero-egress i
   3. Zero prohibited marketing vocabulary across Markdown docs, HTML docs, and React UI components.
   4. Statutory policy pack schema, `safe-regex` ReDoS safety, and `@knowthankyew/policy-packs/subscriptions` parity across all 4 packs (`us-federal`, `state-arl`, `uk-dmcc`, `eu-crd`).
   5. Architecture diagram metadata (`<!-- diagram-meta -->`), referenced file existence, and dependency count parity in `docs/ARCHITECTURE.md`.
-  6. Portfolio Master Brief test count and suite inventory parity (`217/217 Tests`, `25 test files`).
+  6. Portfolio Master Brief test count and suite inventory parity (`218/218 Tests`, `25 test files`).
 
 - [ ] **1.3 Multi-Browser Production Builds & Release Packaging**
   ```bash

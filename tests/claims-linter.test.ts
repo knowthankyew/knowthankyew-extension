@@ -9,7 +9,9 @@ import {
   auditVocabulary,
   auditPolicyPacks,
   auditArchitectureDiagrams,
+  auditSafariPackaging,
   auditPortfolioMasterBrief,
+  assertNoVacatedCitationsInPolicyPack,
   scanDocumentationForVocabulary,
   REMOTE_ASSET_URL_PATTERN,
 // @ts-expect-error - ESM audit script import without bundled d.ts
@@ -252,6 +254,29 @@ knowthankyew-extension/
     for (const snippet of localSnippets) {
       expect(REMOTE_ASSET_URL_PATTERN.test(snippet)).toBe(false);
     }
+  });
+
+  it('validates Safari PrivacyInfo.xcprivacy, host container resources, and vacated federal citation rules', () => {
+    const safariErrors: string[] = [];
+    auditSafariPackaging(safariErrors);
+    expect(safariErrors).toEqual([]);
+
+    const vacatedErrors: string[] = [];
+    assertNoVacatedCitationsInPolicyPack(
+      {
+        description: 'US pack',
+        rules: [
+          {
+            id: 'AR-001',
+            statute: { code: '16 CFR Part 425' },
+          },
+        ],
+      },
+      'test-pack.json',
+      vacatedErrors
+    );
+    expect(vacatedErrors.length).toBe(1);
+    expect(vacatedErrors[0]).toContain('16 CFR Part 425');
   });
 
   it('verifies Portfolio Master Brief parity (test count and test file inventory) if brief is present', () => {
