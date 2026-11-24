@@ -42,11 +42,11 @@
     "@types/safe-regex": "^1.1.6",
     "@vitejs/plugin-react": "^6.3.0",
     "jsdom": "^29.1.1",
-    "playwright": "^1.65.0",
-    "puppeteer": "^25.17.0",
+    "playwright": "^1.65.1",
+    "puppeteer": "^25.18.1",
     "safe-regex": "^2.1.1",
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   }
 }
