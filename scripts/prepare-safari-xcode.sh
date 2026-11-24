@@ -98,29 +98,57 @@ for group_name in targets_to_add:
         if sync_pattern.search(content):
             is_synced = True
 
-    if is_synced:
-        # Synchronized groups automatically embed files placed inside Resources/ without duplicate root copies
-        dest_path = os.path.join(project_dir, group_name, "Resources", "PrivacyInfo.xcprivacy")
-        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        shutil.copyfile(privacy_src, dest_path)
-        print(f"   Synced group embeds {group_name}/Resources/PrivacyInfo.xcprivacy")
-        continue
-
-    # Classic PBXGroup Resources resolves sourceTree="<group>" relative to Shared (App|Extension)/
-    dest_path = os.path.join(project_dir, group_name, "PrivacyInfo.xcprivacy")
+    dest_path = os.path.join(project_dir, group_name, "Resources", "PrivacyInfo.xcprivacy")
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     shutil.copyfile(privacy_src, dest_path)
 
-    rel_file = "PrivacyInfo.xcprivacy"
+    if is_synced:
+        # Synchronized groups automatically embed files placed inside Resources/ without duplicate root copies
+        print(f"   Synced group embeds {group_name}/Resources/PrivacyInfo.xcprivacy")
+        continue
+
+    rel_file = "Resources/PrivacyInfo.xcprivacy"
     file_ref_id = uid(f"fileref:{group_name}:{rel_file}")
     build_file_id = uid(f"buildfile:{group_name}:{rel_file}")
 
     if file_ref_id in content:
         continue
 
+    anchor_file = "Style.css" if "App" in group_name else "manifest.json"
+    group_regex = re.compile(
+        rf'(children\s*=\s*\((?:(?!</dict>|\);)[\s\S])*?{re.escape(anchor_file)}[\s\S]*?)(\n\s*\);)([\s\S]{{0,240}}?\}};)',
+        re.MULTILINE,
+    )
+
+    attached_to_group = False
+    group_uses_resources_path = True
+    for m in group_regex.finditer(content):
+        if "PrivacyInfo.xcprivacy" not in m.group(1):
+            prefix, close, tail = m.group(1), m.group(2), m.group(3)
+            group_uses_resources_path = bool(re.search(r'\bpath\s*=\s*"?Resources"?\s*;', tail))
+            replacement = f"{prefix}\n\t\t\t\t{file_ref_id} /* PrivacyInfo.xcprivacy */,{close}{tail}"
+            content = content[:m.start(1)] + replacement + content[m.end(3):]
+            attached_to_group = True
+            break
+
+    if not attached_to_group:
+        fallback_rg = re.compile(
+            rf'(children\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(anchor_file)}[\s\S]*?)(^\s*\);)([\s\S]{{0,240}}?\}};)',
+            re.MULTILINE,
+        )
+        m = fallback_rg.search(content)
+        if m:
+            group_uses_resources_path = bool(re.search(r'\bpath\s*=\s*"?Resources"?\s*;', m.group(3)))
+            replacement = f"{m.group(1)}\n\t\t\t\t{file_ref_id} /* PrivacyInfo.xcprivacy */,{m.group(2)}{m.group(3)}"
+            content = content[:m.start(1)] + replacement + content[m.end(3):]
+            attached_to_group = True
+
+    # If the matched group sets `path = Resources;`, reference relative to Resources/; otherwise use Resources/PrivacyInfo.xcprivacy
+    pbx_file_path = "PrivacyInfo.xcprivacy" if group_uses_resources_path else "Resources/PrivacyInfo.xcprivacy"
+
     file_ref_entry = (
         f'\t\t{file_ref_id} /* PrivacyInfo.xcprivacy */ = {{isa = PBXFileReference; '
-        f'lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; }};\n'
+        f'lastKnownFileType = text.xml; path = "{pbx_file_path}"; sourceTree = "<group>"; }};\n'
     )
     build_file_entry = (
         f'\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */ = {{isa = PBXBuildFile; '
@@ -138,33 +166,6 @@ for group_name in targets_to_add:
         1,
     )
 
-    anchor_file = "Style.css" if "App" in group_name else "manifest.json"
-    group_regex = re.compile(
-        rf'(path\s*=\s*Resources;\s*\n\s*sourceTree\s*=\s*"<group>";\s*\n\s*\}};)|'
-        rf'(children\s*=\s*\((?:(?!</dict>|\);)[\s\S])*?{re.escape(anchor_file)}[\s\S]*?)(\n\s*\);)',
-        re.MULTILINE,
-    )
-
-    attached_to_group = False
-    for m in group_regex.finditer(content):
-        if m.group(2) is not None and "PrivacyInfo.xcprivacy" not in m.group(2):
-            prefix, close = m.group(2), m.group(3)
-            replacement = f"{prefix}\n\t\t\t\t{file_ref_id} /* PrivacyInfo.xcprivacy */,{close}"
-            content = content[:m.start(2)] + replacement + content[m.end(3):]
-            attached_to_group = True
-            break
-
-    if not attached_to_group:
-        fallback_rg = re.compile(
-            rf'(children\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(anchor_file)}[\s\S]*?)(^\s*\);)',
-            re.MULTILINE,
-        )
-        m = fallback_rg.search(content)
-        if m:
-            replacement = f"{m.group(1)}\n\t\t\t\t{file_ref_id} /* PrivacyInfo.xcprivacy */,{m.group(2)}"
-            content = content[:m.start(1)] + replacement + content[m.end(2):]
-            attached_to_group = True
-
     phase_anchor = "Main.html" if "App" in group_name else "manifest.json"
     phase_regex = re.compile(
         rf'(isa\s*=\s*PBXResourcesBuildPhase;[\s\S]*?files\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(phase_anchor)}[\s\S]*?)(\n\s*\);)',
@@ -179,7 +180,7 @@ for group_name in targets_to_add:
         return f"{body}\n\t\t\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */,{close}"
 
     content = phase_regex.sub(_inject_phase, content)
-    print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phases={phase_count[0]})")
+    print(f"   Registered {group_name}/{rel_file} (pbxPath={pbx_file_path}, group={attached_to_group}, phases={phase_count[0]})")
 
 with open(pbxproj_path, "w", encoding="utf-8") as fh:
     fh.write(content)
