@@ -6,6 +6,8 @@
   --text: #f8fafc;
   --muted: #94a3b8;
   --accent: #38bdf8;
+  --btn-bg: #38bdf8;
+  --btn-text: #0f172a;
   --ok: #10b981;
   --warn: #f59e0b;
   --crit: #ef4444;
@@ -19,6 +21,8 @@
     --text: #0f172a;
     --muted: #475569;
     --accent: #0284c7;
+    --btn-bg: #0369a1;
+    --btn-text: #ffffff;
   }
 }
 
@@ -142,8 +146,8 @@ button {
 }
 
 .primary-btn {
-  background: var(--accent);
-  color: #ffffff;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   border: none;
 }
 

@@ -75,44 +75,43 @@ while IFS= read -r main_html; do
 done < <(find "$PROJECT_DIR" -path "*App*/Resources/*/Main.html" -o -path "*App*/Resources/Base.lproj/Main.html" | sort -u)
 
 echo "4. Installing & registering Apple PrivacyInfo.xcprivacy across App and Extension targets..."
-APP_PRIVACY_ROOT="$PROJECT_DIR/Shared (App)/PrivacyInfo.xcprivacy"
-EXT_PRIVACY_ROOT="$PROJECT_DIR/Shared (Extension)/PrivacyInfo.xcprivacy"
-APP_PRIVACY_DEST="$PROJECT_DIR/Shared (App)/Resources/PrivacyInfo.xcprivacy"
-EXT_PRIVACY_DEST="$PROJECT_DIR/Shared (Extension)/Resources/PrivacyInfo.xcprivacy"
-mkdir -p "$(dirname "$APP_PRIVACY_ROOT")" "$(dirname "$EXT_PRIVACY_ROOT")" "$(dirname "$APP_PRIVACY_DEST")" "$(dirname "$EXT_PRIVACY_DEST")"
-cp "$PRIVACY_MANIFEST" "$APP_PRIVACY_ROOT"
-cp "$PRIVACY_MANIFEST" "$EXT_PRIVACY_ROOT"
-cp "$PRIVACY_MANIFEST" "$APP_PRIVACY_DEST"
-cp "$PRIVACY_MANIFEST" "$EXT_PRIVACY_DEST"
-
-python3 - "$XCODEPROJ/project.pbxproj" "$PROJECT_DIR" <<'PY'
+python3 - "$XCODEPROJ/project.pbxproj" "$PROJECT_DIR" "$PRIVACY_MANIFEST" <<'PY'
 import hashlib
 import os
 import re
+import shutil
 import sys
 
-pbxproj_path, project_dir = sys.argv[1], sys.argv[2]
+pbxproj_path, project_dir, privacy_src = sys.argv[1], sys.argv[2], sys.argv[3]
 with open(pbxproj_path, "r", encoding="utf-8") as fh:
     content = fh.read()
 
-# Validate existing plists
 def uid(seed: str) -> str:
     return hashlib.sha1(seed.encode("utf-8")).hexdigest()[:24].upper()
 
-targets_to_add = [
-    ("Shared (App)", "Resources/PrivacyInfo.xcprivacy"),
-    ("Shared (Extension)", "Resources/PrivacyInfo.xcprivacy"),
-]
+targets_to_add = ["Shared (App)", "Shared (Extension)"]
 
-# If folder uses PBXFileSystemSynchronizedRootGroup, files in Resources/ are already synced automatically
-for group_name, rel_file in targets_to_add:
+for group_name in targets_to_add:
+    is_synced = False
     if "PBXFileSystemSynchronizedRootGroup" in content and group_name in content:
-        # Still verify if explicitly needed; skip duplicate fileRef injection when synced
         sync_pattern = re.compile(rf'PBXFileSystemSynchronizedRootGroup.*?path\s*=\s*"{re.escape(group_name)}"', re.DOTALL)
         if sync_pattern.search(content):
-            print(f"   Synced group handles {group_name}/{rel_file}")
-            continue
+            is_synced = True
 
+    if is_synced:
+        # Synchronized groups automatically embed files placed inside Resources/ without duplicate root copies
+        dest_path = os.path.join(project_dir, group_name, "Resources", "PrivacyInfo.xcprivacy")
+        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+        shutil.copyfile(privacy_src, dest_path)
+        print(f"   Synced group embeds {group_name}/Resources/PrivacyInfo.xcprivacy")
+        continue
+
+    # Classic PBXGroup Resources resolves sourceTree="<group>" relative to Shared (App|Extension)/
+    dest_path = os.path.join(project_dir, group_name, "PrivacyInfo.xcprivacy")
+    os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+    shutil.copyfile(privacy_src, dest_path)
+
+    rel_file = "PrivacyInfo.xcprivacy"
     file_ref_id = uid(f"fileref:{group_name}:{rel_file}")
     build_file_id = uid(f"buildfile:{group_name}:{rel_file}")
 
@@ -139,8 +138,6 @@ for group_name, rel_file in targets_to_add:
         1,
     )
 
-    # Attach to the Resources PBXGroup under group_name or matching children block
-    # Find the PBXGroup matching name = "Resources" whose sibling path references Style.css (App) or manifest.json (Extension)
     anchor_file = "Style.css" if "App" in group_name else "manifest.json"
     group_regex = re.compile(
         rf'(path\s*=\s*Resources;\s*\n\s*sourceTree\s*=\s*"<group>";\s*\n\s*\}};)|'
@@ -158,7 +155,6 @@ for group_name, rel_file in targets_to_add:
             break
 
     if not attached_to_group:
-        # Fallback: locate the Resources group directly above/before path = Resources
         fallback_rg = re.compile(
             rf'(children\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(anchor_file)}[\s\S]*?)(^\s*\);)',
             re.MULTILINE,
@@ -169,7 +165,6 @@ for group_name, rel_file in targets_to_add:
             content = content[:m.start(1)] + replacement + content[m.end(2):]
             attached_to_group = True
 
-    # Attach PBXBuildFile to every matching PBXResourcesBuildPhase (macOS & iOS targets)
     phase_anchor = "Main.html" if "App" in group_name else "manifest.json"
     phase_regex = re.compile(
         rf'(isa\s*=\s*PBXResourcesBuildPhase;[\s\S]*?files\s*=\s*\((?:(?!\);)[\s\S])*?{re.escape(phase_anchor)}[\s\S]*?)(\n\s*\);)',
@@ -184,8 +179,6 @@ for group_name, rel_file in targets_to_add:
         return f"{body}\n\t\t\t\t{build_file_id} /* PrivacyInfo.xcprivacy in Resources */,{close}"
 
     content = phase_regex.sub(_inject_phase, content)
-    attached_to_phase = phase_count[0] > 0
-
     print(f"   Registered {group_name}/{rel_file} (group={attached_to_group}, phases={phase_count[0]})")
 
 with open(pbxproj_path, "w", encoding="utf-8") as fh:
@@ -239,8 +232,9 @@ done < <(find "$PROJECT_DIR" -name "*.entitlements" | sort)
 
 echo "   Verified sandbox & zero outgoing network settings in project.pbxproj"
 
-plutil -lint "$APP_PRIVACY_DEST" >/dev/null
-plutil -lint "$EXT_PRIVACY_DEST" >/dev/null
+while IFS= read -r plist_file; do
+  plutil -lint "$plist_file" >/dev/null
+done < <(find "$PROJECT_DIR" -name "PrivacyInfo.xcprivacy" | sort)
 
 if [ "$RUN_BUILD" = true ]; then
   echo "6. Compiling unsigned macOS Release target via xcodebuild..."

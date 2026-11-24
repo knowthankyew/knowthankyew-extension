@@ -113,6 +113,31 @@ document.getElementById('burn-btn')!.addEventListener('click', () => {
   return join(outDir, 'dist');
 }
 
+async function createIsolatedWebKitPage(browser, baseUrl) {
+  const context = await browser.newContext();
+  const disallowedRequests = [];
+  const pageErrors = [];
+
+  await context.route('**/*', async (route) => {
+    const reqUrl = route.request().url();
+    if (
+      reqUrl === baseUrl ||
+      reqUrl.startsWith(`${baseUrl}/`) ||
+      reqUrl.startsWith('data:') ||
+      reqUrl.startsWith('blob:')
+    ) {
+      await route.continue();
+      return;
+    }
+    disallowedRequests.push(reqUrl);
+    await route.abort();
+  });
+
+  const page = await context.newPage();
+  page.on('pageerror', (err) => pageErrors.push(err.message));
+  return { context, page, pageErrors, disallowedRequests };
+}
+
 async function main() {
   execSync('npm run build:safari', { cwd: ROOT_DIR, stdio: 'pipe' });
 
@@ -124,6 +149,7 @@ async function main() {
   const tmpHarnessRoot = mkdtempSync(join(tmpdir(), 'kty-webkit-'));
   let server;
   let browser;
+  let cspProbeHit = false;
 
   try {
     const handoffDist = await buildFragmentHarness(tmpHarnessRoot);
@@ -131,6 +157,13 @@ async function main() {
     server = http.createServer((req, res) => {
       const reqUrl = new URL(req.url || '/', 'http://127.0.0.1');
       const pathname = reqUrl.pathname;
+
+      if (pathname === '/csp-probe') {
+        cspProbeHit = true;
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('OK');
+        return;
+      }
 
       if (pathname === '/checkout') {
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -193,62 +226,58 @@ async function main() {
 
     // 1. Extension popup & options in WebKit + CSP negative control
     {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pageErrors = [];
-      const nonLoopbackRequests = [];
-
-      page.on('pageerror', (err) => pageErrors.push(err.message));
-      page.on('request', (req) => {
-        const u = req.url();
-        if (!u.startsWith('http://127.0.0.1:') && !u.startsWith('data:') && !u.startsWith('blob:')) {
-          nonLoopbackRequests.push(u);
-        }
-      });
+      const { context, page, pageErrors, disallowedRequests } = await createIsolatedWebKitPage(browser, baseUrl);
 
       await page.goto(`${baseUrl}/popup.html`, { waitUntil: 'networkidle' });
       const popupText = await page.textContent('body');
       assert.ok(popupText && popupText.length > 0, 'WebKit popup.html must render non-empty body');
 
-      const cspBlocked = await page.evaluate(async () => {
+      // Probe same-origin loopback endpoint allowed by context.route so only WebKit CSP connect-src 'none' blocks it
+      const cspResult = await page.evaluate(async (probeUrl) => {
+        const violatedDirectives = [];
+        document.addEventListener('securitypolicyviolation', (ev) => {
+          violatedDirectives.push(ev.violatedDirective || ev.effectiveDirective || '');
+        });
         try {
-          await fetch('https://example.com/leak-probe');
-          return 'ALLOWED';
+          await fetch(probeUrl);
+          return { status: 'ALLOWED', violatedDirectives };
         } catch (err) {
-          return `BLOCKED:${err?.name || 'Error'}`;
+          await new Promise((r) => setTimeout(r, 25));
+          return { status: `BLOCKED:${err?.name || 'Error'}`, violatedDirectives };
         }
-      });
-      assert.ok(cspBlocked.startsWith('BLOCKED:'), `Expected WebKit CSP to block fetch(), got ${cspBlocked}`);
+      }, `${baseUrl}/csp-probe`);
+      assert.ok(cspResult.status.startsWith('BLOCKED:'), `Expected WebKit CSP to block fetch(), got ${cspResult.status}`);
+      assert.ok(
+        cspResult.violatedDirectives.some((d) => d.startsWith('connect-src')),
+        `Expected connect-src securitypolicyviolation event, got ${JSON.stringify(cspResult)}`
+      );
+      assert.equal(cspProbeHit, false, 'WebKit CSP must prevent request from ever reaching /csp-probe');
 
       await page.goto(`${baseUrl}/options.html`, { waitUntil: 'networkidle' });
       const optionsText = await page.textContent('body');
       assert.ok(optionsText && optionsText.includes('KnowThankYew'), 'WebKit options.html must render');
 
       assert.deepEqual(pageErrors, [], `Unexpected page errors in WebKit extension UI: ${pageErrors.join('; ')}`);
-      assert.deepEqual(nonLoopbackRequests, [], `Non-loopback requests observed: ${nonLoopbackRequests.join(', ')}`);
+      assert.deepEqual(disallowedRequests, [], `Disallowed non-origin requests observed: ${disallowedRequests.join(', ')}`);
       await context.close();
       console.log('✓ WebKit Test 1: dist-safari popup.html & options.html render cleanly and block fetch() under connect-src none');
     }
 
     // 2. Classic content/scanner.js in WebKit + Closed Shadow DOM + BroadcastChannel Hard Burn
     {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pageErrors = [];
-      const nonLoopbackRequests = [];
+      const { context, page, pageErrors, disallowedRequests } = await createIsolatedWebKitPage(browser, baseUrl);
 
-      page.on('pageerror', (err) => pageErrors.push(err.message));
-      page.on('request', (req) => {
-        const u = req.url();
-        if (!u.startsWith('http://127.0.0.1:') && !u.startsWith('data:') && !u.startsWith('blob:')) {
-          nonLoopbackRequests.push(u);
-        }
+      await page.addInitScript(() => {
+        const shadowCalls = new WeakMap();
+        const origAttachShadow = Element.prototype.attachShadow;
+        Element.prototype.attachShadow = function (init) {
+          shadowCalls.set(this, init?.mode);
+          return origAttachShadow.call(this, init);
+        };
+        window.__ktyGetAttachShadowMode = (el) => shadowCalls.get(el) ?? null;
       });
 
       await page.goto(`${baseUrl}/checkout`, { waitUntil: 'networkidle' });
-      await page.addInitScript(() => {
-        // Ignore script injection; runtime message mock captures KTY_SCAN_COMPLETED
-      });
       await page.evaluate(() => {
         window.chrome = {
           runtime: {
@@ -268,12 +297,18 @@ async function main() {
           critical: msg?.summary?.critical ?? 0,
           warning: msg?.summary?.warning ?? 0,
           hostCount: hosts.length,
-          allClosedShadow: hosts.every((h) => h.shadowRoot === null),
+          allClosedShadowAttached: hosts.every(
+            (h) => window.__ktyGetAttachShadowMode(h) === 'closed' && h.shadowRoot === null
+          ),
         };
       });
       assert.ok(scanOutcome.critical >= 1, `Expected CRITICAL findings in WebKit checkout scan, got ${JSON.stringify(scanOutcome)}`);
       assert.ok(scanOutcome.hostCount >= 1, 'Expected inline indicator host in WebKit DOM');
-      assert.equal(scanOutcome.allClosedShadow, true, 'WebKit indicator hosts must use closed Shadow DOM (shadowRoot === null)');
+      assert.equal(
+        scanOutcome.allClosedShadowAttached,
+        true,
+        'WebKit indicator hosts must invoke attachShadow({ mode: "closed" }) with shadowRoot === null'
+      );
 
       await page.evaluate(() => {
         const bc = new BroadcastChannel('kty_hard_burn');
@@ -283,25 +318,14 @@ async function main() {
       await page.waitForFunction(() => document.querySelectorAll('[data-kty-indicator-host]').length === 0);
 
       assert.deepEqual(pageErrors, [], `Unexpected page errors in WebKit scanner: ${pageErrors.join('; ')}`);
-      assert.deepEqual(nonLoopbackRequests, [], `Non-loopback requests during WebKit scanner run: ${nonLoopbackRequests.join(', ')}`);
+      assert.deepEqual(disallowedRequests, [], `Disallowed requests during WebKit scanner run: ${disallowedRequests.join(', ')}`);
       await context.close();
       console.log('✓ WebKit Test 2: dist-safari/content/scanner.js scans checkout DOM, mounts Closed Shadow DOM badges, and burns via BroadcastChannel');
     }
 
     // 3. Fragment #kty_handoff= encoding + WebKit URL/history replaceState scrubbing
     {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pageErrors = [];
-      const nonLoopbackRequests = [];
-
-      page.on('pageerror', (err) => pageErrors.push(err.message));
-      page.on('request', (req) => {
-        const u = req.url();
-        if (!u.startsWith('http://127.0.0.1:') && !u.startsWith('data:') && !u.startsWith('blob:')) {
-          nonLoopbackRequests.push(u);
-        }
-      });
+      const { context, page, pageErrors, disallowedRequests } = await createIsolatedWebKitPage(browser, baseUrl);
 
       await page.goto(`${baseUrl}/handoff-app/`, { waitUntil: 'networkidle' });
       const encodedUrl = await page.evaluate(() => {
@@ -346,30 +370,25 @@ async function main() {
       assert.equal(scrubbedLocation.hash, '', 'WebKit must scrub #kty_handoff= hash on mount');
       assert.ok(!scrubbedLocation.href.includes('#kty_handoff='), `Expected scrubbed hash fragment, got ${scrubbedLocation.href}`);
 
+      // Verify burn click clears state synchronously BEFORE reload
       await page.click('#burn-btn');
+      assert.equal(await page.textContent('#status'), 'EMPTY');
+      assert.equal(await page.textContent('#domain'), '');
+      assert.equal(await page.textContent('#count'), '0');
+
+      // Reload confirms scrubbed URL persists empty state without resurrecting burned payload
       await page.reload({ waitUntil: 'networkidle' });
       assert.equal(await page.textContent('#status'), 'EMPTY');
 
       assert.deepEqual(pageErrors, [], `Unexpected errors in WebKit fragment harness: ${pageErrors.join('; ')}`);
-      assert.deepEqual(nonLoopbackRequests, [], `Non-loopback requests during WebKit handoff: ${nonLoopbackRequests.join(', ')}`);
+      assert.deepEqual(disallowedRequests, [], `Disallowed requests during WebKit handoff: ${disallowedRequests.join(', ')}`);
       await context.close();
       console.log('✓ WebKit Test 3: #kty_handoff= URL fragment payload built by src/core/handoff.ts, decoded in WebKit, and scrubbed via replaceState');
     }
 
     // 4. Native Safari container host app UI (safari/host-resources/Main.html)
     {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const pageErrors = [];
-      const nonLoopbackRequests = [];
-
-      page.on('pageerror', (err) => pageErrors.push(err.message));
-      page.on('request', (req) => {
-        const u = req.url();
-        if (!u.startsWith('http://127.0.0.1:') && !u.startsWith('data:') && !u.startsWith('blob:')) {
-          nonLoopbackRequests.push(u);
-        }
-      });
+      const { context, page, pageErrors, disallowedRequests } = await createIsolatedWebKitPage(browser, baseUrl);
 
       await page.goto(`${baseUrl}/safari-app/Base.lproj/Main.html`, { waitUntil: 'networkidle' });
       await page.click('#load-sample-btn');
@@ -381,7 +400,7 @@ async function main() {
       assert.equal((await page.textContent('#clause-results'))?.trim(), '', 'Clear Memory button must wipe container sandbox findings');
 
       assert.deepEqual(pageErrors, [], `Unexpected errors in Safari host UI: ${pageErrors.join('; ')}`);
-      assert.deepEqual(nonLoopbackRequests, [], `Non-loopback requests in Safari host UI: ${nonLoopbackRequests.join(', ')}`);
+      assert.deepEqual(disallowedRequests, [], `Disallowed requests in Safari host UI: ${disallowedRequests.join(', ')}`);
       await context.close();
       console.log('✓ WebKit Test 4: Native Safari companion host app UI & offline clause self-check verified in WebKit');
     }

@@ -153,6 +153,4 @@ jobs:
         with:
           name: knowthankyew-safari-xcode-wrapper
           path: |
-            safari-xcode/KnowThankYew/KnowThankYew.xcodeproj
-            safari-xcode/KnowThankYew/Shared (App)/Resources/PrivacyInfo.xcprivacy
-            safari-xcode/KnowThankYew/Shared (Extension)/Resources/PrivacyInfo.xcprivacy
+            safari-xcode/KnowThankYew/
